@@ -1,5 +1,6 @@
 ﻿import React from 'react';
 import ErrorMessage from './ErrorMessage';
+import VoiceButton from '../voice/VoiceButton';
 
 export default function TextField({
   step = {},
@@ -25,6 +26,8 @@ export default function TextField({
       onNext();
     }
   };
+
+  const isVoiceEnabled = voice && (voice === true || voice.enabled);
 
   return (
     <div className="field-group" style={{ marginBottom: 'var(--space-lg, 24px)' }}>
@@ -57,7 +60,7 @@ export default function TextField({
         </p>
       )}
 
-      <div style={{ display: 'flex', alignItems: 'center', gap: 'var(--space-sm, 8px)' }}>
+      <div style={{ display: 'flex', alignItems: 'center', gap: 'var(--space-sm, 8px)', flexWrap: 'wrap' }}>
         <input
           id={inputId}
           name={id}
@@ -71,6 +74,7 @@ export default function TextField({
           inputMode={step.inputmode || 'text'}
           style={{
             flex: 1,
+            minWidth: '240px',
             minHeight: 'var(--target-min-size, 48px)',
             fontSize: 'var(--font-size-base, 16px)',
             padding: 'var(--space-sm, 8px) var(--space-md, 16px)',
@@ -81,10 +85,13 @@ export default function TextField({
           }}
         />
 
-        {voice && (
-          <div className="voice-slot" aria-live="polite">
-            {typeof voice === 'object' && voice.render ? voice.render() : null}
-          </div>
+        {isVoiceEnabled && (
+          <VoiceButton
+            onTranscript={(spokenText) => onChange(spokenText)}
+            currentValue={value}
+            isMock={voice?.isMock}
+            lang={voice?.lang || 'en-US'}
+          />
         )}
       </div>
 

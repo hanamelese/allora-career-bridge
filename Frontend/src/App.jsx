@@ -14,15 +14,16 @@ export default function App() {
   const [answers, setAnswers] = useState({ name: '', idRoute: '', needs: [] });
   const [error, setError] = useState('');
   const [isSubmitted, setIsSubmitted] = useState(false);
+  const [useMockVoice, setUseMockVoice] = useState(false);
   const headingRef = useRef(null);
 
-  // Steps built entirely with translation keys (no hardcoded text)
   const STEPS = [
     {
       id: 'name',
       type: 'text',
       prompt: t('q.name'),
       help: t('h.name'),
+      voice: true,
       validate: { required: true, minLen: 2 },
       autocomplete: 'name'
     },
@@ -95,11 +96,30 @@ export default function App() {
     <main style={{ maxWidth: '640px', margin: '40px auto', padding: '24px' }}>
       <header style={{ marginBottom: '24px' }}>
         <h1 style={{ color: 'var(--color-primary)', fontSize: 'var(--font-size-xl)' }}>
-          Person B: Task B6 Test Bench
+          Person B: Task B7 Test Bench
         </h1>
         <p style={{ color: 'var(--color-text-muted)' }}>
-          Testing i18n and Translation Keys (q.*, o.*, e.*, h.*, a.*)
+          Testing Voice Input with Read-back and Privacy Consent
         </p>
+
+        {/* Toggle for mock voice testing */}
+        <label
+          style={{
+            display: 'inline-flex',
+            alignItems: 'center',
+            gap: '8px',
+            marginTop: '8px',
+            fontSize: '14px',
+            cursor: 'pointer'
+          }}
+        >
+          <input
+            type="checkbox"
+            checked={useMockVoice}
+            onChange={(e) => setUseMockVoice(e.target.checked)}
+          />
+          <span>Enable Mock Voice (simulates speaking without mic)</span>
+        </label>
       </header>
 
       <LiveRegion message={announcement} />
@@ -140,6 +160,7 @@ export default function App() {
                   if (error) setError('');
                 }}
                 onNext={handleNext}
+                voice={{ enabled: true, isMock: useMockVoice }}
               />
             )}
 
