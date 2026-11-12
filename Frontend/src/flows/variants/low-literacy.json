@@ -1,0 +1,45 @@
+﻿{
+  "id": "low-literacy",
+  "version": 1,
+  "description": "Low-literacy overlay: big icons, simple words, auto read-aloud on every step.",
+  "readAloud": "auto",
+  "steps": [
+    {
+      "id": "name",
+      "prompt": "Your name",
+      "help": "What do people call you?",
+      "icon": "🧑",
+      "readAloud": "auto",
+      "voice": true
+    },
+    {
+      "id": "idRoute",
+      "prompt": "Your card",
+      "help": "Which card do you have?",
+      "icon": "🪪",
+      "readAloud": "auto",
+      "voice": true,
+      "options": [
+        { "value": "national", "label": "Country card", "icon": "🏛️" },
+        { "value": "refugee", "label": "Refugee card", "icon": "🌍" },
+        { "value": "other", "label": "Other paper", "icon": "📄" },
+        { "value": "refer", "label": "No card — help me", "icon": "🤝" }
+      ]
+    },
+    {
+      "id": "needs",
+      "prompt": "Help you need",
+      "help": "Pick what helps you. This is private.",
+      "icon": "🙋",
+      "readAloud": "auto",
+      "voice": true,
+      "options": [
+        { "value": "more_time", "label": "More time", "icon": "⏱️" },
+        { "value": "reader_person", "label": "Read to me", "icon": "🗣️" },
+        { "value": "screen_reader", "label": "Computer voice", "icon": "🎧" },
+        { "value": "phone_call", "label": "Phone call", "icon": "📞" },
+        { "value": "interpreter", "label": "Sign language", "icon": "👋" }
+      ]
+    }
+  ]
+}
