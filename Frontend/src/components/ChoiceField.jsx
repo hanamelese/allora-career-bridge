@@ -1,5 +1,7 @@
-﻿import React from 'react';
+﻿import React, { useState } from 'react';
 import ErrorMessage from './ErrorMessage';
+import VoiceButton from '../voice/VoiceButton';
+import { matchSpokenChoice } from '../voice/choiceMatch';
 
 export default function ChoiceField({
   step = {},
@@ -13,6 +15,20 @@ export default function ChoiceField({
   const legendId = `legend-${id}`;
   const errorId = `error-${id}`;
   const options = step.options || [];
+  const [matchStatus, setMatchStatus] = useState('');
+
+  const isVoiceEnabled = voice && (voice === true || voice.enabled);
+
+  const handleVoiceTranscript = (spokenText) => {
+    const { matchedOption } = matchSpokenChoice(spokenText, options);
+
+    if (matchedOption) {
+      onChange(matchedOption.value);
+      setMatchStatus(`Matched and selected: "${matchedOption.label}"`);
+    } else {
+      setMatchStatus(`Could not find a match for "${spokenText}". Please tap your choice or try speaking again.`);
+    }
+  };
 
   return (
     <fieldset
@@ -49,6 +65,31 @@ export default function ChoiceField({
         >
           {step.help}
         </p>
+      )}
+
+      {isVoiceEnabled && (
+        <div style={{ marginBottom: '16px' }}>
+          <VoiceButton
+            onTranscript={handleVoiceTranscript}
+            currentValue={options.find((o) => o.value === value)?.label || ''}
+            isMock={voice?.isMock}
+            lang={voice?.lang || 'en-US'}
+          />
+          {matchStatus && (
+            <p
+              role="status"
+              aria-live="polite"
+              style={{
+                fontSize: '14px',
+                marginTop: '8px',
+                color: 'var(--color-primary, #002B56)',
+                fontWeight: 500
+              }}
+            >
+              {matchStatus}
+            </p>
+          )}
+        </div>
       )}
 
       <div

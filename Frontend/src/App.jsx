@@ -32,6 +32,7 @@ export default function App() {
       type: 'choice',
       prompt: t('q.idRoute'),
       help: t('h.idRoute'),
+      voice: true,
       validate: { required: true },
       options: [
         { value: 'national', label: t('o.national') },
@@ -96,13 +97,12 @@ export default function App() {
     <main style={{ maxWidth: '640px', margin: '40px auto', padding: '24px' }}>
       <header style={{ marginBottom: '24px' }}>
         <h1 style={{ color: 'var(--color-primary)', fontSize: 'var(--font-size-xl)' }}>
-          Person B: Task B7 Test Bench
+          Person B: Task B8 Test Bench
         </h1>
         <p style={{ color: 'var(--color-text-muted)' }}>
-          Testing Voice Input with Read-back and Privacy Consent
+          Testing Spoken Choice Matching (saying "refugee" selects Refugee ID)
         </p>
 
-        {/* Toggle for mock voice testing */}
         <label
           style={{
             display: 'inline-flex',
@@ -174,6 +174,7 @@ export default function App() {
                   if (error) setError('');
                 }}
                 onNext={handleNext}
+                voice={{ enabled: true, isMock: useMockVoice }}
               />
             )}
 

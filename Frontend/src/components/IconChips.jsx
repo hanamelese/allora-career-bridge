@@ -1,5 +1,7 @@
-﻿import React from 'react';
+﻿import React, { useState } from 'react';
 import ErrorMessage from './ErrorMessage';
+import VoiceButton from '../voice/VoiceButton';
+import { matchSpokenChoice } from '../voice/choiceMatch';
 
 export default function IconChips({
   step = {},
@@ -13,6 +15,9 @@ export default function IconChips({
   const errorId = `error-${id}`;
   const options = step.options || [];
   const selected = Array.isArray(value) ? value : [];
+  const [matchStatus, setMatchStatus] = useState('');
+
+  const isVoiceEnabled = voice && (voice === true || voice.enabled);
 
   const handleToggle = (optValue) => {
     const isAlreadySelected = selected.includes(optValue);
@@ -20,6 +25,19 @@ export default function IconChips({
       ? selected.filter((v) => v !== optValue)
       : [...selected, optValue];
     onChange(nextSelected);
+  };
+
+  const handleVoiceTranscript = (spokenText) => {
+    const { matchedOption } = matchSpokenChoice(spokenText, options);
+
+    if (matchedOption) {
+      handleToggle(matchedOption.value);
+      const willBeSelected = !selected.includes(matchedOption.value);
+      const action = willBeSelected ? 'Selected' : 'Unselected';
+      setMatchStatus(`${action}: "${matchedOption.label}"`);
+    } else {
+      setMatchStatus(`Could not find a match for "${spokenText}". Please tap a chip or try speaking again.`);
+    }
   };
 
   return (
@@ -31,14 +49,19 @@ export default function IconChips({
       }}
       aria-describedby={error ? errorId : undefined}
     >
+      {/* Screen-reader accessible legend without duplicate visual text */}
       <legend
         id={legendId}
         style={{
-          display: 'block',
-          fontSize: 'var(--font-size-lg, 20px)',
-          fontWeight: 600,
-          color: 'var(--color-primary, #002B56)',
-          marginBottom: 'var(--space-sm, 8px)'
+          position: 'absolute',
+          width: '1px',
+          height: '1px',
+          padding: 0,
+          margin: '-1px',
+          overflow: 'hidden',
+          clip: 'rect(0, 0, 0, 0)',
+          whiteSpace: 'nowrap',
+          border: 0
         }}
       >
         {step.prompt || 'Select any support you need'}
@@ -54,6 +77,34 @@ export default function IconChips({
         >
           {step.help}
         </p>
+      )}
+
+      {isVoiceEnabled && (
+        <div style={{ marginBottom: '16px' }}>
+          <VoiceButton
+            onTranscript={handleVoiceTranscript}
+            currentValue={selected
+              .map((val) => options.find((o) => o.value === val)?.label)
+              .filter(Boolean)
+              .join(', ')}
+            isMock={voice?.isMock}
+            lang={voice?.lang || 'en-US'}
+          />
+          {matchStatus && (
+            <p
+              role="status"
+              aria-live="polite"
+              style={{
+                fontSize: '14px',
+                marginTop: '8px',
+                color: 'var(--color-primary, #002B56)',
+                fontWeight: 500
+              }}
+            >
+              {matchStatus}
+            </p>
+          )}
+        </div>
       )}
 
       <div
