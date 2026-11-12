@@ -1,0 +1,33 @@
+﻿@import './tokens.css';
+
+/* Remove default browser outline only when focus-visible is supported */
+:focus {
+  outline: none;
+}
+
+/* Accessible double focus ring: visible on light and dark backgrounds */
+:focus-visible {
+  outline: 2px solid var(--focus-ring-inner);
+  outline-offset: 1px;
+  box-shadow: 0 0 0 4px var(--focus-ring-outer);
+}
+
+/* Ensure interactive elements meet the 48px touch target rule */
+button,
+input,
+select,
+textarea,
+[role="button"],
+a {
+  min-height: var(--target-min-size);
+  display: inline-flex;
+  align-items: center;
+}
+
+/* Windows High Contrast / Forced Colors Mode */
+@media (forced-colors: active) {
+  :focus-visible {
+    outline: 3px solid Highlight;
+    outline-offset: 2px;
+  }
+}
