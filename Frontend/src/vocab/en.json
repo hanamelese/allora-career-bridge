@@ -1,0 +1,43 @@
+﻿{
+  "q.name": "What is your name?",
+  "q.contact": "What is your phone number or email?",
+  "q.idRoute": "Which form of ID do you have?",
+  "q.idNumber": "What is your document number?",
+  "q.partner": "Which partner organization can refer you?",
+  "q.needs": "What accommodations or support do you need?",
+  "q.review": "Review your answers",
+
+  "o.national": "National ID or Passport",
+  "o.refugee": "Refugee ID",
+  "o.other": "Other document",
+  "o.refer": "I have none / Refer me through a partner",
+  "o.phone": "Phone number",
+  "o.email": "Email address",
+
+  "e.required": "Please provide an answer to continue.",
+  "e.name.short": "Please enter at least 2 letters.",
+  "e.contact.invalid": "Please enter a valid phone number or email.",
+  "e.choice.required": "Please choose one option to continue.",
+  "e.general": "Something went wrong. Please check your answer.",
+
+  "h.name": "Use the name you want us to call you.",
+  "h.contact": "Only one is needed so we can send your updates.",
+  "h.idRoute": "No option will block you. Choose 'Refer me' if you have no standard ID.",
+  "h.idNumber": "This number is optional and kept encrypted.",
+  "h.needs": "This stays private on your device and is never shared with employers without your permission.",
+  "h.review": "You can edit any answer before submitting.",
+
+  "a.more_time": "More time to complete tasks",
+  "a.screen_reader": "Screen-reader tools and software",
+  "a.step_free": "Step-free access and physical accommodations",
+  "a.interpreter": "Sign language interpreter",
+  "a.quiet_workspace": "Quiet workspace",
+  "a.reader_person": "Someone to read to me",
+
+  "btn.next": "Next",
+  "btn.back": "Back",
+  "btn.edit": "Edit",
+  "btn.submit": "Submit Registration",
+  "btn.help": "Ask for help",
+  "status.success": "Registration submitted successfully!"
+}

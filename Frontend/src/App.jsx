@@ -6,49 +6,52 @@ import ReviewScreen from './components/ReviewScreen';
 import Progress from './shell/Progress';
 import LiveRegion from './shell/LiveRegion';
 import { useStepFocus } from './shell/FocusManager';
-
-const STEPS = [
-  {
-    id: 'name',
-    type: 'text',
-    prompt: 'What is your name?',
-    help: 'Use the name you want us to call you.',
-    validate: { required: true, minLen: 2 },
-    autocomplete: 'name'
-  },
-  {
-    id: 'idRoute',
-    type: 'choice',
-    prompt: 'Which form of ID do you have?',
-    help: 'No branch will block you. If you have none, choose "Refer me".',
-    validate: { required: true },
-    options: [
-      { value: 'national', label: 'National ID or Passport' },
-      { value: 'refugee', label: 'Refugee ID' },
-      { value: 'other', label: 'Other document' },
-      { value: 'refer', label: 'I have none / Refer me through partner' }
-    ]
-  },
-  {
-    id: 'needs',
-    type: 'chips',
-    prompt: 'What accommodations or support do you need?',
-    help: 'This stays private on your device.',
-    options: [
-      { value: 'more_time', label: 'More time', icon: '⏱️' },
-      { value: 'screen_reader', label: 'Screen-reader tools', icon: '🎧' },
-      { value: 'step_free', label: 'Step-free access', icon: '♿' },
-      { value: 'interpreter', label: 'Sign language interpreter', icon: '👋' }
-    ]
-  }
-];
+import { useTranslation } from './i18n/i18n';
 
 export default function App() {
+  const { t } = useTranslation();
   const [stepIndex, setStepIndex] = useState(0);
   const [answers, setAnswers] = useState({ name: '', idRoute: '', needs: [] });
   const [error, setError] = useState('');
   const [isSubmitted, setIsSubmitted] = useState(false);
   const headingRef = useRef(null);
+
+  // Steps built entirely with translation keys (no hardcoded text)
+  const STEPS = [
+    {
+      id: 'name',
+      type: 'text',
+      prompt: t('q.name'),
+      help: t('h.name'),
+      validate: { required: true, minLen: 2 },
+      autocomplete: 'name'
+    },
+    {
+      id: 'idRoute',
+      type: 'choice',
+      prompt: t('q.idRoute'),
+      help: t('h.idRoute'),
+      validate: { required: true },
+      options: [
+        { value: 'national', label: t('o.national') },
+        { value: 'refugee', label: t('o.refugee') },
+        { value: 'other', label: t('o.other') },
+        { value: 'refer', label: t('o.refer') }
+      ]
+    },
+    {
+      id: 'needs',
+      type: 'chips',
+      prompt: t('q.needs'),
+      help: t('h.needs'),
+      options: [
+        { value: 'more_time', label: t('a.more_time'), icon: '⏱️' },
+        { value: 'screen_reader', label: t('a.screen_reader'), icon: '🎧' },
+        { value: 'step_free', label: t('a.step_free'), icon: '♿' },
+        { value: 'interpreter', label: t('a.interpreter'), icon: '👋' }
+      ]
+    }
+  ];
 
   const isReview = stepIndex === STEPS.length;
   const currentStep = !isReview ? STEPS[stepIndex] : null;
@@ -61,7 +64,7 @@ export default function App() {
 
     if (currentStep.validate?.required) {
       if (!currentVal || (typeof currentVal === 'string' && currentVal.trim().length === 0)) {
-        setError('Please choose or enter an answer to continue.');
+        setError(t('e.required'));
         return;
       }
     }
@@ -85,17 +88,17 @@ export default function App() {
   };
 
   const announcement = isReview
-    ? 'Review screen. Check your answers before submitting.'
+    ? t('q.review')
     : `Question ${stepIndex + 1} of ${STEPS.length}: ${currentStep?.prompt}`;
 
   return (
     <main style={{ maxWidth: '640px', margin: '40px auto', padding: '24px' }}>
       <header style={{ marginBottom: '24px' }}>
         <h1 style={{ color: 'var(--color-primary)', fontSize: 'var(--font-size-xl)' }}>
-          Person B: Task B5 Test Bench
+          Person B: Task B6 Test Bench
         </h1>
         <p style={{ color: 'var(--color-text-muted)' }}>
-          Testing ChoiceField, IconChips, and ReviewScreen
+          Testing i18n and Translation Keys (q.*, o.*, e.*, h.*, a.*)
         </p>
       </header>
 
@@ -181,7 +184,7 @@ export default function App() {
                     cursor: 'pointer'
                   }}
                 >
-                  Back
+                  {t('btn.back')}
                 </button>
               )}
 
@@ -199,7 +202,7 @@ export default function App() {
                   cursor: 'pointer'
                 }}
               >
-                Next
+                {t('btn.next')}
               </button>
             </div>
           </div>
@@ -225,7 +228,7 @@ export default function App() {
                   fontWeight: 600
                 }}
               >
-                🎉 Registration Submitted Successfully!
+                {t('status.success')}
               </div>
             )}
           </div>
