@@ -7,6 +7,7 @@ import Progress from './shell/Progress';
 import LiveRegion from './shell/LiveRegion';
 import { useStepFocus } from './shell/FocusManager';
 import { useTranslation } from './i18n/i18n';
+import ReadAloudButton from './readaloud/ReadAloudButton';
 
 export default function App() {
   const { t } = useTranslation();
@@ -97,10 +98,10 @@ export default function App() {
     <main style={{ maxWidth: '640px', margin: '40px auto', padding: '24px' }}>
       <header style={{ marginBottom: '24px' }}>
         <h1 style={{ color: 'var(--color-primary)', fontSize: 'var(--font-size-xl)' }}>
-          Person B: Task B8 Test Bench
+          Person B: Accessible Interface
         </h1>
         <p style={{ color: 'var(--color-text-muted)' }}>
-          Testing Spoken Choice Matching (saying "refugee" selects Refugee ID)
+          Microphone (Speak) and Speaker (Read Aloud) on every screen
         </p>
 
         <label
@@ -137,18 +138,34 @@ export default function App() {
       >
         {!isReview ? (
           <div>
-            <h2
-              ref={headingRef}
-              data-question-heading
+            <div
               style={{
-                fontSize: 'var(--font-size-lg)',
-                color: 'var(--color-primary)',
+                display: 'flex',
+                justifyContent: 'space-between',
+                alignItems: 'center',
                 marginBottom: '16px',
-                outline: 'none'
+                gap: '12px',
+                flexWrap: 'wrap'
               }}
             >
-              {currentStep.prompt}
-            </h2>
+              <h2
+                ref={headingRef}
+                data-question-heading
+                style={{
+                  fontSize: 'var(--font-size-lg)',
+                  color: 'var(--color-primary)',
+                  margin: 0,
+                  outline: 'none'
+                }}
+              >
+                {currentStep.prompt}
+              </h2>
+
+              <ReadAloudButton
+                text={`${currentStep.prompt}. ${currentStep.help || ''}`}
+                label="Listen"
+              />
+            </div>
 
             {currentStep.type === 'text' && (
               <TextField
@@ -187,6 +204,7 @@ export default function App() {
                   setAnswers((prev) => ({ ...prev, [currentStep.id]: val }));
                   if (error) setError('');
                 }}
+                voice={{ enabled: true, isMock: useMockVoice }}
               />
             )}
 

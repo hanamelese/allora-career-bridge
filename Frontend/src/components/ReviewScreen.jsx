@@ -1,4 +1,5 @@
 ﻿import React from 'react';
+import ReadAloudButton from '../readaloud/ReadAloudButton';
 
 export default function ReviewScreen({
   steps = [],
@@ -7,19 +8,13 @@ export default function ReviewScreen({
   onSubmit = () => {},
   onBack = () => {}
 }) {
-  const formatAnswer = (step, val) => {
-    if (val === undefined || val === null || val === '') {
-      return <span style={{ color: 'var(--color-text-muted, #718096)', fontStyle: 'italic' }}>Not provided</span>;
-    }
+  const formatAnswerText = (step, val) => {
+    if (val === undefined || val === null || val === '') return 'Not provided';
     if (Array.isArray(val)) {
-      if (val.length === 0) {
-        return <span style={{ color: 'var(--color-text-muted, #718096)', fontStyle: 'italic' }}>None selected</span>;
-      }
-      const labels = val.map((item) => {
-        const opt = step.options?.find((o) => o.value === item);
-        return opt ? opt.label : item;
-      });
-      return labels.join(', ');
+      if (val.length === 0) return 'None selected';
+      return val
+        .map((item) => step.options?.find((o) => o.value === item)?.label || item)
+        .join(', ');
     }
     if (step.options) {
       const opt = step.options.find((o) => o.value === val);
@@ -28,17 +23,29 @@ export default function ReviewScreen({
     return String(val);
   };
 
+  // Compile full spoken summary for the audio reader
+  const fullSummary =
+    'Review your answers. ' +
+    steps.map((s) => `${s.prompt}: ${formatAnswerText(s, answers[s.id])}.`).join(' ') +
+    ' Please check your answers and click Submit.';
+
   return (
     <div className="review-screen">
-      <h2
-        style={{
-          fontSize: 'var(--font-size-xl, 24px)',
-          color: 'var(--color-primary, #002B56)',
-          marginBottom: 'var(--space-sm, 8px)'
-        }}
-      >
-        Review your answers
-      </h2>
+      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '8px', flexWrap: 'wrap', gap: '12px' }}>
+        <h2
+          style={{
+            fontSize: 'var(--font-size-xl, 24px)',
+            color: 'var(--color-primary, #002B56)',
+            margin: 0
+          }}
+        >
+          Review your answers
+        </h2>
+
+        {/* 🔊 Built-in Audio Reader for Review Screen */}
+        <ReadAloudButton text={fullSummary} label="Listen to summary" />
+      </div>
+
       <p
         style={{
           fontSize: 'var(--font-size-base, 16px)',
@@ -62,6 +69,7 @@ export default function ReviewScreen({
       >
         {steps.map((step) => {
           const val = answers[step.id];
+          const textVal = formatAnswerText(step, val);
           return (
             <div
               key={step.id}
@@ -90,7 +98,7 @@ export default function ReviewScreen({
                     color: 'var(--color-text, #002B56)'
                   }}
                 >
-                  {formatAnswer(step, val)}
+                  {textVal}
                 </dd>
               </div>
 
