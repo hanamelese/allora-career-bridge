@@ -1,122 +1,103 @@
-import { useState } from 'react'
-import heroImg from './assets/hero.png'
-import reactLogo from './assets/react.svg'
-import viteLogo from './assets/vite.svg'
-import './App.css'
+﻿import React, { useState } from 'react';
+import TextField from './components/TextField';
 
-function App() {
-  const [count, setCount] = useState(0)
+export default function App() {
+  const [value, setValue] = useState('');
+  const [error, setError] = useState('');
+  const [submitted, setSubmitted] = useState(false);
+
+  const sampleStep = {
+    id: 'name',
+    prompt: 'What is your name?',
+    help: 'Use the name you want us to call you.',
+    validate: { required: true, minLen: 2 },
+    autocomplete: 'name'
+  };
+
+  const handleNext = () => {
+    if (!value || value.trim().length < 2) {
+      setError('Please enter at least 2 letters.');
+      setSubmitted(false);
+    } else {
+      setError('');
+      setSubmitted(true);
+    }
+  };
 
   return (
-    <>
-      <section id="center">
-        <div className="hero">
-          <img src={heroImg} className="base" width="170" height="179" alt="" />
-          <img src={reactLogo} className="framework" alt="React logo" />
-          <img src={viteLogo} className="vite" alt="Vite logo" />
+    <main style={{ maxWidth: '600px', margin: '40px auto', padding: '24px' }}>
+      <header style={{ marginBottom: '32px' }}>
+        <h1 style={{ color: 'var(--color-primary)', fontSize: 'var(--font-size-xl)' }}>
+          Person B: Accessibility & UI Test Bench
+        </h1>
+        <p style={{ color: 'var(--color-text-muted)' }}>
+          Testing Task B3: TextField and ErrorMessage
+        </p>
+      </header>
+
+      <section aria-label="Question form" style={{ border: '1px solid var(--color-border)', borderRadius: 'var(--radius-md)', padding: '24px' }}>
+        <TextField
+          step={sampleStep}
+          value={value}
+          error={error}
+          onChange={(newVal) => {
+            setValue(newVal);
+            if (error) setError('');
+          }}
+          onNext={handleNext}
+        />
+
+        <div style={{ display: 'flex', gap: '12px', marginTop: '16px' }}>
+          <button
+            type="button"
+            onClick={handleNext}
+            style={{
+              backgroundColor: 'var(--color-primary)',
+              color: '#FFFFFF',
+              border: 'none',
+              borderRadius: 'var(--radius-sm)',
+              padding: '12px 24px',
+              fontSize: 'var(--font-size-base)',
+              fontWeight: 600,
+              cursor: 'pointer'
+            }}
+          >
+            Next
+          </button>
+
+          <button
+            type="button"
+            onClick={() => setError('Please enter at least 2 letters.')}
+            style={{
+              backgroundColor: '#FFFFFF',
+              color: 'var(--color-error)',
+              border: '2px solid var(--color-error)',
+              borderRadius: 'var(--radius-sm)',
+              padding: '12px 24px',
+              fontSize: 'var(--font-size-base)',
+              fontWeight: 600,
+              cursor: 'pointer'
+            }}
+          >
+            Trigger fake error
+          </button>
         </div>
-        <div>
-          <h1>Get started</h1>
-          <p>
-            Edit <code>src/App.jsx</code> and save to test <code>HMR</code>
+
+        {submitted && (
+          <p
+            role="status"
+            style={{
+              marginTop: '16px',
+              color: '#065F46',
+              backgroundColor: '#D1FAE5',
+              padding: '12px',
+              borderRadius: 'var(--radius-sm)'
+            }}
+          >
+            Success! Answer recorded: "{value}"
           </p>
-        </div>
-        <button
-          type="button"
-          className="counter"
-          onClick={() => setCount((count) => count + 1)}
-        >
-          Count is {count}
-        </button>
+        )}
       </section>
-
-      <div className="ticks"></div>
-
-      <section id="next-steps">
-        <div id="docs">
-          <svg className="icon" role="presentation" aria-hidden="true">
-            <use href="/icons.svg#documentation-icon"></use>
-          </svg>
-          <h2>Documentation</h2>
-          <p>Your questions, answered</p>
-          <ul>
-            <li>
-              <a href="https://vite.dev/" target="_blank">
-                <img className="logo" src={viteLogo} alt="" />
-                Explore Vite
-              </a>
-            </li>
-            <li>
-              <a href="https://react.dev/" target="_blank">
-                <img className="button-icon" src={reactLogo} alt="" />
-                Learn more
-              </a>
-            </li>
-          </ul>
-        </div>
-        <div id="social">
-          <svg className="icon" role="presentation" aria-hidden="true">
-            <use href="/icons.svg#social-icon"></use>
-          </svg>
-          <h2>Connect with us</h2>
-          <p>Join the Vite community</p>
-          <ul>
-            <li>
-              <a href="https://github.com/vitejs/vite" target="_blank">
-                <svg
-                  className="button-icon"
-                  role="presentation"
-                  aria-hidden="true"
-                >
-                  <use href="/icons.svg#github-icon"></use>
-                </svg>
-                GitHub
-              </a>
-            </li>
-            <li>
-              <a href="https://chat.vite.dev/" target="_blank">
-                <svg
-                  className="button-icon"
-                  role="presentation"
-                  aria-hidden="true"
-                >
-                  <use href="/icons.svg#discord-icon"></use>
-                </svg>
-                Discord
-              </a>
-            </li>
-            <li>
-              <a href="https://x.com/vite_js" target="_blank">
-                <svg
-                  className="button-icon"
-                  role="presentation"
-                  aria-hidden="true"
-                >
-                  <use href="/icons.svg#x-icon"></use>
-                </svg>
-                X.com
-              </a>
-            </li>
-            <li>
-              <a href="https://bsky.app/profile/vite.dev" target="_blank">
-                <svg
-                  className="button-icon"
-                  role="presentation"
-                  aria-hidden="true"
-                >
-                  <use href="/icons.svg#bluesky-icon"></use>
-                </svg>
-                Bluesky
-              </a>
-            </li>
-          </ul>
-        </div>
-      </section>
-
-      <div className="ticks"></div>
-      <section id="spacer"></section>
-    </>
-  )
+    </main>
+  );
 }
-
-export default App
