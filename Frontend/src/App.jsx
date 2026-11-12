@@ -8,6 +8,7 @@ import LiveRegion from './shell/LiveRegion';
 import { useStepFocus } from './shell/FocusManager';
 import { useTranslation } from './i18n/i18n';
 import ReadAloudButton from './readaloud/ReadAloudButton';
+import HelpDialog from './shell/HelpDialog';
 
 export default function App() {
   const { t } = useTranslation();
@@ -16,6 +17,7 @@ export default function App() {
   const [error, setError] = useState('');
   const [isSubmitted, setIsSubmitted] = useState(false);
   const [useMockVoice, setUseMockVoice] = useState(false);
+  const [isHelpOpen, setIsHelpOpen] = useState(false);
   const headingRef = useRef(null);
 
   const STEPS = [
@@ -97,12 +99,38 @@ export default function App() {
   return (
     <main style={{ maxWidth: '640px', margin: '40px auto', padding: '24px' }}>
       <header style={{ marginBottom: '24px' }}>
-        <h1 style={{ color: 'var(--color-primary)', fontSize: 'var(--font-size-xl)' }}>
-          Person B: Accessible Interface
-        </h1>
-        <p style={{ color: 'var(--color-text-muted)' }}>
-          Microphone (Speak) and Speaker (Read Aloud) on every screen
-        </p>
+        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', flexWrap: 'wrap', gap: '12px' }}>
+          <div>
+            <h1 style={{ color: 'var(--color-primary)', fontSize: 'var(--font-size-xl)' }}>
+              Person B: Accessible Interface
+            </h1>
+            <p style={{ color: 'var(--color-text-muted)' }}>
+              Microphone (Speak) and Speaker (Read Aloud) on every screen
+            </p>
+          </div>
+
+          <button
+            type="button"
+            onClick={() => setIsHelpOpen(true)}
+            aria-label="Ask for help and support"
+            style={{
+              minHeight: 'var(--target-min-size, 48px)',
+              padding: '8px 16px',
+              backgroundColor: '#FFFFFF',
+              color: 'var(--color-primary)',
+              border: '2px solid var(--color-primary)',
+              borderRadius: 'var(--radius-sm)',
+              fontWeight: 600,
+              cursor: 'pointer',
+              display: 'inline-flex',
+              alignItems: 'center',
+              gap: '6px'
+            }}
+          >
+            <span aria-hidden="true">❓</span>
+            <span>{t('btn.help') || 'Ask for help'}</span>
+          </button>
+        </div>
 
         <label
           style={{
@@ -274,6 +302,9 @@ export default function App() {
           </div>
         )}
       </section>
+
+      {/* Global native HelpDialog for private support requests */}
+      <HelpDialog isOpen={isHelpOpen} onClose={() => setIsHelpOpen(false)} />
     </main>
   );
 }

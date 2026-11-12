@@ -1,0 +1,32 @@
+﻿{
+  "id": "support-request",
+  "version": 1,
+  "title": "Ask for Support",
+  "description": "Tell us how we can help. We will never ask for medical proof or private details.",
+  "steps": [
+    {
+      "id": "support_needs",
+      "type": "chips",
+      "prompt": "What kind of support would help you?",
+      "help": "Select all that apply. This is completely private.",
+      "voice": true,
+      "options": [
+        { "value": "more_time", "label": "More time to complete tasks", "icon": "⏱️" },
+        { "value": "reader_person", "label": "Someone to read to me", "icon": "🗣️" },
+        { "value": "screen_reader", "label": "Screen-reader assistance", "icon": "🎧" },
+        { "value": "phone_call", "label": "A phone call from an advisor", "icon": "📞" },
+        { "value": "in_person", "label": "Help from a person in person", "icon": "🤝" },
+        { "value": "interpreter", "label": "Sign language interpreter", "icon": "👋" },
+        { "value": "other", "label": "Other support", "icon": "💬" }
+      ]
+    },
+    {
+      "id": "support_note",
+      "type": "text",
+      "prompt": "Any details you want to add?",
+      "help": "Tell us what you need. Please do not share medical information.",
+      "voice": true,
+      "validate": { "required": false }
+    }
+  ]
+}
