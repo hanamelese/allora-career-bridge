@@ -1,0 +1,31 @@
+{
+  "name": "api",
+  "private": true,
+  "version": "0.1.0",
+  "description": "Dashboard and public form API for the Accessible Onboarding System",
+  "type": "module",
+  "main": "src/server.js",
+  "scripts": {
+    "dev": "node --watch src/server.js",
+    "start": "node src/server.js",
+    "db:generate": "drizzle-kit generate",
+    "db:seed": "node src/db/seed.js",
+    "test": "vitest run"
+  },
+  "dependencies": {
+    "@onboarding/contracts": "*",
+    "better-sqlite3": "^13.1.1",
+    "cors": "^2.8.6",
+    "dotenv": "^18.0.10",
+    "drizzle-orm": "^0.45.4",
+    "express": "^5.3.0",
+    "jsonwebtoken": "^9.0.3",
+    "zod": "^4.6.7",
+    "bcryptjs": "^3.0.3"
+  },
+  "devDependencies": {
+    "drizzle-kit": "^0.31.11",
+    "supertest": "^7.3.2",
+    "vitest": "^5.1.0"
+  }
+}

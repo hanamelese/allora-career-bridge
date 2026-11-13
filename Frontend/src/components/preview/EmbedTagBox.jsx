@@ -11,14 +11,13 @@ import './EmbedTagBox.css';
  * that is already live on someone's site.
  */
 
-/* Replaced with the partner's real public key in Phase 4, once keys are
-   issued by the API. A public key is safe in a page by design; the secret
-   key never reaches the browser. */
-const PLACEHOLDER_PUBLIC_KEY = 'pk_test_xxxxxxxxxxxx';
+/* A public key is safe in a page by design: it allows reading a published
+   config and submitting to that form, nothing more. The secret key is
+   stored only as a hash and never leaves the server. */
 const WIDGET_VERSION = 'v1';
 const CDN_ORIGIN = 'https://cdn.example.org';
 
-export function EmbedTagBox({ formId, formVersion, language }) {
+export function EmbedTagBox({ formId, formVersion, language, publicKey }) {
   const [copied, setCopied] = useState(false);
 
   const snippet = [
@@ -26,7 +25,7 @@ export function EmbedTagBox({ formId, formVersion, language }) {
     '',
     '<onboarding-form',
     `  form-id="${formId}"`,
-    `  public-key="${PLACEHOLDER_PUBLIC_KEY}"`,
+    `  public-key="${publicKey ?? 'pk_live_your_key'}"`,
     `  form-version="${formVersion ?? 1}"`,
     `  lang="${language}">`,
     '</onboarding-form>',
@@ -82,8 +81,8 @@ export function EmbedTagBox({ formId, formVersion, language }) {
         <div>
           <dt>Still to come</dt>
           <dd>
-            The widget script itself is not released yet, and the key above is a placeholder until
-            the API issues real ones.
+            The widget script at that address is not released yet, so the tag will not load until
+            it is published to the CDN.
           </dd>
         </div>
       </dl>

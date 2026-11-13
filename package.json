@@ -6,12 +6,14 @@
   "description": "Accessible Onboarding System - Partner Dashboard, shared contracts and Form Engine",
   "workspaces": [
     "packages/*",
-    "Frontend"
+    "Frontend",
+    "API"
   ],
   "scripts": {
     "dev": "npm run dev -w frontend",
     "build": "npm run build -w frontend",
     "lint": "npm run lint -w frontend",
-    "test": "npm run test -w @onboarding/contracts -w @onboarding/form-engine"
+    "test": "npm run test -w @onboarding/contracts -w @onboarding/form-engine -w api",
+    "api": "npm run dev -w api"
   }
 }

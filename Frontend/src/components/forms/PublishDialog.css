@@ -1,0 +1,43 @@
+.publish-dialog {
+  width: min(32rem, calc(100vw - 2rem));
+  padding: var(--space-xl);
+  border: 1px solid var(--border-subtle);
+  border-radius: var(--radius-lg);
+  background-color: var(--surface);
+  color: var(--ink);
+  box-shadow: var(--shadow-lg);
+}
+
+.publish-dialog::backdrop {
+  background-color: rgba(15, 23, 42, 0.45);
+}
+
+.publish-dialog__title {
+  font-size: var(--font-size-md);
+}
+
+.publish-dialog__body {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-sm);
+  margin-block-start: var(--space-md);
+  font-size: var(--font-size-sm);
+  color: var(--ink-secondary);
+  line-height: var(--line-height-relaxed);
+}
+
+.publish-dialog__note {
+  padding: var(--space-sm) var(--space-gutter);
+  border-radius: var(--radius-md);
+  background-color: var(--warning-surface);
+  color: var(--warning);
+  font-weight: var(--font-weight-medium);
+}
+
+.publish-dialog__actions {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: flex-end;
+  gap: var(--space-sm);
+  margin-block-start: var(--space-lg);
+}

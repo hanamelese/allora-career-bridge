@@ -18,9 +18,9 @@ function formatTimestamp(value) {
 /**
  * Draft and published state for this form.
  *
- * Saving, publishing and the embed snippet are wired to the real API in
- * Phase 4; the version history below is read from the same shape that API
- * will return.
+ * Saving and publishing happen from the bar above, which stays with the
+ * partner across all three views. This page is the record: what is live,
+ * what has been published before, and when.
  */
 export function PublishPage() {
   const { form } = useOutletContext();
@@ -63,7 +63,7 @@ export function PublishPage() {
         <SectionHeading
           id="versions-heading"
           title="Version history"
-          description="Every published version is kept, so a partner site pinned to an older version keeps working."
+          description="Every published version is kept and can never be changed, so a website pinned to an older version keeps working."
         />
 
         <div className="publish-page__versions">
@@ -75,11 +75,16 @@ export function PublishPage() {
             />
           ) : (
             <ul className="publish-page__version-list" role="list">
-              {form.versions.map((version) => (
+              {[...form.versions].reverse().map((version) => (
                 <li className="publish-page__version" key={version.version}>
-                  <span className="publish-page__version-number">Version {version.version}</span>
+                  <span className="publish-page__version-number">
+                    Version {version.version}
+                    {version.version === form.currentVersion ? (
+                      <Badge tone="published">Live</Badge>
+                    ) : null}
+                  </span>
                   <span className="publish-page__version-date">
-                    {formatTimestamp(version.publishedAt)}
+                    Published {formatTimestamp(version.publishedAt)}
                   </span>
                 </li>
               ))}

@@ -63,6 +63,9 @@ function collectErrors(config, issues) {
 
 export function useFormConfig(initialConfig) {
   const [config, setConfig] = useState(initialConfig);
+  /* What the server currently holds. Saving moves this forward, which is
+     how "unsaved changes" stops being true. */
+  const [savedConfig, setSavedConfig] = useState(initialConfig);
 
   const validation = useMemo(() => {
     const result = formConfigSchema.safeParse(config);
@@ -118,12 +121,18 @@ export function useFormConfig(initialConfig) {
   }, []);
 
   const reset = useCallback(() => {
-    setConfig(initialConfig);
-  }, [initialConfig]);
+    setConfig(savedConfig);
+  }, [savedConfig]);
+
+  /** Accept what the server stored as the new starting point. */
+  const markSaved = useCallback((stored) => {
+    setSavedConfig(stored);
+    setConfig(stored);
+  }, []);
 
   return {
     config,
-    isDirty: config !== initialConfig,
+    isDirty: config !== savedConfig,
     isValid: validation.isValid,
     errors: validation.byPath,
     fieldErrors: validation.byField,
@@ -135,5 +144,6 @@ export function useFormConfig(initialConfig) {
     updateCustomField,
     removeCustomField,
     reset,
+    markSaved,
   };
 }

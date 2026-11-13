@@ -20,7 +20,6 @@ export function ConfigurePage() {
   const { formType, configState } = useOutletContext();
   const {
     config,
-    isDirty,
     fieldErrors,
     errors,
     generalErrors,
@@ -131,12 +130,6 @@ export function ConfigurePage() {
         </Card>
       ) : null}
 
-      {isDirty ? (
-        <p className="configure-page__unsaved" role="status">
-          These changes are not saved yet. Saving drafts and publishing versions arrive with the
-          backend, so leaving this page will discard them.
-        </p>
-      ) : null}
     </div>
   );
 }

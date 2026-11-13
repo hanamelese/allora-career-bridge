@@ -34,6 +34,7 @@ export function PreviewPage() {
           formId={form.formId}
           formVersion={form.currentVersion}
           language={config.defaultLanguage}
+          publicKey={form.publicKey}
         />
       </Card>
     </div>

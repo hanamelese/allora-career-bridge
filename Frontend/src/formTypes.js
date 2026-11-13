@@ -10,14 +10,13 @@ import { ClipboardList, UserRound, Briefcase, Building2 } from 'lucide-react';
  * never shows an id; it shows `name`.
  *
  * `slug` is what appears in the URL, so a partner can bookmark or share a
- * link to one form without the legacy identifier leaking into it.
- *
- * `formId` is the stable key the API and the embed tag use.
+ * link to one form without the legacy identifier leaking into it. The
+ * form's own id is issued by the server and looked up by `id` (the type).
+
  */
 export const FORM_TYPES = [
   {
     id: 'signup',
-    formId: 'frm_learner_registration',
     slug: 'learner-registration',
     name: 'Learner Registration',
     summary: 'Basic details and account registration',
@@ -28,7 +27,6 @@ export const FORM_TYPES = [
   },
   {
     id: 'learner',
-    formId: 'frm_learner_profile',
     slug: 'learner-profile',
     name: 'Learner Profile & Support',
     summary: 'Onboarding profile and private support requests',
@@ -39,7 +37,6 @@ export const FORM_TYPES = [
   },
   {
     id: 'jobApplication',
-    formId: 'frm_job_application',
     slug: 'job-application',
     name: 'Job Application',
     summary: 'Accessible applications with voice answers',
@@ -50,7 +47,6 @@ export const FORM_TYPES = [
   },
   {
     id: 'employer',
-    formId: 'frm_employer_accessibility',
     slug: 'employer-accessibility',
     name: 'Employer & Workplace Accessibility',
     summary: 'Organisation details and accommodations offered',

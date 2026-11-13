@@ -1,9 +1,8 @@
 import { useParams } from 'react-router-dom';
 import { CircleAlert } from 'lucide-react';
-import { getForm } from '../api/formsClient.js';
+import { getFormByType } from '../api/formsClient.js';
 import { getFormTypeBySlug } from '../formTypes.js';
 import { useAsync } from '../hooks/useAsync.js';
-import { Badge } from '../components/ui/Badge.jsx';
 import { Card } from '../components/ui/Card.jsx';
 import { ErrorState } from '../components/ui/ErrorState.jsx';
 import { Skeleton } from '../components/ui/Skeleton.jsx';
@@ -19,11 +18,15 @@ import './FormWorkspace.css';
 export function FormWorkspace() {
   const { formSlug } = useParams();
   const formType = getFormTypeBySlug(formSlug);
-  const formId = formType?.formId ?? null;
 
+  /* Form ids are issued by the server and differ between partners, so the
+     form is found by the type this route names. */
   const { status, data: form, error, reload } = useAsync(
-    () => (formId ? getForm(formId) : Promise.reject(new Error('Unknown form'))),
-    [formId],
+    () =>
+      formType
+        ? getFormByType(formType.id)
+        : Promise.reject(new Error('Unknown form')),
+    [formType?.id],
   );
 
   if (!formType) {
@@ -43,14 +46,6 @@ export function FormWorkspace() {
             <h1 className="form-workspace__title">{formType.name}</h1>
             <p className="form-workspace__audience">{formType.audience}</p>
           </div>
-
-          {status === 'success' ? (
-            <Badge tone={form.status === 'published' ? 'published' : 'draft'}>
-              {form.status === 'published'
-                ? `Published · version ${form.currentVersion}`
-                : 'Draft · not published yet'}
-            </Badge>
-          ) : null}
         </div>
 
         <p className="form-workspace__purpose">{formType.purpose}</p>
@@ -86,12 +81,7 @@ export function FormWorkspace() {
         ) : null}
 
         {status === 'success' ? (
-          <FormEditor
-            key={`${form.formId}:${form.updatedAt ?? 'new'}`}
-            form={form}
-            formType={formType}
-            reload={reload}
-          />
+          <FormEditor key={form.formId} form={form} formType={formType} />
         ) : null}
       </div>
 

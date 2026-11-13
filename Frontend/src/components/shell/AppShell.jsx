@@ -1,11 +1,12 @@
 import { useState } from 'react';
 import { Outlet, useLocation } from 'react-router-dom';
-import { Menu } from 'lucide-react';
+import { LogOut, Menu } from 'lucide-react';
 import { Button } from '../ui/Button.jsx';
 import { LiveRegion } from '../ui/LiveRegion.jsx';
 import { SkipLink } from '../ui/SkipLink.jsx';
 import { FormsSidebar } from './FormsSidebar.jsx';
 import { getFormTypeBySlug } from '../../formTypes.js';
+import { useAuth } from '../../auth/authContext.js';
 import './AppShell.css';
 
 /**
@@ -19,6 +20,7 @@ import './AppShell.css';
  * announces each change politely through one shared live region.
  */
 export function AppShell() {
+  const { partner, signOut } = useAuth();
   const [isNavOpen, setIsNavOpen] = useState(false);
   const location = useLocation();
 
@@ -54,7 +56,10 @@ export function AppShell() {
         </div>
 
         <div className="app-shell__account">
-          <span className="app-shell__org">ALX Ethiopia</span>
+          <span className="app-shell__org">{partner?.name}</span>
+          <Button variant="quiet-inverse" size="sm" icon={LogOut} onClick={signOut}>
+            Sign out
+          </Button>
         </div>
       </header>
 

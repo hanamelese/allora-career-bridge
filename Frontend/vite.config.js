@@ -10,4 +10,14 @@ export default defineConfig({
   optimizeDeps: {
     exclude: ['@onboarding/contracts', '@onboarding/form-engine'],
   },
+  server: {
+    // The dashboard calls /api/v1 on its own origin, so there is no CORS
+    // request in development and no API address baked into the bundle.
+    proxy: {
+      '/api': {
+        target: process.env.VITE_API_PROXY ?? 'http://localhost:3001',
+        changeOrigin: true,
+      },
+    },
+  },
 });
