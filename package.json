@@ -1,0 +1,8 @@
+{
+  "name": "allora-onboarding-workspace",
+  "private": true,
+  "type": "module",
+  "workspaces": [
+    "packages/*"
+  ]
+}
