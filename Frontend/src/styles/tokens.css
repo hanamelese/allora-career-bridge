@@ -1,0 +1,150 @@
+/**
+ * Design tokens.
+ *
+ * The first tier (palette) holds raw values. The second tier (semantic)
+ * names a role, and components only ever use the semantic names, so a
+ * palette change never means a component change.
+ *
+ * Contrast is part of the contract here, not an afterthought:
+ *   --ink on --surface            ~14.5:1
+ *   --ink-secondary on --surface   ~8.6:1
+ *   --ink-muted on --surface       ~5.4:1
+ *   --danger on --danger-surface   ~7.5:1
+ *   --border-strong on --surface    ~3.1:1  (non-text UI boundaries)
+ */
+
+:root {
+  /* ---------- Palette ---------- */
+  --navy-900: #001a35;
+  --navy-800: #002b56;
+  --navy-700: #0a3a6b;
+  --navy-100: #e8eef5;
+  --navy-050: #f4f7fb;
+
+  --teal-700: #0f766e;
+  --teal-800: #115e59;
+  --teal-100: #d6f0ed;
+
+  --slate-900: #0f172a;
+  --slate-700: #334155;
+  --slate-600: #4a5568;
+  --slate-500: #64748b;
+  --slate-300: #cbd5e1;
+  --slate-200: #e2e8f0;
+  --slate-100: #f1f5f9;
+  --slate-050: #f7fafc;
+
+  --red-700: #9b1c1c;
+  --red-050: #fdf2f2;
+  --green-800: #0f5132;
+  --green-050: #e6f4ec;
+  --amber-800: #8a5300;
+  --amber-050: #fef6e7;
+
+  /* ---------- Semantic: surfaces ---------- */
+  --surface: #ffffff;
+  --surface-sunken: var(--slate-050);
+  --surface-raised: #ffffff;
+  --surface-selected: var(--navy-100);
+  --surface-inverse: var(--navy-800);
+
+  /* ---------- Semantic: ink ---------- */
+  --ink: var(--navy-800);
+  --ink-secondary: var(--slate-700);
+  --ink-muted: var(--slate-500);
+  --ink-inverse: #ffffff;
+  --ink-accent: var(--teal-800);
+
+  /* ---------- Semantic: borders ---------- */
+  --border-subtle: var(--slate-200);
+  --border-default: var(--slate-300);
+  --border-strong: var(--slate-600);
+
+  /* ---------- Semantic: intent ---------- */
+  --accent: var(--teal-700);
+  --accent-surface: var(--teal-100);
+  --danger: var(--red-700);
+  --danger-surface: var(--red-050);
+  --success: var(--green-800);
+  --success-surface: var(--green-050);
+  --warning: var(--amber-800);
+  --warning-surface: var(--amber-050);
+
+  /* ---------- Focus ring (double ring: readable on any background) ---------- */
+  --focus-ring-inner: #ffffff;
+  --focus-ring-outer: var(--navy-800);
+
+  /* ---------- Typography ---------- */
+  --font-sans: ui-sans-serif, system-ui, -apple-system, "Segoe UI", Roboto,
+    "Noto Sans Ethiopic", "Helvetica Neue", Arial, sans-serif;
+  --font-mono: ui-monospace, SFMono-Regular, "SF Mono", Menlo, Consolas,
+    "Liberation Mono", monospace;
+
+  --font-size-xs: 0.75rem;
+  --font-size-sm: 0.875rem;
+  --font-size-base: 1rem;
+  --font-size-md: 1.125rem;
+  --font-size-lg: 1.25rem;
+  --font-size-xl: 1.5rem;
+  --font-size-2xl: 1.875rem;
+
+  --font-weight-regular: 400;
+  --font-weight-medium: 500;
+  --font-weight-semibold: 600;
+  --font-weight-bold: 700;
+
+  --line-height-base: 1.5;
+  --line-height-tight: 1.25;
+  --line-height-relaxed: 1.65;
+
+  /* ---------- Spacing (4px base) ---------- */
+  --space-2xs: 0.125rem;
+  --space-xs: 0.25rem;
+  --space-sm: 0.5rem;
+  --space-md: 1rem;
+  --space-lg: 1.5rem;
+  --space-xl: 2rem;
+  --space-2xl: 3rem;
+  --space-3xl: 4rem;
+  --space-gutter: 0.75rem;
+
+  /* ---------- Radii ---------- */
+  --radius-sm: 4px;
+  --radius-md: 8px;
+  --radius-lg: 12px;
+  --radius-xl: 16px;
+  --radius-pill: 999px;
+
+  /* ---------- Elevation ---------- */
+  --shadow-sm: 0 1px 2px rgba(15, 23, 42, 0.06),
+    0 1px 3px rgba(15, 23, 42, 0.04);
+  --shadow-md: 0 2px 4px rgba(15, 23, 42, 0.05),
+    0 4px 12px rgba(15, 23, 42, 0.07);
+  --shadow-lg: 0 8px 24px rgba(15, 23, 42, 0.1),
+    0 2px 6px rgba(15, 23, 42, 0.05);
+
+  /* ---------- Targets and motion ---------- */
+  --target-min-size: 48px;
+  --target-compact-size: 36px;
+  --transition-fast: 120ms ease;
+  --transition-base: 180ms ease;
+
+  /* ---------- Layout ---------- */
+  --sidebar-width: 19rem;
+  --header-height: 4rem;
+  --content-max-width: 76rem;
+
+  /* ---------- Backwards-compatible aliases ----------
+     The shared accessibility styles and the learner-facing form were
+     authored against these names. Keep them pointing at the semantic
+     tier so there is only ever one source of truth. */
+  --color-primary: var(--navy-800);
+  --color-primary-dark: var(--navy-900);
+  --color-text: var(--ink);
+  --color-text-muted: var(--ink-secondary);
+  --color-bg: var(--surface);
+  --color-bg-alt: var(--surface-sunken);
+  --color-border: var(--border-strong);
+  --color-error: var(--danger);
+  --color-error-bg: var(--danger-surface);
+}

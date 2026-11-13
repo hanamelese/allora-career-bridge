@@ -1,0 +1,17 @@
+.skip-link:focus {
+  position: fixed;
+  inset-block-start: var(--space-sm);
+  inset-inline-start: var(--space-sm);
+  z-index: 100;
+  display: inline-flex;
+  align-items: center;
+  min-height: var(--target-min-size);
+  padding-inline: var(--space-md);
+  background-color: var(--surface);
+  color: var(--ink);
+  border: 1px solid var(--border-strong);
+  border-radius: var(--radius-md);
+  box-shadow: var(--shadow-lg);
+  font-weight: var(--font-weight-semibold);
+  text-decoration: none;
+}

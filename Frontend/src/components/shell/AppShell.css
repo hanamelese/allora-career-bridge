@@ -1,0 +1,93 @@
+.app-shell {
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+}
+
+/* ---- Header ---- */
+.app-shell__header {
+  position: sticky;
+  inset-block-start: 0;
+  z-index: 20;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--space-md);
+  min-height: var(--header-height);
+  padding-inline: var(--space-lg);
+  background-color: var(--surface-inverse);
+  color: var(--ink-inverse);
+}
+
+.app-shell__brand {
+  display: flex;
+  align-items: center;
+  gap: var(--space-gutter);
+  min-width: 0;
+}
+
+.app-shell__product {
+  font-size: var(--font-size-base);
+  font-weight: var(--font-weight-semibold);
+  line-height: var(--line-height-tight);
+}
+
+.app-shell__tagline {
+  font-size: var(--font-size-xs);
+  color: rgba(255, 255, 255, 0.72);
+  line-height: var(--line-height-tight);
+}
+
+.app-shell__account {
+  display: flex;
+  align-items: center;
+  gap: var(--space-md);
+  font-size: var(--font-size-sm);
+}
+
+.app-shell__org {
+  color: rgba(255, 255, 255, 0.85);
+}
+
+.app-shell__nav-toggle {
+  display: none;
+}
+
+/* ---- Body ---- */
+.app-shell__body {
+  display: flex;
+  flex: 1;
+  align-items: flex-start;
+  min-height: 0;
+}
+
+.app-shell__main {
+  flex: 1;
+  min-width: 0;
+  padding: var(--space-xl) var(--space-lg) var(--space-2xl);
+}
+
+.app-shell__main:focus {
+  outline: none;
+}
+
+.app-shell__content {
+  max-width: var(--content-max-width);
+  margin-inline: auto;
+}
+
+/* ---- Narrow screens: the sidebar becomes a disclosure ---- */
+@media (max-width: 55rem) {
+  .app-shell__body {
+    flex-direction: column;
+    align-items: stretch;
+  }
+
+  .app-shell__nav-toggle {
+    display: inline-flex;
+  }
+
+  .app-shell__main {
+    padding-inline: var(--space-md);
+  }
+}

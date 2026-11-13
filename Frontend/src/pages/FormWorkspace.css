@@ -1,0 +1,53 @@
+.form-workspace__header {
+  margin-block-end: var(--space-lg);
+}
+
+.form-workspace__title-row {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: var(--space-md);
+}
+
+.form-workspace__title {
+  font-size: var(--font-size-xl);
+}
+
+.form-workspace__audience {
+  margin-block-start: var(--space-2xs);
+  font-size: var(--font-size-sm);
+  color: var(--ink-muted);
+}
+
+.form-workspace__purpose {
+  margin-block-start: var(--space-sm);
+  max-width: 70ch;
+  color: var(--ink-secondary);
+  line-height: var(--line-height-relaxed);
+}
+
+.form-workspace__panel {
+  margin-block-start: var(--space-lg);
+}
+
+.form-workspace__hint {
+  display: flex;
+  align-items: flex-start;
+  gap: var(--space-sm);
+  margin-block-start: var(--space-lg);
+  padding: var(--space-gutter) var(--space-md);
+  border-radius: var(--radius-md);
+  background-color: var(--surface-sunken);
+  border: 1px solid var(--border-subtle);
+  font-size: var(--font-size-sm);
+  color: var(--ink-secondary);
+}
+
+.form-workspace__hint-icon {
+  width: 1.125rem;
+  height: 1.125rem;
+  flex-shrink: 0;
+  margin-block-start: 0.125rem;
+  color: var(--ink-muted);
+}

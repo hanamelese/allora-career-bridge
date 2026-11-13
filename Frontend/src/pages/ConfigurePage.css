@@ -1,0 +1,39 @@
+.configure-page__fields {
+  margin-block-start: var(--space-md);
+}
+
+.configure-page__settings {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(14rem, 1fr));
+  gap: var(--space-md);
+  margin-block-start: var(--space-md);
+}
+
+.configure-page__setting {
+  padding: var(--space-gutter);
+  border: 1px solid var(--border-subtle);
+  border-radius: var(--radius-md);
+  background-color: var(--surface-sunken);
+}
+
+.configure-page__setting dt {
+  display: flex;
+  align-items: center;
+  gap: var(--space-sm);
+  font-size: var(--font-size-sm);
+  font-weight: var(--font-weight-semibold);
+}
+
+.configure-page__setting dd {
+  margin-block-start: var(--space-xs);
+  margin-inline-start: calc(1.125rem + var(--space-sm));
+  font-size: var(--font-size-sm);
+  color: var(--ink-secondary);
+}
+
+.configure-page__setting-icon {
+  width: 1.125rem;
+  height: 1.125rem;
+  color: var(--ink-muted);
+  flex-shrink: 0;
+}

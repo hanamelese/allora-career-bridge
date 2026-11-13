@@ -1,0 +1,17 @@
+{
+  "name": "allora-career-bridge",
+  "private": true,
+  "version": "0.1.0",
+  "type": "module",
+  "description": "Accessible Onboarding System - Partner Dashboard, shared contracts and Form Engine",
+  "workspaces": [
+    "packages/*",
+    "Frontend"
+  ],
+  "scripts": {
+    "dev": "npm run dev -w frontend",
+    "build": "npm run build -w frontend",
+    "lint": "npm run lint -w frontend",
+    "test": "npm run test -w @onboarding/contracts -w @onboarding/form-engine"
+  }
+}

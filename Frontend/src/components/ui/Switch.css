@@ -1,0 +1,92 @@
+.switch__control {
+  display: flex;
+  align-items: center;
+}
+
+/* The input stays in the accessibility tree and in the tab order; the
+   visible track is drawn by the label and follows the input's state. */
+.switch__input {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  overflow: hidden;
+  clip-path: inset(50%);
+}
+
+.switch__label {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-gutter);
+  min-height: var(--target-compact-size);
+  cursor: pointer;
+  font-size: var(--font-size-sm);
+  font-weight: var(--font-weight-medium);
+}
+
+.switch__track {
+  position: relative;
+  flex-shrink: 0;
+  width: 2.5rem;
+  height: 1.375rem;
+  border-radius: var(--radius-pill);
+  background-color: var(--slate-300);
+  border: 1px solid var(--border-default);
+  transition: background-color var(--transition-fast);
+}
+
+.switch__thumb {
+  position: absolute;
+  inset-block-start: 1px;
+  inset-inline-start: 1px;
+  width: 1.125rem;
+  height: 1.125rem;
+  border-radius: 50%;
+  background-color: var(--surface);
+  box-shadow: var(--shadow-sm);
+  transition: transform var(--transition-fast);
+}
+
+.switch__input:checked + .switch__label .switch__track {
+  background-color: var(--accent);
+  border-color: var(--teal-800);
+}
+
+.switch__input:checked + .switch__label .switch__thumb {
+  transform: translateX(1.125rem);
+}
+
+/* The ring is drawn on the visible track, since the input itself is
+   clipped to a single pixel. */
+.switch__input:focus-visible + .switch__label .switch__track {
+  outline: 2px solid var(--focus-ring-inner);
+  outline-offset: 1px;
+  box-shadow: 0 0 0 4px var(--focus-ring-outer);
+}
+
+.switch--disabled .switch__label {
+  cursor: not-allowed;
+  color: var(--ink-secondary);
+}
+
+.switch__description,
+.switch__locked {
+  margin-block-start: var(--space-xs);
+  font-size: var(--font-size-sm);
+  color: var(--ink-secondary);
+  line-height: var(--line-height-base);
+}
+
+.switch__locked {
+  color: var(--ink-secondary);
+  font-style: normal;
+}
+
+@media (forced-colors: active) {
+  .switch__track {
+    border: 1px solid CanvasText;
+  }
+
+  .switch__input:checked + .switch__label .switch__track {
+    background-color: Highlight;
+  }
+}

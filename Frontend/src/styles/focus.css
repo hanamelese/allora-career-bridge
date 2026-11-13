@@ -1,0 +1,55 @@
+/**
+ * Focus visibility.
+ *
+ * A double ring - a light inner outline plus a dark outer ring - stays
+ * visible whether the focused control sits on a white card or a navy
+ * header, so one rule covers the whole interface.
+ *
+ * Two repairs to the original rules this is based on:
+ *   1. The outline is only removed for pointer focus. A browser without
+ *      :focus-visible support keeps its native indicator rather than
+ *      losing all focus indication.
+ *   2. The 48px minimum target is applied to the controls that need it,
+ *      not blanket-applied to every <a> and <input> - which previously
+ *      stretched inline text links and deformed 20px radios.
+ */
+
+:focus-visible {
+  outline: 2px solid var(--focus-ring-inner);
+  outline-offset: 1px;
+  box-shadow: 0 0 0 4px var(--focus-ring-outer);
+  border-radius: var(--radius-sm);
+}
+
+/* Only suppress the native ring where :focus-visible can take over. */
+@supports selector(:focus-visible) {
+  :focus:not(:focus-visible) {
+    outline: none;
+  }
+}
+
+/* Comfortable hit targets for the controls a learner or partner taps. */
+button,
+[role="button"],
+[role="tab"],
+select,
+input:not([type="checkbox"]):not([type="radio"]),
+textarea {
+  min-height: var(--target-min-size);
+}
+
+/* Checkboxes and radios stay their natural size; the label row carries
+   the target area instead. */
+input[type="checkbox"],
+input[type="radio"] {
+  min-height: auto;
+}
+
+/* Windows High Contrast / forced colours. */
+@media (forced-colors: active) {
+  :focus-visible {
+    outline: 3px solid Highlight;
+    outline-offset: 2px;
+    box-shadow: none;
+  }
+}

@@ -1,0 +1,47 @@
+/* Shared utilities. Kept deliberately few. */
+
+/* Available to assistive technology, not to sighted users. One shared
+   definition, rather than the same clip-rect inlined in each component. */
+.visually-hidden {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  margin: -1px;
+  overflow: hidden;
+  clip: rect(0, 0, 0, 0);
+  clip-path: inset(50%);
+  white-space: nowrap;
+  border: 0;
+}
+
+/* Hidden until focused - used by the skip link. */
+.visually-hidden-focusable:not(:focus):not(:focus-within) {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  margin: -1px;
+  overflow: hidden;
+  clip: rect(0, 0, 0, 0);
+  clip-path: inset(50%);
+  white-space: nowrap;
+  border: 0;
+}
+
+.stack-sm > * + * {
+  margin-block-start: var(--space-sm);
+}
+
+.stack-md > * + * {
+  margin-block-start: var(--space-md);
+}
+
+.stack-lg > * + * {
+  margin-block-start: var(--space-lg);
+}
+
+.text-mono {
+  font-family: var(--font-mono);
+  font-size: var(--font-size-sm);
+}
