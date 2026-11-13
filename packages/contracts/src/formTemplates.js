@@ -60,7 +60,11 @@ export const FORM_TEMPLATES = {
       field('phone', { required: true }),
       field('email'),
       field('identityRoute', { required: true, locked: true }),
-      field('documentId'),
+      /* Only asked when the chosen document actually carries a number, so a
+         learner with no document never meets it. */
+      field('documentId', {
+        showIf: { field: 'identityRoute', in: ['kebele_id', 'passport', 'refugee_id'] },
+      }),
       field('location'),
       field('address', { enabled: false }),
       // Partner-assisted registration: an optional extra, off by default.

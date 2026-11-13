@@ -30,6 +30,7 @@ export {
 export {
   validateSubmission,
   validateProgress,
+  validateAnswer,
 } from './validation.js';
 
 export {
@@ -37,6 +38,8 @@ export {
   createAccessibilitySettings,
   getLocalizedText,
   getQuestionContent,
+  resolveOptions,
   getReadBackContent,
+  formatAnswerText,
   updateAccessibilitySettings,
 } from './accessibility.js';

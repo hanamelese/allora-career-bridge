@@ -49,14 +49,29 @@ export const identityRoutesSchema = z
 // 3. Conditional field display
 // ==========================================
 
-export const showIfSchema = z.object({
-  field: z.string().min(1),
-  equals: z.union([
-    z.string(),
-    z.number(),
-    z.boolean(),
-  ]),
-}).strict();
+const showIfValueSchema = z.union([
+  z.string(),
+  z.number(),
+  z.boolean(),
+]);
+
+/**
+ * When a question should be asked.
+ *
+ * `equals` covers a single answer; `in` covers several, which is what a
+ * question like "ID number" needs - it applies to a Kebele ID, a passport
+ * and a refugee ID, but not to a learner who has no document at all.
+ */
+export const showIfSchema = z.union([
+  z.object({
+    field: z.string().min(1),
+    equals: showIfValueSchema,
+  }).strict(),
+  z.object({
+    field: z.string().min(1),
+    in: z.array(showIfValueSchema).min(1),
+  }).strict(),
+]);
 
 // ==========================================
 // 3b. Partner text overrides

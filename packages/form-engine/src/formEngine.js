@@ -32,6 +32,7 @@ import {
 import {
   validateSubmission,
   validateProgress,
+  validateAnswer,
 } from './validation.js';
 
 import {
@@ -76,7 +77,7 @@ export function createFormEngine(config, initialAnswers = {}, settings = {}) {
     }
 
     return currentQuestion
-      ? getQuestionContent(currentQuestion, accessibility)
+      ? getQuestionContent(currentQuestion, accessibility, config)
       : null;
   }
 
@@ -170,6 +171,19 @@ export function createFormEngine(config, initialAnswers = {}, settings = {}) {
     return getCurrentQuestion();
   }
 
+  /* Jump straight to one question, if it is currently being asked. */
+  function goTo(fieldKey) {
+    const target = getVisibleQuestions(fields, answers).find(
+      (question) => question.key === fieldKey
+    );
+
+    if (target) {
+      currentQuestion = target;
+    }
+
+    return getCurrentQuestion();
+  }
+
   function updateSettings(updates) {
     accessibility = updateAccessibilitySettings(
       accessibility,
@@ -177,6 +191,21 @@ export function createFormEngine(config, initialAnswers = {}, settings = {}) {
     );
 
     return { ...accessibility };
+  }
+
+  /* Where the learner is, counted over the questions actually visible -
+     a conditional question that does not apply is not part of the total. */
+  function getProgress() {
+    const visibleQuestions = getVisibleQuestions(fields, answers);
+    const index = visibleQuestions.findIndex(
+      (question) => question.key === currentQuestion?.key
+    );
+
+    return {
+      index: index === -1 ? 0 : index,
+      position: index === -1 ? 1 : index + 1,
+      total: visibleQuestions.length,
+    };
   }
 
   function getStatus() {
@@ -190,6 +219,7 @@ export function createFormEngine(config, initialAnswers = {}, settings = {}) {
         : true,
       answers: getAllAnswers(answers),
       settings: { ...accessibility },
+      progress: getProgress(),
     };
   }
 
@@ -212,10 +242,21 @@ export function createFormEngine(config, initialAnswers = {}, settings = {}) {
 
     goNext,
     goBack,
+    goTo,
     getStatus,
+    getProgress,
 
-    validateSubmission: () => validateSubmission(config, answers),
-    validateProgress: () => validateProgress(config, answers),
+    /* The questions a learner will actually be asked, in order - the
+       review step needs the whole list, not just the current one. */
+    getVisibleQuestions: () =>
+      getVisibleQuestions(fields, answers).map((question) =>
+        getQuestionContent(question, accessibility, config)
+      ),
+
+    validateSubmission: () => validateSubmission(config, answers, accessibility.language),
+    validateProgress: () => validateProgress(config, answers, accessibility.language),
+    validateAnswer: (fieldKey) =>
+      validateAnswer(config, fieldKey, answers, accessibility.language),
 
     updateSettings,
   };

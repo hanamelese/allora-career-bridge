@@ -1,0 +1,500 @@
+/**
+ * The learner-facing form's own styles.
+ *
+ * Every custom property has a fallback, so this renders correctly both
+ * inside the dashboard - where it picks up the design tokens and matches
+ * the rest of the interface - and on its own inside the embedded widget,
+ * where no tokens exist.
+ *
+ * Targets are at least 48px, contrast is checked, and nothing here depends
+ * on colour alone to carry meaning.
+ */
+
+.fe-form {
+  --fe-ink: var(--ink, #002b56);
+  --fe-ink-secondary: var(--ink-secondary, #334155);
+  --fe-ink-muted: var(--ink-muted, #64748b);
+  --fe-surface: var(--surface, #ffffff);
+  --fe-surface-sunken: var(--surface-sunken, #f7fafc);
+  --fe-selected: var(--surface-selected, #e8eef5);
+  --fe-border: var(--border-default, #cbd5e1);
+  --fe-border-subtle: var(--border-subtle, #e2e8f0);
+  --fe-accent: var(--accent, #0f766e);
+  --fe-danger: var(--danger, #9b1c1c);
+  --fe-danger-surface: var(--danger-surface, #fdf2f2);
+  --fe-radius: var(--radius-md, 8px);
+  --fe-target: var(--target-min-size, 48px);
+
+  font-family: var(--font-sans, system-ui, sans-serif);
+  color: var(--fe-ink);
+  line-height: 1.5;
+  display: flex;
+  flex-direction: column;
+  gap: 1.5rem;
+}
+
+.fe-visually-hidden {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  margin: -1px;
+  overflow: hidden;
+  clip-path: inset(50%);
+  white-space: nowrap;
+  border: 0;
+}
+
+/* ---- Progress ---- */
+.fe-progress__label {
+  font-size: 0.875rem;
+  font-weight: 600;
+  color: var(--fe-ink-secondary);
+  margin-block-end: 0.375rem;
+}
+
+.fe-progress__track {
+  height: 6px;
+  border-radius: 999px;
+  background-color: var(--fe-border-subtle);
+  overflow: hidden;
+}
+
+.fe-progress__bar {
+  height: 100%;
+  background-color: var(--fe-accent);
+  transition: width 200ms ease;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .fe-progress__bar {
+    transition: none;
+  }
+}
+
+/* ---- Question ---- */
+.fe-question {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+}
+
+.fe-question__title {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 0.75rem;
+}
+
+.fe-question__heading {
+  font-size: 1.375rem;
+  line-height: 1.3;
+  margin: 0;
+  flex: 1;
+  min-width: 12rem;
+}
+
+.fe-question__heading:focus {
+  outline: none;
+}
+
+.fe-question__heading:focus-visible {
+  outline: 2px solid #ffffff;
+  outline-offset: 1px;
+  box-shadow: 0 0 0 4px var(--fe-ink);
+  border-radius: 4px;
+}
+
+.fe-question__icon {
+  display: grid;
+  place-items: center;
+  width: 3rem;
+  height: 3rem;
+  border-radius: var(--fe-radius);
+  background-color: var(--fe-surface-sunken);
+  color: var(--fe-accent);
+}
+
+.fe-question__icon svg {
+  width: 1.75rem;
+  height: 1.75rem;
+}
+
+.fe-question__help,
+.fe-question__footnote {
+  font-size: 1rem;
+  color: var(--fe-ink-secondary);
+  margin: 0;
+}
+
+.fe-question__footnote {
+  font-size: 0.875rem;
+  color: var(--fe-ink-muted);
+}
+
+/* A notice carries the privacy promise attached to a question, so it is
+   marked out rather than left to blend into the help text. */
+.fe-question__note {
+  margin: 0;
+  padding: 0.75rem 1rem;
+  border-inline-start: 3px solid var(--fe-accent);
+  background-color: var(--fe-surface-sunken);
+  border-radius: 4px;
+  font-size: 0.9375rem;
+  color: var(--fe-ink-secondary);
+}
+
+/* ---- Inputs ---- */
+.fe-input {
+  width: 100%;
+  min-height: var(--fe-target);
+  padding: 0.625rem 0.75rem;
+  font: inherit;
+  color: inherit;
+  background-color: var(--fe-surface);
+  border: 1px solid var(--fe-border);
+  border-radius: var(--fe-radius);
+}
+
+textarea.fe-input {
+  resize: vertical;
+}
+
+.fe-input--invalid {
+  border-color: var(--fe-danger);
+  border-width: 2px;
+}
+
+/* ---- Options ---- */
+.fe-options {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+  border: none;
+  padding: 0;
+  margin: 0;
+}
+
+.fe-options--invalid {
+  padding: 0.5rem;
+  border: 2px solid var(--fe-danger);
+  border-radius: var(--fe-radius);
+}
+
+.fe-option {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  min-height: var(--fe-target);
+  padding: 0.625rem 0.875rem;
+  border: 1px solid var(--fe-border);
+  border-radius: var(--fe-radius);
+  background-color: var(--fe-surface);
+  cursor: pointer;
+}
+
+.fe-option:hover {
+  background-color: var(--fe-surface-sunken);
+}
+
+.fe-option:has(.fe-option__input:checked) {
+  background-color: var(--fe-selected);
+  border-color: var(--fe-ink);
+  box-shadow: inset 0 0 0 1px var(--fe-ink);
+}
+
+.fe-option:has(.fe-option__input:focus-visible) {
+  outline: 2px solid #ffffff;
+  outline-offset: 1px;
+  box-shadow: 0 0 0 4px var(--fe-ink);
+}
+
+.fe-option__input {
+  width: 1.25rem;
+  height: 1.25rem;
+  flex-shrink: 0;
+  accent-color: var(--fe-accent);
+}
+
+.fe-option__icon {
+  display: grid;
+  place-items: center;
+  flex-shrink: 0;
+  color: var(--fe-accent);
+}
+
+.fe-option__icon svg {
+  width: 1.5rem;
+  height: 1.5rem;
+}
+
+.fe-option__label {
+  font-size: 1rem;
+}
+
+/* ---- Consent ---- */
+.fe-consent {
+  display: flex;
+  align-items: flex-start;
+  gap: 0.75rem;
+  padding: 0.875rem 1rem;
+  border: 1px solid var(--fe-border);
+  border-radius: var(--fe-radius);
+  background-color: var(--fe-surface-sunken);
+}
+
+.fe-consent--invalid {
+  border-color: var(--fe-danger);
+  border-width: 2px;
+}
+
+.fe-consent__input {
+  width: 1.25rem;
+  height: 1.25rem;
+  margin-block-start: 0.1875rem;
+  flex-shrink: 0;
+  accent-color: var(--fe-accent);
+}
+
+.fe-consent__label {
+  font-size: 1rem;
+  cursor: pointer;
+}
+
+/* ---- Error ---- */
+.fe-error {
+  margin: 0;
+  padding: 0.625rem 0.875rem;
+  background-color: var(--fe-danger-surface);
+  border-radius: 4px;
+  color: var(--fe-danger);
+  font-weight: 600;
+  font-size: 0.9375rem;
+}
+
+/* ---- Buttons ---- */
+.fe-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.75rem;
+}
+
+.fe-button {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-height: var(--fe-target);
+  padding-inline: 1.25rem;
+  font: inherit;
+  font-weight: 600;
+  color: var(--fe-ink);
+  background-color: var(--fe-surface);
+  border: 1px solid var(--fe-border);
+  border-radius: var(--fe-radius);
+  cursor: pointer;
+}
+
+.fe-button:hover {
+  background-color: var(--fe-surface-sunken);
+}
+
+.fe-button--primary {
+  background-color: var(--fe-ink);
+  border-color: var(--fe-ink);
+  color: #ffffff;
+}
+
+.fe-button--primary:hover {
+  background-color: #001a35;
+}
+
+.fe-button--quiet {
+  border-color: transparent;
+  background-color: transparent;
+  color: var(--fe-accent);
+  padding-inline: 0.75rem;
+}
+
+.fe-button--quiet:hover {
+  background-color: var(--fe-surface-sunken);
+}
+
+.fe-audio-button {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.375rem;
+  min-height: var(--fe-target);
+  padding-inline: 0.75rem;
+  font: inherit;
+  font-size: 0.875rem;
+  font-weight: 600;
+  color: var(--fe-accent);
+  background: none;
+  border: 1px solid var(--fe-border);
+  border-radius: 999px;
+  cursor: pointer;
+}
+
+.fe-audio-button:hover {
+  background-color: var(--fe-surface-sunken);
+}
+
+/* ---- Voice ---- */
+.fe-voice {
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+  padding-block-start: 0.5rem;
+}
+
+.fe-voice__mic {
+  align-self: flex-start;
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  min-height: var(--fe-target);
+  padding-inline: 1rem;
+  font: inherit;
+  font-weight: 600;
+  color: var(--fe-ink);
+  background-color: var(--fe-surface);
+  border: 1px solid var(--fe-border);
+  border-radius: 999px;
+  cursor: pointer;
+}
+
+.fe-voice__mic--live {
+  background-color: var(--fe-danger-surface);
+  border-color: var(--fe-danger);
+  color: var(--fe-danger);
+}
+
+.fe-voice__proposal {
+  padding: 0.875rem 1rem;
+  border: 1px solid var(--fe-border);
+  border-radius: var(--fe-radius);
+  background-color: var(--fe-surface-sunken);
+}
+
+.fe-voice__heard {
+  margin: 0 0 0.75rem;
+  font-size: 1rem;
+}
+
+.fe-voice__actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+}
+
+.fe-voice__note,
+.fe-voice__status {
+  margin: 0;
+  font-size: 0.875rem;
+  color: var(--fe-ink-muted);
+}
+
+.fe-voice__status:empty {
+  display: none;
+}
+
+/* ---- Review ---- */
+.fe-review {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+}
+
+.fe-review__list {
+  margin: 0;
+  border-block-start: 1px solid var(--fe-border-subtle);
+}
+
+.fe-review__item {
+  display: grid;
+  grid-template-columns: 1fr auto;
+  align-items: center;
+  gap: 0.25rem 1rem;
+  padding-block: 0.875rem;
+  border-block-end: 1px solid var(--fe-border-subtle);
+}
+
+.fe-review__term {
+  grid-column: 1;
+  font-size: 0.875rem;
+  font-weight: 600;
+  color: var(--fe-ink-secondary);
+}
+
+.fe-review__answer {
+  grid-column: 1;
+  grid-row: 2;
+  margin: 0;
+  font-size: 1rem;
+}
+
+.fe-review__item > .fe-button {
+  grid-column: 2;
+  grid-row: 1 / span 2;
+}
+
+.fe-review__private {
+  display: inline-block;
+  margin-inline-start: 0.5rem;
+  padding: 0 0.5rem;
+  border-radius: 999px;
+  background-color: var(--fe-selected);
+  color: var(--fe-ink);
+  font-size: 0.75rem;
+}
+
+/* ---- Done ---- */
+.fe-done {
+  text-align: center;
+  padding-block: 2rem;
+}
+
+.fe-done__icon {
+  display: grid;
+  place-items: center;
+  width: 3rem;
+  height: 3rem;
+  margin: 0 auto 1rem;
+  border-radius: 999px;
+  background-color: var(--success-surface, #e6f4ec);
+  color: var(--success, #0f5132);
+  font-size: 1.5rem;
+  font-weight: 700;
+}
+
+.fe-done__heading {
+  margin: 0 0 0.5rem;
+  font-size: 1.25rem;
+}
+
+/* ---- Simple words and icons ---- */
+.fe-form[data-low-literacy] .fe-question__heading {
+  font-size: 1.625rem;
+}
+
+.fe-form[data-low-literacy] .fe-option {
+  min-height: 3.75rem;
+  font-size: 1.125rem;
+}
+
+.fe-form[data-low-literacy] .fe-option__label,
+.fe-form[data-low-literacy] .fe-question__help {
+  font-size: 1.125rem;
+}
+
+.fe-form[data-low-literacy] .fe-button {
+  min-height: 3.5rem;
+  font-size: 1.125rem;
+}
+
+@media (forced-colors: active) {
+  .fe-option:has(.fe-option__input:checked) {
+    border-color: Highlight;
+    box-shadow: inset 0 0 0 2px Highlight;
+  }
+}

@@ -1,0 +1,45 @@
+.preview-pane {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-md);
+  margin-block-start: var(--space-md);
+}
+
+.preview-pane__controls {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: flex-end;
+  gap: var(--space-md) var(--space-lg);
+  padding-block-end: var(--space-md);
+  border-block-end: 1px solid var(--border-subtle);
+}
+
+.preview-pane__controls .select {
+  min-width: 12rem;
+}
+
+.preview-pane__variant {
+  padding: var(--space-sm) var(--space-gutter);
+  border-radius: var(--radius-md);
+  background-color: var(--warning-surface);
+  color: var(--warning);
+  font-size: var(--font-size-sm);
+}
+
+/* A plain surface with room to breathe: the preview should read as the
+   learner's screen, not as another dashboard panel. */
+.preview-pane__frame {
+  padding: var(--space-xl);
+  border: 1px solid var(--border-subtle);
+  border-radius: var(--radius-lg);
+  background-color: var(--surface);
+  max-width: 34rem;
+  margin-inline: auto;
+  width: 100%;
+}
+
+@media (max-width: 40rem) {
+  .preview-pane__frame {
+    padding: var(--space-md);
+  }
+}

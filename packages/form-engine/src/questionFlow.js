@@ -4,26 +4,16 @@
  *
  * Controls the order of questions in a form.
  * This module does not display UI or store data.
+ *
+ * Visibility comes from the shared contracts helper, so the question a
+ * learner is shown and the question validation demands are decided by one
+ * piece of code.
  */
 
-function isQuestionVisible(question, answers = {}) {
-  if (question.enabled === false) {
-    return false;
-  }
-
-  if (!question.showIf) {
-    return true;
-  }
-
-  const { field, equals } = question.showIf;
-
-  return answers[field] === equals;
-}
+import { isFieldVisible } from '@onboarding/contracts/fieldVisibility.js';
 
 export function getVisibleQuestions(fields, answers = {}) {
-  return fields.filter((field) =>
-    isQuestionVisible(field, answers)
-  );
+  return fields.filter((field) => isFieldVisible(field, answers));
 }
 
 export function getFirstQuestion(fields, answers = {}) {

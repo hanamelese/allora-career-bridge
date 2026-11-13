@@ -62,6 +62,11 @@ export {
 } from './formConfig.js';
 
 export {
+  matchesShowIf,
+  isFieldVisible,
+} from './fieldVisibility.js';
+
+export {
   buildSubmissionSchema,
   buildProgressSchema,
   getPartnerSafeAnswers,

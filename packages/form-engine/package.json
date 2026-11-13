@@ -6,6 +6,8 @@
   "main": "src/index.js",
   "exports": {
     ".": "./src/index.js",
+    "./react": "./react/index.js",
+    "./react/*": "./react/*",
     "./*": "./src/*"
   },
   "scripts": {
@@ -16,5 +18,8 @@
   },
   "devDependencies": {
     "vitest": "^5.1.0"
+  },
+  "peerDependencies": {
+    "react": ">=19"
   }
 }

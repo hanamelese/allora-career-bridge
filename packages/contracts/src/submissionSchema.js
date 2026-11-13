@@ -3,20 +3,7 @@ import { z } from 'zod';
 
 import { fieldCatalog } from './fieldCatalog.js';
 import { getCatalogKeys } from './optionCatalogs.js';
-
-// ==========================================
-// 1. Conditional visibility
-// ==========================================
-
-function isFieldVisible(fieldConfig, answers) {
-  if (!fieldConfig.showIf) {
-    return true;
-  }
-
-  const { field, equals } = fieldConfig.showIf;
-
-  return answers[field] === equals;
-}
+import { matchesShowIf } from './fieldVisibility.js';
 
 // ==========================================
 // 2. Built-in field validation
@@ -190,7 +177,7 @@ function addRequiredFieldValidation(
         continue;
       }
 
-      if (!isFieldVisible(fieldConfig, answers)) {
+      if (!matchesShowIf(fieldConfig.showIf, answers)) {
         continue;
       }
 
@@ -245,7 +232,7 @@ function addRequiredFieldValidation(
         continue;
       }
 
-      if (!isFieldVisible(customField, answers)) {
+      if (!matchesShowIf(customField.showIf, answers)) {
         continue;
       }
 
@@ -312,7 +299,7 @@ export function getPartnerSafeAnswers(config, answers) {
     }
 
     // Do not share answers for hidden conditional fields
-    if (!isFieldVisible(fieldConfig, answers)) {
+    if (!matchesShowIf(fieldConfig.showIf, answers)) {
       continue;
     }
 
@@ -338,7 +325,7 @@ export function getPartnerSafeAnswers(config, answers) {
     }
 
     // Do not share answers for hidden conditional fields
-    if (!isFieldVisible(customField, answers)) {
+    if (!matchesShowIf(customField.showIf, answers)) {
       continue;
     }
 

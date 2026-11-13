@@ -1,29 +1,41 @@
 import { useOutletContext } from 'react-router-dom';
-import { MonitorPlay } from 'lucide-react';
 import { Card } from '../components/ui/Card.jsx';
-import { EmptyState } from '../components/ui/EmptyState.jsx';
+import { SectionHeading } from '../components/ui/SectionHeading.jsx';
+import { PreviewPane } from '../components/preview/PreviewPane.jsx';
+import { EmbedTagBox } from '../components/preview/EmbedTagBox.jsx';
 
 /**
- * Where the live preview goes.
- *
- * The preview is rendered by the shared Form Engine, so that what a
- * partner sees here is the same code a learner will meet. Those React
- * bindings arrive in Phase 3; showing a mock-up instead would defeat the
- * purpose of the preview.
+ * What the learner will see, and the tag that puts it on a partner's site.
  */
 export function PreviewPage() {
-  const { formType } = useOutletContext();
+  const { form, formType, configState } = useOutletContext();
+  const { config } = configState;
 
   return (
-    <Card as="section" aria-labelledby="preview-heading">
-      <h2 className="visually-hidden" id="preview-heading">
-        Preview
-      </h2>
-      <EmptyState
-        icon={MonitorPlay}
-        title="The live preview is not connected yet"
-        description={`Once the shared Form Engine is wired up, this panel will render ${formType.name} exactly as the learner meets it - one question per screen, in English or Amharic, with read-aloud and voice answers.`}
-      />
-    </Card>
+    <div className="stack-lg">
+      <Card as="section" aria-labelledby="preview-heading">
+        <SectionHeading
+          id="preview-heading"
+          title="Live preview"
+          description={`This is ${formType.name} exactly as a learner meets it: one question per screen, with a chance to check every answer before sending. It updates as you change the settings.`}
+        />
+
+        <PreviewPane config={config} />
+      </Card>
+
+      <Card as="section" aria-labelledby="embed-heading">
+        <SectionHeading
+          id="embed-heading"
+          title="Embed tag"
+          description="Paste this into your website where the form should appear."
+        />
+
+        <EmbedTagBox
+          formId={form.formId}
+          formVersion={form.currentVersion}
+          language={config.defaultLanguage}
+        />
+      </Card>
+    </div>
   );
 }
