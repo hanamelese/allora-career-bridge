@@ -275,8 +275,14 @@ export function buildProgressSchema(config) {
 export function getPartnerSafeAnswers(config, answers) {
   const safeAnswers = {};
 
+  // Filter built-in fields
   for (const fieldConfig of config.fields) {
     if (!fieldConfig.enabled) {
+      continue;
+    }
+
+    // Do not share answers for hidden conditional fields
+    if (!isFieldVisible(fieldConfig, answers)) {
       continue;
     }
 
@@ -295,8 +301,14 @@ export function getPartnerSafeAnswers(config, answers) {
     }
   }
 
+  // Filter custom fields
   for (const customField of config.customFields ?? []) {
     if (!customField.enabled) {
+      continue;
+    }
+
+    // Do not share answers for hidden conditional fields
+    if (!isFieldVisible(customField, answers)) {
       continue;
     }
 

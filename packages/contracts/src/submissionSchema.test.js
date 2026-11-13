@@ -166,4 +166,35 @@ describe('Partner-safe answers', () => {
     expect(safeAnswers.consent).toBe(true);
     expect(safeAnswers).not.toHaveProperty('supportNeeds');
   });
+
+  it('does not include answers for hidden conditional fields', () => {
+    const config = {
+      fields: [
+        { key: 'identityRoute', enabled: true, required: true },
+      ],
+      identityRoutes: baseConfig.identityRoutes,
+      customFields: [
+        {
+          key: 'identityNumber',
+          type: 'text',
+          enabled: true,
+          required: false,
+          showIf: {
+            field: 'identityRoute',
+            equals: 'kebele_id',
+          },
+        },
+      ],
+    };
+
+    const answers = {
+      identityRoute: 'no_document',
+      identityNumber: '123456',
+    };
+
+    const safeAnswers = getPartnerSafeAnswers(config, answers);
+
+    expect(safeAnswers.identityRoute).toBe('no_document');
+    expect(safeAnswers).not.toHaveProperty('identityNumber');
+  });
 });
