@@ -1,0 +1,35 @@
+.options-editor {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-md);
+}
+
+.options-editor__list {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-sm);
+}
+
+.options-editor__item {
+  display: grid;
+  grid-template-columns: 1fr auto;
+  align-items: end;
+  gap: var(--space-sm);
+  padding: var(--space-gutter);
+  background-color: var(--surface-sunken);
+  border: 1px solid var(--border-subtle);
+  border-radius: var(--radius-md);
+}
+
+.options-editor__key {
+  grid-column: 1 / -1;
+  color: var(--ink-muted);
+  font-size: var(--font-size-xs);
+}
+
+.options-editor__labels {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(11rem, 1fr));
+  gap: var(--space-sm);
+  min-width: 0;
+}

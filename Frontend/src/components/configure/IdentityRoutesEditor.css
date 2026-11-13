@@ -1,0 +1,38 @@
+.identity-routes {
+  margin-block-start: var(--space-md);
+}
+
+.identity-routes__list {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(17rem, 1fr));
+  gap: var(--space-md);
+}
+
+.identity-routes__item {
+  display: flex;
+  align-items: flex-start;
+  gap: var(--space-gutter);
+}
+
+.identity-routes__icon {
+  display: grid;
+  place-items: center;
+  width: 2rem;
+  height: 2rem;
+  flex-shrink: 0;
+  border-radius: var(--radius-md);
+  background-color: var(--surface-sunken);
+  color: var(--ink-secondary);
+}
+
+.identity-routes__icon svg {
+  width: 1.125rem;
+  height: 1.125rem;
+}
+
+.identity-routes__error {
+  margin-block-end: var(--space-md);
+  font-size: var(--font-size-sm);
+  font-weight: var(--font-weight-medium);
+  color: var(--danger);
+}

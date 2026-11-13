@@ -10,6 +10,10 @@ export {
   SUPPORTED_LANGUAGES,
   IDENTITY_ROUTES,
   LEVEL_OPTIONS,
+  AVAILABILITY_OPTIONS,
+  EDUCATION_OPTIONS,
+  SECTOR_OPTIONS,
+  EMPLOYMENT_TYPE_OPTIONS,
   fieldCatalog,
   FIELD_KEYS,
   getField,
@@ -21,12 +25,35 @@ export {
 } from './supportCatalog.js';
 
 export {
+  workplaceAccommodations,
+  WORKPLACE_ACCOMMODATION_KEYS,
+  interviewAccommodations,
+  INTERVIEW_ACCOMMODATION_KEYS,
+} from './accommodationCatalog.js';
+
+export {
+  optionCatalogs,
+  OPTION_CATALOG_NAMES,
+  getCatalogItems,
+  getCatalogKeys,
+} from './optionCatalogs.js';
+
+export {
+  FORM_TEMPLATES,
+  LOCK_REASONS,
+  getTemplate,
+  getLockReason,
+} from './formTemplates.js';
+
+export {
   FORM_TYPES,
   formTypeSchema,
   IDENTITY_ROUTE_KEYS,
   identityRoutesSchema,
   showIfSchema,
   fieldVisibilitySchema,
+  localizedTextSchema,
+  builtInOptionSchema,
   formFieldConfigSchema,
   CUSTOM_FIELD_TYPES,
   customFieldSchema,

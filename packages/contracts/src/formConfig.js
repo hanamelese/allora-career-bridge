@@ -1,6 +1,6 @@
 
 import { z } from 'zod';
-import { IDENTITY_ROUTES } from './fieldCatalog.js';
+import { IDENTITY_ROUTES, fieldCatalog } from './fieldCatalog.js';
 
 // ==========================================
 // 1. Supported form types
@@ -59,6 +59,33 @@ export const showIfSchema = z.object({
 }).strict();
 
 // ==========================================
+// 3b. Partner text overrides
+// ==========================================
+
+/**
+ * A partner may reword a question. English is required because it is the
+ * fallback for every other language; Amharic is optional and falls back to
+ * the catalogue's reviewed translation when left out, so a partner is
+ * never forced to write Amharic in order to fix an English label.
+ */
+export const localizedTextSchema = z.object({
+  en: z.string().min(1).max(300),
+  am: z.string().min(1).max(300).optional(),
+}).strict();
+
+/**
+ * An option on an editable built-in choice field. Keyed like the catalogue
+ * options it replaces, so stored answers keep their meaning.
+ */
+export const builtInOptionSchema = z.object({
+  key: z.string().min(1).max(60).regex(
+    /^[a-z0-9_]+$/,
+    'Option keys may use lower-case letters, numbers and underscores only.'
+  ),
+  label: localizedTextSchema,
+}).strict();
+
+// ==========================================
 // 4. Field visibility
 // ==========================================
 
@@ -78,7 +105,63 @@ export const formFieldConfigSchema = z.object({
   locked: z.boolean(),
   visibility: fieldVisibilitySchema.default('public'),
   showIf: showIfSchema.optional(),
-}).strict();
+
+  // Optional partner overrides. Absent means "use the field catalogue".
+  label: localizedTextSchema.optional(),
+  helpText: localizedTextSchema.optional(),
+  options: z.array(builtInOptionSchema).min(1).optional(),
+  voiceInput: z.boolean().optional(),
+}).strict().superRefine((field, ctx) => {
+  const definition = fieldCatalog[field.key];
+
+  if (!definition) {
+    ctx.addIssue({
+      code: 'custom',
+      path: ['key'],
+      message: `"${field.key}" is not a field in the catalogue.`,
+    });
+    return;
+  }
+
+  /* A field the catalogue marks private stays private. Answers to it are
+     filtered out of anything a partner sees, so letting the config claim
+     otherwise would only mislead. */
+  if (definition.private === true && field.visibility !== 'private') {
+    ctx.addIssue({
+      code: 'custom',
+      path: ['visibility'],
+      message: `"${field.key}" holds private information and must stay private.`,
+    });
+  }
+
+  if (field.options) {
+    if (definition.optionsEditable !== true) {
+      ctx.addIssue({
+        code: 'custom',
+        path: ['options'],
+        message: `The options for "${field.key}" cannot be changed.`,
+      });
+    }
+
+    const keys = field.options.map((option) => option.key);
+
+    if (new Set(keys).size !== keys.length) {
+      ctx.addIssue({
+        code: 'custom',
+        path: ['options'],
+        message: 'Option keys must not contain duplicates.',
+      });
+    }
+  }
+
+  if (field.voiceInput === true && definition.voiceInput === false) {
+    ctx.addIssue({
+      code: 'custom',
+      path: ['voiceInput'],
+      message: `"${field.key}" cannot be answered by voice.`,
+    });
+  }
+});
 
 // ==========================================
 // 6. Custom field types
@@ -91,14 +174,21 @@ export const CUSTOM_FIELD_TYPES = [
 ];
 
 export const customFieldSchema = z.object({
-  key: z.string().min(1),
+  /* Constrained because a key becomes a property name on the submitted
+     answers: lower-case letters, numbers and underscores only. */
+  key: z.string().min(1).max(60).regex(
+    /^[a-z0-9_]+$/,
+    'Field keys may use lower-case letters, numbers and underscores only.'
+  ),
 
   type: z.enum(CUSTOM_FIELD_TYPES),
 
-  label: z.object({
-    en: z.string().min(1),
-    am: z.string().min(1),
-  }).strict(),
+  /* Amharic is optional and falls back to English, the same rule as a
+     partner's override of a built-in label. Requiring it would only
+     encourage guessed translations. */
+  label: localizedTextSchema,
+
+  helpText: localizedTextSchema.optional(),
 
   enabled: z.boolean().default(true),
 
@@ -110,11 +200,11 @@ export const customFieldSchema = z.object({
 
   options: z.array(
     z.object({
-      value: z.string().min(1),
-      label: z.object({
-        en: z.string().min(1),
-        am: z.string().min(1),
-      }).strict(),
+      value: z.string().min(1).max(60).regex(
+        /^[a-z0-9_]+$/,
+        'Option values may use lower-case letters, numbers and underscores only.'
+      ),
+      label: localizedTextSchema,
     }).strict()
   ).optional(),
 

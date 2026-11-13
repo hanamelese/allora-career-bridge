@@ -1,0 +1,142 @@
+.field-row {
+  padding: var(--space-md) 0;
+  border-block-end: 1px solid var(--border-subtle);
+}
+
+.field-row:last-child {
+  border-block-end: none;
+}
+
+.field-row__header {
+  display: flex;
+  align-items: flex-start;
+  gap: var(--space-gutter);
+}
+
+.field-row__icon {
+  display: grid;
+  place-items: center;
+  width: 2rem;
+  height: 2rem;
+  flex-shrink: 0;
+  border-radius: var(--radius-md);
+  background-color: var(--surface-sunken);
+  color: var(--ink-secondary);
+}
+
+.field-row__icon svg {
+  width: 1.125rem;
+  height: 1.125rem;
+}
+
+.field-row__identity {
+  flex: 1;
+  min-width: 0;
+}
+
+.field-row__label {
+  font-size: var(--font-size-sm);
+  font-weight: var(--font-weight-semibold);
+}
+
+.field-row__meta {
+  margin-block-start: 0.125rem;
+  font-size: var(--font-size-xs);
+  color: var(--ink-muted);
+}
+
+.field-row__badges {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-xs);
+  flex-shrink: 0;
+}
+
+.field-row__controls {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-md) var(--space-xl);
+  margin-block-start: var(--space-sm);
+  margin-inline-start: calc(2rem + var(--space-gutter));
+}
+
+.field-row__notice,
+.field-row__fixed {
+  margin-block-start: var(--space-sm);
+  padding: var(--space-sm) var(--space-gutter);
+  border-inline-start: 3px solid var(--border-default);
+  background-color: var(--surface-sunken);
+  border-radius: var(--radius-sm);
+  font-size: var(--font-size-sm);
+  color: var(--ink-secondary);
+}
+
+.field-row__notice {
+  margin-inline-start: calc(2rem + var(--space-gutter));
+  border-inline-start-color: var(--accent);
+}
+
+.field-row__error {
+  margin-block-start: var(--space-sm);
+  margin-inline-start: calc(2rem + var(--space-gutter));
+  font-size: var(--font-size-sm);
+  font-weight: var(--font-weight-medium);
+  color: var(--danger);
+}
+
+/* ---- Disclosure ---- */
+.field-row__details {
+  margin-block-start: var(--space-sm);
+  margin-inline-start: calc(2rem + var(--space-gutter));
+}
+
+.field-row__summary {
+  display: inline-flex;
+  align-items: center;
+  min-height: var(--target-compact-size);
+  padding-inline: var(--space-sm);
+  border-radius: var(--radius-sm);
+  cursor: pointer;
+  font-size: var(--font-size-sm);
+  font-weight: var(--font-weight-medium);
+  color: var(--ink-accent);
+  width: fit-content;
+}
+
+.field-row__summary:hover {
+  background-color: var(--surface-sunken);
+}
+
+.field-row__panel {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-md);
+  margin-block-start: var(--space-sm);
+  padding: var(--space-md);
+  border: 1px solid var(--border-subtle);
+  border-radius: var(--radius-md);
+  background-color: var(--surface);
+}
+
+.field-row__group {
+  border: none;
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-sm);
+}
+
+.field-row__legend {
+  padding: 0;
+  margin-block-end: var(--space-xs);
+  font-size: var(--font-size-xs);
+  font-weight: var(--font-weight-bold);
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  color: var(--ink-muted);
+}
+
+.field-row__pair {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(13rem, 1fr));
+  gap: var(--space-md);
+}

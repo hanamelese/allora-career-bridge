@@ -1,0 +1,25 @@
+.select {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-xs);
+}
+
+.select__label {
+  font-size: var(--font-size-sm);
+  font-weight: var(--font-weight-medium);
+}
+
+.select__control {
+  width: 100%;
+  padding: var(--space-sm) var(--space-gutter);
+  border: 1px solid var(--border-default);
+  border-radius: var(--radius-md);
+  background-color: var(--surface);
+  color: var(--ink);
+  font-size: var(--font-size-sm);
+}
+
+.select__help {
+  font-size: var(--font-size-sm);
+  color: var(--ink-secondary);
+}

@@ -1,4 +1,4 @@
-import { Outlet, useParams } from 'react-router-dom';
+import { useParams } from 'react-router-dom';
 import { CircleAlert } from 'lucide-react';
 import { getForm } from '../api/formsClient.js';
 import { getFormTypeBySlug } from '../formTypes.js';
@@ -8,6 +8,7 @@ import { Card } from '../components/ui/Card.jsx';
 import { ErrorState } from '../components/ui/ErrorState.jsx';
 import { Skeleton } from '../components/ui/Skeleton.jsx';
 import { WorkspaceNav } from '../components/shell/WorkspaceNav.jsx';
+import { FormEditor } from './FormEditor.jsx';
 import './FormWorkspace.css';
 
 /**
@@ -84,7 +85,14 @@ export function FormWorkspace() {
           </Card>
         ) : null}
 
-        {status === 'success' ? <Outlet context={{ form, formType, reload }} /> : null}
+        {status === 'success' ? (
+          <FormEditor
+            key={`${form.formId}:${form.updatedAt ?? 'new'}`}
+            form={form}
+            formType={formType}
+            reload={reload}
+          />
+        ) : null}
       </div>
 
       {status === 'success' && form.status !== 'published' ? (

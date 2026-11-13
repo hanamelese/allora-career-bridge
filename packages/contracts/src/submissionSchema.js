@@ -2,7 +2,7 @@
 import { z } from 'zod';
 
 import { fieldCatalog } from './fieldCatalog.js';
-import { SUPPORT_KEYS } from './supportCatalog.js';
+import { getCatalogKeys } from './optionCatalogs.js';
 
 // ==========================================
 // 1. Conditional visibility
@@ -22,7 +22,8 @@ function isFieldVisible(fieldConfig, answers) {
 // 2. Built-in field validation
 // ==========================================
 
-function getBuiltInFieldSchema(key, config) {
+function getBuiltInFieldSchema(fieldConfig, config) {
+  const key = fieldConfig.key;
   const definition = fieldCatalog[key];
 
   if (!definition) {
@@ -30,7 +31,8 @@ function getBuiltInFieldSchema(key, config) {
   }
 
   switch (definition.type) {
-    case 'text': {
+    case 'text':
+    case 'longText': {
       let schema = z.string();
 
       if (definition.rules?.minLength !== undefined) {
@@ -58,9 +60,10 @@ function getBuiltInFieldSchema(key, config) {
     }
 
     case 'choice': {
-      const allowedValues = (definition.options ?? []).map(
-        (option) => option.key
-      );
+      /* A partner may have reworded or replaced the options; validate
+         against the list the learner was actually shown. */
+      const options = fieldConfig.options ?? definition.options ?? [];
+      const allowedValues = options.map((option) => option.key);
 
       return z.string().refine(
         (value) => allowedValues.includes(value),
@@ -77,16 +80,25 @@ function getBuiltInFieldSchema(key, config) {
       );
     }
 
-    case 'multiChoice':
+    case 'multiChoice': {
+      const allowedKeys = getCatalogKeys(definition.optionsFrom);
+
       return z.array(
         z.string().refine(
-          (value) => SUPPORT_KEYS.includes(value),
-          'Choose a valid support option.'
+          (value) => allowedKeys.includes(value),
+          'Choose an option from the list.'
         )
       ).refine(
         (values) => new Set(values).size === values.length,
-        'Do not select the same support option more than once.'
+        'Do not select the same option more than once.'
       );
+    }
+
+    case 'email':
+      return z.email('Enter an email address, like name@example.com.');
+
+    case 'url':
+      return z.url('Enter a web address, like https://example.org');
 
     case 'consent':
       return z.boolean();
@@ -141,7 +153,7 @@ function buildAnswerShape(config) {
     }
 
     shape[fieldConfig.key] = getBuiltInFieldSchema(
-      fieldConfig.key,
+      fieldConfig,
       config
     ).optional();
   }
@@ -183,6 +195,37 @@ function addRequiredFieldValidation(
       }
 
       const value = answers[fieldConfig.key];
+      const definition = fieldCatalog[fieldConfig.key];
+
+      /* Checked by type, not by key: a form can carry more than one
+         consent question - a learner's own, and a partner's confirmation
+         that they may register on the learner's behalf - and `false` is
+         not an empty answer, so the generic check below would pass it. */
+      if (definition?.type === 'consent') {
+        if (value !== true) {
+          context.addIssue({
+            code: 'custom',
+            path: [fieldConfig.key],
+            message: 'Permission is required to continue.',
+          });
+        }
+
+        continue;
+      }
+
+      /* An empty list is an unanswered multi-choice question; [] is
+         neither undefined nor '', so it needs saying explicitly. */
+      if (Array.isArray(value)) {
+        if (value.length === 0) {
+          context.addIssue({
+            code: 'custom',
+            path: [fieldConfig.key],
+            message: 'Choose at least one option.',
+          });
+        }
+
+        continue;
+      }
 
       if (
         value === undefined ||
@@ -193,19 +236,6 @@ function addRequiredFieldValidation(
           code: 'custom',
           path: [fieldConfig.key],
           message: 'This question is required.',
-        });
-
-        continue;
-      }
-
-      if (
-        fieldConfig.key === 'consent' &&
-        value !== true
-      ) {
-        context.addIssue({
-          code: 'custom',
-          path: ['consent'],
-          message: 'Permission is required to continue.',
         });
       }
     }

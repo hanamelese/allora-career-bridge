@@ -1,5 +1,5 @@
+import { FORM_TEMPLATES } from '@onboarding/contracts';
 import { FORM_TYPES } from '../formTypes.js';
-import { SEED_CONFIGS } from './seedConfigs.js';
 
 /**
  * PHASE 1 STAND-IN - not the real backend.
@@ -24,15 +24,17 @@ function delay(ms = LATENCY_MS) {
   });
 }
 
+/* A form starts from the shared template for its type, so the dashboard
+   and the API seed from exactly the same defaults. */
 function buildInitialForms() {
   return FORM_TYPES.map((formType) => ({
-    formId: SEED_CONFIGS[formType.id].formId,
+    formId: formType.formId,
     type: formType.id,
     status: 'draft',
     currentVersion: null,
     updatedAt: null,
     publishedAt: null,
-    draftConfig: SEED_CONFIGS[formType.id],
+    draftConfig: FORM_TEMPLATES[formType.id],
     versions: [],
   }));
 }
