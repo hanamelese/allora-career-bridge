@@ -1,4 +1,4 @@
-import { sqliteTable, text, integer, uniqueIndex } from 'drizzle-orm/sqlite-core';
+import { sqliteTable, text, integer, uniqueIndex, index } from 'drizzle-orm/sqlite-core';
 
 /**
  * The tables the dashboard and the embedded form need.
@@ -164,4 +164,31 @@ export const allowedOrigins = sqliteTable(
     createdAt: text('created_at').notNull(),
   },
   (table) => [uniqueIndex('allowed_origins_partner_origin').on(table.partnerId, table.origin)],
+);
+
+/**
+ * A learner's answers to an embedded form, against the published version
+ * they answered.
+ *
+ * Only what an organisation can act on is kept (see `toStorableSubmission`
+ * in the contracts package): never private support answers, the referral
+ * choice, ID numbers, or the contents of a file - an uploaded CV is kept as
+ * its name, size and type.
+ */
+export const submissions = sqliteTable(
+  'submissions',
+  {
+    id: text('id').primaryKey(),
+    partnerId: text('partner_id')
+      .notNull()
+      .references(() => partners.id),
+    partnerFormId: text('partner_form_id')
+      .notNull()
+      .references(() => partnerForms.id),
+    version: integer('version').notNull(),
+    answers: text('answers', { mode: 'json' }).notNull(),
+    language: text('language').notNull().default('en'),
+    createdAt: text('created_at').notNull(),
+  },
+  (table) => [index('submissions_form_created').on(table.partnerFormId, table.createdAt)],
 );

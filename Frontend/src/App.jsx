@@ -9,6 +9,7 @@ import { ConfigurePage } from './pages/ConfigurePage.jsx';
 import { PreviewPage } from './pages/PreviewPage.jsx';
 import { PublishPage } from './pages/PublishPage.jsx';
 import { EmbedPage } from './pages/EmbedPage.jsx';
+import { SubmissionsPage } from './pages/SubmissionsPage.jsx';
 import { NotFoundPage } from './pages/NotFoundPage.jsx';
 import { OrganisationPage } from './pages/OrganisationPage.jsx';
 import { ReferralPage } from './pages/ReferralPage.jsx';
@@ -45,6 +46,7 @@ function DashboardRoutes() {
           <Route path="preview" element={<PreviewPage />} />
           <Route path="publish" element={<PublishPage />} />
           <Route path="embed" element={<EmbedPage />} />
+          <Route path="submissions" element={<SubmissionsPage />} />
         </Route>
 
         <Route path="*" element={<NotFoundPage />} />

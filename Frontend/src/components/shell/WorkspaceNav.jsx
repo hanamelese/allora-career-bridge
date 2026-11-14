@@ -2,9 +2,9 @@ import { NavLink } from 'react-router-dom';
 import './WorkspaceNav.css';
 
 /**
- * The four steps of the partner's workflow, in the order they happen:
- * configure the form, check how it will look, publish it, then take the
- * tag that puts the published version on their site.
+ * The partner's workflow, in the order it happens: configure the form,
+ * check how it will look, publish it, take the tag that puts the published
+ * version on their site, then read what learners sent from there.
  *
  * Like the sidebar these are routes, so they are links with
  * `aria-current`, not ARIA tabs - announcing "tab" for something that
@@ -15,6 +15,7 @@ const VIEWS = [
   { slug: 'preview', label: 'Preview', description: 'See the learner experience' },
   { slug: 'publish', label: 'Publish', description: 'Save and publish a version' },
   { slug: 'embed', label: 'Embed tag', description: 'Put it on your website' },
+  { slug: 'submissions', label: 'Submissions', description: 'What learners sent' },
 ];
 
 export function WorkspaceNav({ formSlug }) {

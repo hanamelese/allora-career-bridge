@@ -1,7 +1,22 @@
 import { Router } from 'express';
 import { and, asc, eq, desc } from 'drizzle-orm';
-import { referralRequestSchema } from '@onboarding/contracts';
-import { partnerForms, formVersions, apiKeys, partners, referralPartners, referrals } from '../db/schema.js';
+import {
+  buildSubmissionSchema,
+  referralRequestSchema,
+  storedSubmissionConfig,
+  submissionRequestSchema,
+  toStorableSubmission,
+} from '@onboarding/contracts';
+import {
+  partnerForms,
+  formVersions,
+  apiKeys,
+  partners,
+  referralPartners,
+  referrals,
+  submissions,
+} from '../db/schema.js';
+import { newId } from '../db/keys.js';
 import { ApiError } from '../middleware/errors.js';
 import { validateBody } from '../middleware/validate.js';
 import {
@@ -18,12 +33,23 @@ import {
  * only - a draft is never visible to a learner - and it is reached with a
  * public key, which allows nothing beyond reading a published config for
  * that partner's own forms and sending a learner's referral to that
- * partner's own registered referral partners.
+ * partner's own registered referral partners, and storing a learner's
+ * answers to that partner's published forms - only the ones an
+ * organisation can act on (see `toStorableSubmission`).
  *
  * The referral link routes at the bottom need no key: the unguessable
  * token in the link is the credential.
  */
-export function publicFormRoutes(db, { sms = null, rateLimiter = createRateLimiter() } = {}) {
+export function publicFormRoutes(
+  db,
+  {
+    sms = null,
+    rateLimiter = createRateLimiter(),
+    /* Generous enough for a family sharing one connection, tight enough
+       that a script cannot fill the database. */
+    submissionLimiter = createRateLimiter({ limit: 20 }),
+  } = {},
+) {
   const router = Router();
 
   function requireKey(request) {
@@ -156,6 +182,78 @@ export function publicFormRoutes(db, { sms = null, rateLimiter = createRateLimit
       });
 
       response.json(result);
+    },
+  );
+
+  /* ---- A learner sends the form ---- */
+
+  router.post(
+    '/forms/:formId/submissions',
+    validateBody(submissionRequestSchema, 'These answers could not be sent.'),
+    (request, response) => {
+      const key = requireKey(request);
+      const form = findPublishedForm(key, request.params.formId);
+      const { version: versionNumber, answers, language = 'en' } = request.validated;
+
+      /* Checked against the version the learner actually answered, which a
+         website may have pinned to an older one. */
+      const version = db
+        .select()
+        .from(formVersions)
+        .where(and(eq(formVersions.partnerFormId, form.id), eq(formVersions.version, versionNumber)))
+        .get();
+
+      if (!version) {
+        throw new ApiError(404, 'version_not_found', `Version ${versionNumber} does not exist.`);
+      }
+
+      /* The form leaves private answers, ID numbers and file contents in
+         the browser. Anything of that kind arriving here is refused, not
+         quietly dropped, so a broken or hostile page is noticed. */
+      const storable = toStorableSubmission(version.config, answers);
+      const refused = Object.keys(answers).filter(
+        (field) =>
+          !Object.hasOwn(storable, field) || JSON.stringify(storable[field]) !== JSON.stringify(answers[field]),
+      );
+
+      if (refused.length) {
+        return response.status(422).json({
+          error: 'answers_not_storable',
+          message: 'Some answers are private or not part of this form, so they cannot be stored.',
+          issues: refused.map((field) => ({ path: field, message: 'Not stored by this service.' })),
+        });
+      }
+
+      const checked = buildSubmissionSchema(storedSubmissionConfig(version.config)).safeParse(storable);
+
+      if (!checked.success) {
+        return response.status(422).json({
+          error: 'invalid_answers',
+          message: 'Some answers do not fit this form.',
+          issues: checked.error.issues.map((issue) => ({ path: issue.path.join('.'), message: issue.message })),
+        });
+      }
+
+      if (!submissionLimiter(`${key.publicKey}|${request.ip}`)) {
+        throw new ApiError(429, 'rate_limited', 'Too many forms were sent from here. Wait a few minutes and try again.');
+      }
+
+      const id = newId('sub');
+
+      db.insert(submissions)
+        .values({
+          id,
+          partnerId: key.partnerId,
+          partnerFormId: form.id,
+          version: version.version,
+          answers: storable,
+          language,
+          createdAt: new Date().toISOString(),
+        })
+        .run();
+
+      response.set('Cache-Control', 'no-store');
+      response.status(201).json({ submissionId: id });
     },
   );
 

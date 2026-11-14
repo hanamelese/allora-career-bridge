@@ -7,6 +7,9 @@ const COPY = {
     change: 'Change',
     changeFor: (label) => `Change your answer to: ${label}`,
     submit: 'Send my answers',
+    sending: 'Sending your answers…',
+    sendFailed:
+      'Your answers could not be sent. Check your internet connection, then press Send my answers again. Your answers are still here.',
     back: 'Back',
     private: 'Private',
     privateNote: 'Answers marked private are not shared with employers.',
@@ -18,6 +21,8 @@ const COPY = {
     change: 'ቀይር',
     changeFor: (label) => `የዚህን መልስ ይቀይሩ፦ ${label}`,
     submit: 'መልሶቼን ላክ',
+    sending: 'መልሶችዎ በመላክ ላይ ናቸው…',
+    sendFailed: 'መልሶችዎ ሊላኩ አልቻሉም። የኢንተርኔት ግንኙነትዎን ያረጋግጡ፣ ከዚያ «መልሶቼን ላክ»ን እንደገና ይጫኑ። መልሶችዎ አልጠፉም።',
     back: 'ተመለስ',
     private: 'የግል',
     privateNote: 'የግል ተብለው የተመለከቱ መልሶች ለአሠሪዎች አይጋሩም።',
@@ -33,7 +38,7 @@ const COPY = {
  * a screen-reader user hears "Change your answer to: Full name" rather
  * than a list of buttons all called "Change".
  */
-export function ReviewStep({ items, summary, language, onEdit, onSubmit, onBack }) {
+export function ReviewStep({ items, summary, language, onEdit, onSubmit, onBack, isSending = false, sendFailed = false }) {
   const copy = COPY[language] ?? COPY.en;
   const hasPrivateAnswers = items.some((item) => item.isPrivate);
   /* Support and accommodation answers are listed apart, as they were
@@ -90,12 +95,30 @@ export function ReviewStep({ items, summary, language, onEdit, onSubmit, onBack 
 
       {hasPrivateAnswers ? <p className="fe-question__note">{copy.privateNote}</p> : null}
 
+      {sendFailed && !isSending ? (
+        <p className="fe-error" role="alert">
+          {copy.sendFailed}
+        </p>
+      ) : null}
+
+      {/* Announced politely while the answers are on their way. */}
+      <p className="fe-visually-hidden" role="status" aria-live="polite">
+        {isSending ? copy.sending : ''}
+      </p>
+
       <div className="fe-actions">
-        <button type="button" className="fe-button" onClick={onBack}>
+        <button type="button" className="fe-button" onClick={onBack} disabled={isSending}>
           {copy.back}
         </button>
-        <button type="button" className="fe-button fe-button--primary" onClick={onSubmit}>
-          {copy.submit}
+        {/* aria-disabled rather than disabled, so focus stays on the
+            button while the answers are sent. */}
+        <button
+          type="button"
+          className="fe-button fe-button--primary"
+          aria-disabled={isSending || undefined}
+          onClick={isSending ? undefined : onSubmit}
+        >
+          {isSending ? copy.sending : copy.submit}
         </button>
       </div>
     </div>

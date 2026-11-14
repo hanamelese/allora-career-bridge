@@ -1,7 +1,7 @@
 import { Router } from 'express';
-import { and, eq, asc } from 'drizzle-orm';
+import { and, eq, asc, desc } from 'drizzle-orm';
 import { formConfigSchema, LEGACY_FORM_TYPES, referralRequestSchema } from '@onboarding/contracts';
-import { partnerForms, formVersions, apiKeys } from '../db/schema.js';
+import { partnerForms, formVersions, apiKeys, submissions } from '../db/schema.js';
 import { newId } from '../db/keys.js';
 import { validateBody } from '../middleware/validate.js';
 import { ApiError } from '../middleware/errors.js';
@@ -217,6 +217,32 @@ export function formRoutes(db, { sms = null } = {}) {
         version: version.version,
         publishedAt: version.publishedAt,
         config: version.config,
+      })),
+    );
+  });
+
+  /* What learners sent from the embedded form, newest first. Private
+     answers, ID numbers and files were never stored (see the public
+     submissions route), so there is nothing more to hide here. */
+  router.get('/:id/submissions', (request, response) => {
+    const form = findForm(request.auth.partnerId, request.params.id);
+
+    const rows = db
+      .select()
+      .from(submissions)
+      .where(and(eq(submissions.partnerFormId, form.id), eq(submissions.partnerId, request.auth.partnerId)))
+      .orderBy(desc(submissions.createdAt))
+      .limit(200)
+      .all();
+
+    response.set('Cache-Control', 'no-store');
+    response.json(
+      rows.map((row) => ({
+        submissionId: row.id,
+        version: row.version,
+        language: row.language,
+        createdAt: row.createdAt,
+        answers: row.answers,
       })),
     );
   });

@@ -2,6 +2,7 @@ import { useCallback, useEffect, useMemo, useReducer, useRef, useState } from 'r
 import { createFormEngine } from '../src/formEngine.js';
 import { formatAnswerText } from '../src/accessibility.js';
 import { canSave, clearProgress, loadProgress, saveProgress } from './progressStore.js';
+import { sendAnswers } from './sendAnswers.js';
 
 /**
  * React binding for the headless form engine.
@@ -35,6 +36,10 @@ export function useFormEngine(config, settings = {}, { onSubmit, progressKey = n
 
   const [isReviewing, setIsReviewing] = useState(restored?.isReviewing === true);
   const [isSubmitted, setIsSubmitted] = useState(false);
+  /* While a host's `onSubmit` promise is pending, and if it fails. */
+  const [isSending, setIsSending] = useState(false);
+  const [sendFailed, setSendFailed] = useState(false);
+  const sendingRef = useRef(false);
   const [error, setError] = useState(null);
 
   /**
@@ -154,6 +159,10 @@ export function useFormEngine(config, settings = {}, { onSubmit, progressKey = n
   );
 
   const submit = useCallback(() => {
+    /* One send at a time: a second press while the first is on its way
+       would send the answers twice. */
+    if (sendingRef.current) return { valid: false, errors: {}, sending: true };
+
     const result = engine.validateSubmission();
 
     if (!result.valid) {
@@ -171,10 +180,25 @@ export function useFormEngine(config, settings = {}, { onSubmit, progressKey = n
       return result;
     }
 
-    setIsSubmitted(true);
-    /* Sent: nothing is left behind in the browser. */
-    clearProgress(progressKey);
-    onSubmit?.(result.data);
+    sendAnswers(onSubmit, result.data, {
+      onSending: () => {
+        sendingRef.current = true;
+        setIsSending(true);
+        setSendFailed(false);
+      },
+      onSent: () => {
+        sendingRef.current = false;
+        setIsSending(false);
+        setIsSubmitted(true);
+        /* Sent: nothing is left behind in the browser. */
+        clearProgress(progressKey);
+      },
+      onFailed: () => {
+        sendingRef.current = false;
+        setIsSending(false);
+        setSendFailed(true);
+      },
+    });
 
     return result;
   }, [engine, sync, onSubmit, progressKey]);
@@ -249,6 +273,8 @@ export function useFormEngine(config, settings = {}, { onSubmit, progressKey = n
     isLast: status.isLast,
     isReviewing,
     isSubmitted,
+    isSending,
+    sendFailed,
     answers: status.answers,
     currentAnswer: question ? status.answers[question.key] : undefined,
     error,

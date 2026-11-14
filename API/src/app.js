@@ -20,7 +20,7 @@ import { organisationRoutes } from './routes/organisation.js';
  * in-memory one, and routes are versioned under /api/v1 so a later release
  * can add /v2 without breaking a partner pinned to this one.
  */
-export function createApp(db, { sms = null, rateLimiter, signupLimiter } = {}) {
+export function createApp(db, { sms = null, rateLimiter, submissionLimiter, signupLimiter } = {}) {
   const app = express();
 
   app.disable('x-powered-by');
@@ -133,7 +133,7 @@ export function createApp(db, { sms = null, rateLimiter, signupLimiter } = {}) {
   app.use('/api/v1/auth', authRoutes(db, signupLimiter ? { signupLimiter } : {}));
   app.use('/api/v1/forms', requireAuth, formRoutes(db, { sms }));
   app.use('/api/v1/organisation', requireAuth, organisationRoutes(db));
-  app.use('/api/v1/public', publicFormRoutes(db, { sms, rateLimiter }));
+  app.use('/api/v1/public', publicFormRoutes(db, { sms, rateLimiter, submissionLimiter }));
 
   app.use(notFound);
   app.use(errorHandler);

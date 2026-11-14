@@ -84,13 +84,27 @@ dashboard is served so links in messages point to it.
 What works today, end to end: a published form loads on a partner's own
 website, learners fill it in (voice, keyboard, screen reader, contrast and
 text size, Amharic, uploads, saved progress in the tab, referral SMS), and
-the finished answers and files are handed to that website's own code.
+the finished answers are stored and handed, with any files, to that
+website's own code.
 
-**This system does not store learners' answers or files.** When a learner
-presses *Send my answers*, the form fires an `onboarding-submit` event on
-the page, and the partner's code decides where the answers go: their own
-database, a CRM, an email. The only thing the widget itself sends to this
-API is a referral the learner has confirmed, so the SMS can go out.
+**What this system stores, and what it does not.** When a learner presses
+*Send my answers*, the widget sends this API the answers an organisation can
+act on, and the form says "sent" only once they are stored (if that fails,
+the learner keeps every answer and can press Send again). The partner reads
+them in the form's **Submissions** tab. Never stored, and refused by the API
+if a page sends them anyway:
+
+- private answers: support needs, accommodations, the referral choice, and
+  the identity document file;
+- ID numbers;
+- the contents of any file. An uploaded CV is stored as its name, size and
+  type only.
+
+After the answers are stored, the form fires an `onboarding-submit` event on
+the page with **everything** the learner gave, private answers and the
+files themselves included, plus the stored `submissionId`. What happens to
+those is the partner's own code's decision. The Sign up / Sign in form is
+never stored (it holds a password); its event is the only result.
 
 ### For a partner organisation
 
@@ -121,7 +135,7 @@ API is a referral the learner has confirmed, so the SMS can go out.
    ```html
    <script>
      document.addEventListener('onboarding-submit', async (event) => {
-       const { formId, version, type, answers, files } = event.detail;
+       const { formId, version, type, submissionId, answers, files } = event.detail;
        // answers: { name: "…", phone: "…", … }   files: { cvFile: File, … }
        const body = new FormData();
        body.append('answers', JSON.stringify(answers));
@@ -140,7 +154,8 @@ API is a referral the learner has confirmed, so the SMS can go out.
    question; `onboarding-ready` fires on the page. If it says your site is
    not on the list, repeat step 7 (the address must match exactly,
    including `https://` and any `www.`). Fill it in and send: your
-   `onboarding-submit` handler should receive the answers.
+   `onboarding-submit` handler should receive the answers, and they appear
+   in the form's **Submissions** tab (the fifth item).
 9. **Update it.** Change the form, **Publish** again (version *N+1*), copy
    the new tag from **Embed tag** and replace the old one. Until you do,
    your site keeps showing version *N*: a published version never changes.
@@ -161,8 +176,8 @@ API is a referral the learner has confirmed, so the SMS can go out.
 - The public form config is sent with `Cache-Control: no-cache`, so a
   website removed from a partner's list stops working at once.
 
-**Already in place:** the API, database, file handling (in the browser),
-widget and dashboard. **Still needed before real use:** a host for the API
+**Already in place:** the API, database (including stored submissions), file
+handling (in the browser), widget and dashboard. **Still needed before real use:** a host for the API
 with a persistent disk, a host for the dashboard, a domain or two, and an
 SMS provider. Nothing here has been deployed.
 
@@ -179,3 +194,80 @@ Sources: Render, [Deploy for Free](https://render.com/docs/free); Oracle,
 [Always Free Resources](https://docs.oracle.com/en-us/iaas/Content/FreeTier/resourceref.htm);
 InfoQ, [Oracle Cloud free tier limits](https://infoq.com/news/2026/07/oracle-cloud-free-tier-limits/);
 Africa's Talking, [sandbox help](https://help.africastalking.com/en/articles/1170660-how-do-i-get-started-on-the-africa-s-talking-sandbox).
+
+## ALX Savanna demo
+
+ALX's Savanna learner pages (the separate `Savanna-static-pages` repository)
+show the two learner forms, each on a portal page of its own, placed with the
+tag the dashboard generated. The two repositories stay separate: Savanna holds
+only the pasted tags and a little page CSS and JS around them.
+
+| Savanna page | Form | Version |
+| --- | --- | --- |
+| `pages/register.html` | Learner Registration & Profile | 5 |
+| `pages/job-application.html` | Job Application | 1 |
+
+The tags name the **ALX Ethiopia** partner's form IDs and public key in your
+local database (`API/data/onboarding.db`). On another machine or a fresh
+database, publish the forms there and paste the new tags (see step 6).
+
+### Starting it
+
+```bash
+# Form Engine (this repository)
+npm run build:widget        # the embed script the API serves
+npm run api                 # http://localhost:3001
+npm run dev                 # http://localhost:5173 (dashboard)
+
+# Savanna (no install)
+cd ../../Savanna-static-pages     # wherever it is checked out
+python3 -m http.server 8080 --bind 127.0.0.1
+```
+
+Open `http://localhost:8080/` (exactly that: `127.0.0.1:8080` is a different
+website, so it is refused). `Frontend/.env.development` makes the dashboard's
+tag point straight at the API on `:3001`, as it would when deployed.
+
+### Walking through it
+
+1. **What ALX offers.** Open `http://localhost:8080/`. It lists the portal
+   pages: the learner dashboards, a course page, and the two demo pages.
+   Open the self-paced homepage. The sidebar has a new **Get hired** group,
+   and a **Ready for work?** card sits under the dashboard's cards.
+2. **Registering.** Choose **Register**. The form appears inside the portal's
+   own card. Try it with the keyboard only (Tab, Enter), with
+   **Answer by speaking**, and with **Read aloud**. Open **Settings** for text
+   size, contrast, simple words and Amharic. Reload halfway through: the form
+   comes back where you left it, without the private answers. Send it: the
+   form confirms, and the page shows **What next?**
+3. **Applying for a job.** Choose **Apply for a job**. It asks one question at
+   a time, with a CV upload (try a `.txt` or a file over 10 MB) and *What would
+   help you at this job?* in its own private section. It ends with *How can we
+   identify you?*: a document with its number and upload, or
+   **I have no document, refer me**, which offers the referral SMS.
+4. **How it is embedded.** View the page source of `pages/register.html`: one
+   `<script>` and one `<onboarding-form>` element. That is all a partner
+   pastes.
+5. **What arrived.** Sign in to the dashboard (`http://localhost:5173`), open
+   the form, then **Submissions**. Each submission shows the answers the
+   organisation can act on. Private support answers, accommodations, the
+   referral choice, ID numbers and uploaded files are never stored; the
+   partner's website receives those in the `onboarding-submit` event.
+6. **Configuring and publishing.** In the dashboard: **Configure** (switch a
+   question on or off, change upload limits), **Preview**, **Save draft**,
+   **Publish** (version *N+1*), then **Embed tag** → **Copy the tag**. Paste
+   it over the tag in the Savanna page and reload: the page now shows the new
+   version. Until the tag is replaced, the page keeps the version it names.
+   The Savanna website is allowed under **Your organisation → Websites**
+   (`http://localhost:8080`).
+
+### What the demo does not do
+
+- **Text messages:** no SMS provider is configured, so a referral says
+  "Nothing was sent" and nothing is recorded as sent. See *Referral SMS* and
+  the free-hosting table above.
+- **Uploaded files are not stored:** the files reach the page only in the
+  `onboarding-submit` event. The demo page does nothing more with them.
+- **The Savanna portal pages are a static copy:** apart from the new links,
+  their own links still go nowhere (`#`), as ALX supplied them.
+- **Not deployed:** everything runs on `localhost`.

@@ -231,6 +231,8 @@ export function FormRenderer({
           onEdit={engine.goTo}
           onSubmit={engine.submit}
           onBack={engine.back}
+          isSending={engine.isSending}
+          sendFailed={engine.sendFailed}
         />
       </>,
     );

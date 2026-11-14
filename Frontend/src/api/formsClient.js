@@ -10,6 +10,7 @@ import { apiFetch } from './http.js';
  *   publish(id)              POST   /api/v1/forms/:id/publish
  *   listVersions(id)         GET    /api/v1/forms/:id/versions
  *   sendTestReferral(id, r)  POST   /api/v1/forms/:id/referrals/test
+ *   listSubmissions(id)      GET    /api/v1/forms/:id/submissions
  */
 
 export function listForms() {
@@ -73,4 +74,9 @@ export async function getFormByType(type) {
   }
 
   return getForm(match.formId);
+}
+
+/** What learners sent from the embedded form, newest first. */
+export function listSubmissions(formId) {
+  return apiFetch(`/forms/${encodeURIComponent(formId)}/submissions`);
 }

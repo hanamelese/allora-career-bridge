@@ -3,6 +3,7 @@ import { FormRenderer } from '@onboarding/form-engine/react';
 /* The form's styles go inside the element's shadow root, so the partner's
    own CSS cannot break the form and the form's cannot touch their page. */
 import formCss from '@onboarding/form-engine/react/form-engine.css?inline';
+import { toStorableSubmission } from '@onboarding/contracts/submissions.js';
 import { createPublicApi } from './publicApi.js';
 
 const WIDGET_VERSION = 'v1';
@@ -40,13 +41,19 @@ const HOST_CSS = `
  * events it can listen for:
  *
  *   onboarding-ready   { formId, version, type }
- *   onboarding-submit  { formId, version, type, answers, files }
- *   onboarding-error   { code, message }
+ *   onboarding-submit  { formId, version, type, submissionId, answers, files }
+ *   onboarding-error   { code, message, issues? }
  *
- * Nothing a learner enters is sent anywhere by the widget except a
- * referral they confirm (which goes to this API to send the SMS). Their
- * answers, and any files they chose, are handed to the page in
- * `onboarding-submit`; storing them is the page's job.
+ * When the learner sends the form, the answers an organisation can act on
+ * are stored by this API first (`toStorableSubmission`: never private
+ * support answers, the referral choice, ID numbers or file contents - a
+ * file is stored as its name, size and type). Only once that has worked
+ * does the form say "sent" and fire `onboarding-submit`, which carries
+ * everything the learner gave, files included, for the page's own use.
+ * A referral the learner confirms goes to this API to send the SMS.
+ *
+ * The Sign up / Sign in form (`type: 'account'`) is never stored here: it
+ * holds a password, and signing in is the page's job.
  */
 class OnboardingFormElement extends HTMLElement {
   static observedAttributes = ['form-id', 'public-key', 'form-version', 'lang'];
@@ -130,16 +137,42 @@ class OnboardingFormElement extends HTMLElement {
           organisationName: organisationName ?? '',
           onSend: (request) => api.sendReferral(formId, request),
         }}
-        onSubmit={(data, extra) =>
-          this.emit('onboarding-submit', {
+        onSubmit={(data, extra) => {
+          const detail = {
             formId,
             version: published.version,
             type: published.type,
             ...(extra?.mode ? { mode: extra.mode } : {}),
             answers: answers(data),
             files: files(data),
-          })
-        }
+          };
+
+          if (published.type === 'account') {
+            this.emit('onboarding-submit', detail);
+            return undefined;
+          }
+
+          /* Returned to the form, which waits for it: "sent" is only shown
+             once the answers are stored, and a failure lets the learner
+             press Send again with nothing lost. */
+          return api
+            .sendSubmission(formId, {
+              version: published.version,
+              ...(lang === 'en' || lang === 'am' ? { language: lang } : {}),
+              answers: toStorableSubmission(config, data),
+            })
+            .then(
+              ({ submissionId }) => this.emit('onboarding-submit', { ...detail, submissionId }),
+              (error) => {
+                this.emit('onboarding-error', {
+                  code: error.code ?? 'submission_failed',
+                  message: error.message,
+                  ...(error.issues ? { issues: error.issues } : {}),
+                });
+                throw error;
+              },
+            );
+        }}
       />,
     );
 

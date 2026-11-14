@@ -888,3 +888,131 @@ describe('embedding on a partner’s website', () => {
     }
   });
 });
+
+describe('learners sending an embedded form', () => {
+  const SITE = 'https://jobs.example.org';
+  const submit = (body, { id = formId, key = seeded.publicKey, origin = SITE } = {}) =>
+    request(app).post(`/api/v1/public/forms/${id}/submissions?key=${key}`).set('origin', origin).send(body);
+  const answers = {
+    name: 'Hana Tesfaye',
+    phone: '0911234567',
+    currentLevel: 'beginner',
+    identityRoute: 'passport',
+  };
+
+  beforeEach(async () => {
+    await authed('post', '/api/v1/organisation/allowed-origins').send({ origin: SITE });
+  });
+
+  it('stores the answers against the published version, and the partner can read them', async () => {
+    await authed('post', `/api/v1/forms/${formId}/publish`);
+
+    const sent = await submit({ version: 1, answers, language: 'am' });
+    expect(sent.status).toBe(201);
+    expect(sent.body.submissionId).toMatch(/^sub_/);
+    expect(sent.headers['access-control-allow-origin']).toBe(SITE);
+
+    const list = await authed('get', `/api/v1/forms/${formId}/submissions`);
+    expect(list.status).toBe(200);
+    expect(list.body).toHaveLength(1);
+    expect(list.body[0]).toMatchObject({ submissionId: sent.body.submissionId, version: 1, language: 'am', answers });
+  });
+
+  it('refuses private answers, ID numbers and anything not on the form, storing nothing', async () => {
+    await authed('post', `/api/v1/forms/${formId}/publish`);
+
+    for (const extra of [
+      { supportNote: 'I use a screen reader.' },
+      { documentId: 'EP1234567' },
+      { favouriteColour: 'blue' },
+    ]) {
+      const response = await submit({ version: 1, answers: { ...answers, ...extra } });
+      expect(response.status).toBe(422);
+      expect(response.body.error).toBe('answers_not_storable');
+      expect(response.body.issues.map((issue) => issue.path)).toEqual(Object.keys(extra));
+    }
+
+    const list = await authed('get', `/api/v1/forms/${formId}/submissions`);
+    expect(list.body).toHaveLength(0);
+  });
+
+  it('still requires the answers the form requires, and checks them', async () => {
+    await authed('post', `/api/v1/forms/${formId}/publish`);
+
+    const missing = await submit({ version: 1, answers: { ...answers, name: undefined } });
+    expect(missing.status).toBe(422);
+    expect(missing.body.error).toBe('invalid_answers');
+
+    const short = await submit({ version: 1, answers: { ...answers, name: 'H' } });
+    expect(short.status).toBe(422);
+  });
+
+  it('keeps a CV only as its name, size and type, and refuses one that breaks the rules', async () => {
+    const jobId = seeded.formIds.jobApplication;
+    await authed('post', `/api/v1/forms/${jobId}/publish`);
+    const job = {
+      name: 'Abebe Kebede',
+      phone: '0911234567',
+      jobReference: 'VA-12',
+      identityRoute: 'no_document',
+      cvFile: { name: 'cv.pdf', size: 2048, type: 'application/pdf' },
+    };
+
+    const sent = await submit({ version: 1, answers: job }, { id: jobId });
+    expect(sent.status).toBe(201);
+
+    const withContents = await submit(
+      { version: 1, answers: { ...job, cvFile: { ...job.cvFile, data: 'JVBERi0xLjQK' } } },
+      { id: jobId },
+    );
+    expect(withContents.status).toBe(422);
+    expect(withContents.body.issues[0].path).toBe('cvFile');
+
+    const exe = await submit(
+      { version: 1, answers: { ...job, cvFile: { name: 'cv.exe', size: 10, type: 'application/x-msdownload' } } },
+      { id: jobId },
+    );
+    expect(exe.status).toBe(422);
+    expect(exe.body.error).toBe('invalid_answers');
+
+    const list = await authed('get', `/api/v1/forms/${jobId}/submissions`);
+    expect(list.body.map((row) => row.answers.cvFile)).toEqual([job.cvFile]);
+  });
+
+  it('accepts nothing for an unpublished form, an unknown version, a wrong key or another website', async () => {
+    expect((await submit({ version: 1, answers })).body.error).toBe('form_not_published');
+
+    await authed('post', `/api/v1/forms/${formId}/publish`);
+    expect((await submit({ version: 7, answers })).status).toBe(404);
+    /* An unknown key has no websites, so the browser is refused before the key is even checked. */
+    expect((await submit({ version: 1, answers }, { key: 'pk_live_nope' })).status).toBe(403);
+    expect((await submit({ version: 1, answers }, { origin: 'https://elsewhere.example' })).status).toBe(403);
+  });
+
+  it('shows a partner only their own forms’ submissions', async () => {
+    await authed('post', `/api/v1/forms/${formId}/publish`);
+    await submit({ version: 1, answers });
+
+    const other = await request(app)
+      .post('/api/v1/auth/signup')
+      .send({ organisationName: 'Other NGO', email: 'other@ngo.example', password: 'another long password' });
+    const response = await request(app)
+      .get(`/api/v1/forms/${formId}/submissions`)
+      .set('authorization', `Bearer ${other.body.token}`);
+
+    expect(response.status).toBe(404);
+  });
+
+  it('limits how many forms one place can send', async () => {
+    const limited = createApp(app.locals.db, { submissionLimiter: createRateLimiter({ limit: 1 }) });
+    await authed('post', `/api/v1/forms/${formId}/publish`);
+    const send = () =>
+      request(limited)
+        .post(`/api/v1/public/forms/${formId}/submissions?key=${seeded.publicKey}`)
+        .set('origin', SITE)
+        .send({ version: 1, answers });
+
+    expect((await send()).status).toBe(201);
+    expect((await send()).status).toBe(429);
+  });
+});
