@@ -1,6 +1,12 @@
 import { and, eq } from 'drizzle-orm';
-import { formConfigSchema, upgradeLearnerDraft } from '@onboarding/contracts';
-import { partnerForms } from './schema.js';
+import {
+  FORM_TEMPLATES,
+  formConfigSchema,
+  moveIdentityToEnd,
+  upgradeLearnerDraft,
+} from '@onboarding/contracts';
+import { partners, partnerForms } from './schema.js';
+import { insertForm } from './partners.js';
 
 /**
  * Brings stored drafts forward to the current templates. Runs at start-up
@@ -9,9 +15,9 @@ import { partnerForms } from './schema.js';
  * Only drafts change. Published versions are immutable (see the triggers
  * in client.js), so a website pinned to one is unaffected.
  *
- * Today this has one job: merging each partner's Learner Profile & Support
- * draft (`learner`) into their Learner Registration draft (`signup`). The
- * `learner` row is left in place, unused, so nothing is destroyed.
+ * For the learner form (`signup`) it merges in each partner's Learner
+ * Profile & Support draft (`learner`) - that row is left in place, unused,
+ * so nothing is destroyed - and moves the identity questions to the end.
  */
 export function upgradeStoredDrafts(db) {
   const signupForms = db.select().from(partnerForms).where(eq(partnerForms.type, 'signup')).all();
@@ -24,7 +30,11 @@ export function upgradeStoredDrafts(db) {
       .where(and(eq(partnerForms.partnerId, form.partnerId), eq(partnerForms.type, 'learner')))
       .get();
 
-    const next = upgradeLearnerDraft(form.draftConfig, profile?.draftConfig ?? null);
+    /* Merge in the profile questions, then put the identity questions
+       last, beside the referral step they lead to. */
+    const next = moveIdentityToEnd(
+      upgradeLearnerDraft(form.draftConfig, profile?.draftConfig ?? null),
+    );
 
     if (next === form.draftConfig) continue;
 
@@ -43,4 +53,33 @@ export function upgradeStoredDrafts(db) {
   }
 
   return { upgraded };
+}
+
+/**
+ * Gives every partner a draft of any form type added since they joined -
+ * the Sign up / Sign in form, for a partner created before it existed.
+ * Idempotent: a partner that already has the form is left alone.
+ */
+export function ensurePartnerForms(db) {
+  const all = db.select({ id: partners.id }).from(partners).all();
+  let created = 0;
+
+  for (const { id: partnerId } of all) {
+    const existing = new Set(
+      db
+        .select({ type: partnerForms.type })
+        .from(partnerForms)
+        .where(eq(partnerForms.partnerId, partnerId))
+        .all()
+        .map((row) => row.type),
+    );
+
+    for (const type of Object.keys(FORM_TEMPLATES)) {
+      if (existing.has(type)) continue;
+      insertForm(db, partnerId, type);
+      created += 1;
+    }
+  }
+
+  return { created };
 }

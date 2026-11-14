@@ -2,7 +2,6 @@ import { useMemo, useState } from 'react';
 import { RotateCcw } from 'lucide-react';
 import { FormRenderer } from '@onboarding/form-engine/react';
 import { Button } from '../ui/Button.jsx';
-import { Select } from '../ui/Select.jsx';
 import { getIcon } from '../../icons.js';
 import { sendTestReferral } from '../../api/formsClient.js';
 import { listReferralPartners } from '../../api/organisationClient.js';
@@ -27,8 +26,10 @@ function renderIcon(name) {
 }
 
 export function PreviewPane({ config, formId }) {
-  const [language, setLanguage] = useState(config.defaultLanguage);
   const [runId, setRunId] = useState(0);
+  /* What a sign-in button or the sign-in form would have done on the
+     partner's site; the preview reports it instead of leaving the page. */
+  const [accountNote, setAccountNote] = useState('');
   const { partner } = useAuth();
 
   /* The organisation's real referral partners, so the referral step shows
@@ -51,22 +52,14 @@ export function PreviewPane({ config, formId }) {
   return (
     <div className="preview-pane">
       <div className="preview-pane__controls">
-        <Select
-          id="preview-language"
-          label="Preview in"
-          value={language}
-          onChange={setLanguage}
-          options={config.languages.map((code) => ({
-            value: code,
-            label: code === 'am' ? 'Amharic (አማርኛ)' : 'English',
-          }))}
-        />
-
         <Button
           variant="secondary"
           size="sm"
           icon={RotateCcw}
-          onClick={() => setRunId((current) => current + 1)}
+          onClick={() => {
+            setAccountNote('');
+            setRunId((current) => current + 1);
+          }}
         >
           Start again
         </Button>
@@ -80,14 +73,38 @@ export function PreviewPane({ config, formId }) {
         </p>
       ) : null}
 
+      <p className="preview-pane__note">
+        Learners change contrast, text size, language and simple words from the Settings button at
+        the top of the form.
+      </p>
+
+      {config.type === 'account' ? (
+        <p className="preview-pane__note" role="status">
+          {accountNote}
+        </p>
+      ) : null}
+
       <div className="preview-pane__frame">
         <FormRenderer
           /* A new run remounts the renderer, which is how "start again"
              clears the answers without the engine needing a reset API. */
-          key={`${runId}-${language}`}
+          key={`${runId}-${config.defaultLanguage}`}
           config={config}
-          settings={{ language }}
+          settings={{ language: config.defaultLanguage }}
           referral={referral}
+          onSocialSignIn={(provider) =>
+            setAccountNote(`On your site, “${provider.name}” opens ${provider.url}. The preview stays here.`)
+          }
+          onSubmit={
+            config.type === 'account'
+              ? (data) =>
+                  setAccountNote(
+                    `On your site, these details go to your own sign-in system: ${Object.keys(data)
+                      .map((key) => (key === 'password' ? 'password (hidden)' : `${key} “${data[key]}”`))
+                      .join(', ')}.`,
+                  )
+              : undefined
+          }
           renderIcon={renderIcon}
         />
       </div>

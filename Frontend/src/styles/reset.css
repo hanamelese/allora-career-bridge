@@ -15,8 +15,9 @@ html {
   -webkit-text-size-adjust: 100%;
 }
 
+/* No min-width: at 400% zoom the viewport is 320px including a desktop
+   scrollbar, and a 320px floor would then scroll sideways (WCAG 1.4.10). */
 body {
-  min-width: 320px;
   font-family: var(--font-sans);
   font-size: var(--font-size-base);
   line-height: var(--line-height-base);

@@ -17,7 +17,11 @@ export function PreviewPage() {
         <SectionHeading
           id="preview-heading"
           title="Live preview"
-          description={`This is ${formType.name} exactly as a learner meets it: one question per screen, with a chance to check every answer before sending. It updates as you change the settings.`}
+          description={
+            config.type === 'account'
+              ? `This is ${formType.name} exactly as people on your site will meet it: one screen, every option reachable by keyboard and named for screen readers. It updates as you change the settings.`
+              : `This is ${formType.name} exactly as a learner meets it: one question per screen, with a chance to check every answer before sending. It updates as you change the settings.`
+          }
         />
 
         <PreviewPane config={config} formId={form.formId} />

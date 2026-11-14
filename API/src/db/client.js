@@ -4,7 +4,7 @@ import Database from 'better-sqlite3';
 import { drizzle } from 'drizzle-orm/better-sqlite3';
 import { migrate } from 'drizzle-orm/better-sqlite3/migrator';
 import * as schema from './schema.js';
-import { upgradeStoredDrafts } from './upgrades.js';
+import { ensurePartnerForms, upgradeStoredDrafts } from './upgrades.js';
 
 /**
  * Published form versions must never change. The route only ever inserts
@@ -40,6 +40,7 @@ export function createDatabase(url) {
   migrate(db, { migrationsFolder: new URL('../../drizzle', import.meta.url).pathname });
   sqlite.exec(IMMUTABILITY_TRIGGERS);
   upgradeStoredDrafts(db);
+  ensurePartnerForms(db);
 
   return { db, sqlite };
 }

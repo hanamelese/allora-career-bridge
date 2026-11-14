@@ -13,7 +13,8 @@ import { SelectionBar } from './SelectionBar.jsx';
  */
 export function MultiChoiceAnswer({ question, value, onChange, describedBy, hasError, renderIcon }) {
   const selected = Array.isArray(value) ? value : [];
-  const showIcons = question.lowLiteracy;
+  /* Pictures help everyone, so they are always shown, not only with simple words. */
+  const showIcons = true;
 
   function toggle(optionValue, checked) {
     onChange(

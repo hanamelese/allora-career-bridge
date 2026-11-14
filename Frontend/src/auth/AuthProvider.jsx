@@ -51,13 +51,7 @@ export function AuthProvider({ children }) {
     return () => setUnauthorizedHandler(null);
   }, [signOut]);
 
-  const signIn = useCallback(async (email, password) => {
-    const result = await apiFetch('/auth/login', {
-      method: 'POST',
-      body: { email, password },
-      auth: false,
-    });
-
+  const begin = useCallback((result) => {
     const next = { token: result.token, partner: result.partner, user: result.user };
 
     setAuthToken(next.token);
@@ -67,15 +61,41 @@ export function AuthProvider({ children }) {
     return next;
   }, []);
 
+  const signIn = useCallback(
+    async (email, password) =>
+      begin(
+        await apiFetch('/auth/login', {
+          method: 'POST',
+          body: { email, password },
+          auth: false,
+        }),
+      ),
+    [begin],
+  );
+
+  /* A new partner organisation; it is signed in as soon as it exists. */
+  const signUp = useCallback(
+    async ({ organisationName, email, password }) =>
+      begin(
+        await apiFetch('/auth/signup', {
+          method: 'POST',
+          body: { organisationName, email, password },
+          auth: false,
+        }),
+      ),
+    [begin],
+  );
+
   const value = useMemo(
     () => ({
       isSignedIn: Boolean(session?.token),
       partner: session?.partner ?? null,
       user: session?.user ?? null,
       signIn,
+      signUp,
       signOut,
     }),
-    [session, signIn, signOut],
+    [session, signIn, signUp, signOut],
   );
 
   return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;

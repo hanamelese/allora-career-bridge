@@ -68,3 +68,30 @@ export function upgradeLearnerDraft(signupDraft, learnerDraft = null) {
     customFields: [...(signupDraft.customFields ?? []), ...carriedCustom],
   };
 }
+
+const IDENTITY_KEYS = ['identityRoute', 'documentId'];
+
+/**
+ * Moves "How can we identify you?" and the ID number to the end of a
+ * learner draft, just before the referral step, so the identity questions
+ * and the referral that may follow them are one unbroken run.
+ *
+ * Every other question keeps its place. Returns the same object when the
+ * draft is already in that order.
+ */
+export function moveIdentityToEnd(draft) {
+  const identity = IDENTITY_KEYS.map((key) => draft.fields.find((field) => field.key === key)).filter(
+    Boolean,
+  );
+
+  if (identity.length === 0) return draft;
+
+  const rest = draft.fields.filter((field) => !IDENTITY_KEYS.includes(field.key));
+  const referralIndex = rest.findIndex((field) => field.key === 'referral');
+  const at = referralIndex === -1 ? rest.length : referralIndex;
+  const fields = [...rest.slice(0, at), ...identity, ...rest.slice(at)];
+
+  const unchanged = fields.every((field, index) => field === draft.fields[index]);
+
+  return unchanged ? draft : { ...draft, fields };
+}

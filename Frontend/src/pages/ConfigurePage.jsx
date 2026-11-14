@@ -8,6 +8,7 @@ import { CustomFieldRow } from '../components/configure/CustomFieldRow.jsx';
 import { CustomFieldEditor } from '../components/configure/CustomFieldEditor.jsx';
 import { LanguageSettings } from '../components/configure/LanguageSettings.jsx';
 import { IdentityRoutesEditor } from '../components/configure/IdentityRoutesEditor.jsx';
+import { AccountSettings } from '../components/configure/AccountSettings.jsx';
 import './ConfigurePage.css';
 
 /**
@@ -51,6 +52,22 @@ export function ConfigurePage() {
         </Card>
       ) : null}
 
+      {config.account ? (
+        <Card as="section" aria-labelledby="account-heading">
+          <SectionHeading
+            id="account-heading"
+            title="Sign-in options"
+            description="The form's title, and the ways people can sign up or sign in."
+          />
+
+          <AccountSettings
+            account={config.account}
+            errors={errors}
+            onChange={(patch) => updateConfig({ account: { ...config.account, ...patch } })}
+          />
+        </Card>
+      ) : null}
+
       <Card as="section" aria-labelledby="fields-heading">
         <SectionHeading
           id="fields-heading"
@@ -66,6 +83,8 @@ export function ConfigurePage() {
         />
       </Card>
 
+      {/* A sign-in form asks only for what signing in needs. */}
+      {config.type !== 'account' ? (
       <Card as="section" aria-labelledby="custom-fields-heading">
         <SectionHeading
           id="custom-fields-heading"
@@ -97,6 +116,7 @@ export function ConfigurePage() {
           onAdd={addCustomField}
         />
       </Card>
+      ) : null}
 
       <Card as="section" aria-labelledby="language-heading">
         <SectionHeading

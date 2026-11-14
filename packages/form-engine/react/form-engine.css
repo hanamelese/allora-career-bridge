@@ -17,14 +17,24 @@
   --fe-surface: var(--surface, #ffffff);
   --fe-surface-sunken: var(--surface-sunken, #f7fafc);
   --fe-selected: var(--surface-selected, #e8eef5);
-  --fe-border: var(--border-default, #cbd5e1);
+  /* Controls' edges must reach 3:1 (WCAG 1.4.11), which the dashboard's
+     decorative border colour does not, so the form sets its own. */
+  --fe-border: #6b7280;
   --fe-border-subtle: var(--border-subtle, #e2e8f0);
   --fe-accent: var(--accent, #0f766e);
   --fe-danger: var(--danger, #9b1c1c);
   --fe-danger-surface: var(--danger-surface, #fdf2f2);
   --fe-radius: var(--radius-md, 8px);
   --fe-target: var(--target-min-size, 48px);
+  --fe-on-ink: #ffffff;
+  --fe-ink-strong: #001a35;
+  --fe-focus-inner: #ffffff;
+  --fe-focus-width: 4px;
+  --fe-success: var(--success, #0f5132);
+  --fe-success-surface: var(--success-surface, #e6f4ec);
+  --fe-scale: 1;
 
+  font-size: calc(1rem * var(--fe-scale));
   font-family: var(--font-sans, system-ui, sans-serif);
   color: var(--fe-ink);
   line-height: 1.5;
@@ -39,6 +49,8 @@
   /* Lets the review rows and actions respond to the space the form
      actually has, which differs between the preview and an embed. */
   container-type: inline-size;
+  background-color: var(--fe-surface);
+  border-radius: var(--fe-radius);
 }
 
 .fe-form *,
@@ -50,35 +62,9 @@
 /* One focus ring for every control in the form, clearly visible on any
    background - a light inner ring and a dark outer one. */
 .fe-form :is(button, input, textarea, select, a):focus-visible {
-  outline: 2px solid #ffffff;
+  outline: 2px solid var(--fe-focus-inner);
   outline-offset: 1px;
-  box-shadow: 0 0 0 4px var(--fe-ink);
-}
-
-.fe-toolbar {
-  display: flex;
-  flex-wrap: wrap;
-  justify-content: flex-end;
-  gap: 0.5rem;
-}
-
-.fe-toolbar__option {
-  display: inline-flex;
-  align-items: center;
-  gap: 0.5rem;
-  min-height: var(--fe-target);
-  padding: 0.25rem 0.75rem;
-  border: 1px solid var(--fe-border);
-  border-radius: var(--fe-radius);
-  background: var(--fe-surface);
-  cursor: pointer;
-  font-weight: 600;
-}
-
-.fe-toolbar__input {
-  width: 1.25rem;
-  height: 1.25rem;
-  accent-color: var(--fe-accent);
+  box-shadow: 0 0 0 var(--fe-focus-width) var(--fe-ink);
 }
 
 .fe-visually-hidden {
@@ -95,7 +81,7 @@
 
 /* ---- Progress ---- */
 .fe-progress__label {
-  font-size: 0.875rem;
+  font-size: calc(0.875rem * var(--fe-scale, 1));
   font-weight: 600;
   color: var(--fe-ink-secondary);
   margin-block-end: 0.375rem;
@@ -110,7 +96,7 @@
 
 .fe-progress__note {
   margin: 0.5rem 0 0;
-  font-size: 0.875rem;
+  font-size: calc(0.875rem * var(--fe-scale, 1));
   color: var(--fe-ink-secondary);
 }
 
@@ -141,7 +127,7 @@
 }
 
 .fe-question__heading {
-  font-size: 1.375rem;
+  font-size: calc(1.375rem * var(--fe-scale, 1));
   line-height: 1.3;
   margin: 0;
   flex: 1 1 12rem;
@@ -165,9 +151,9 @@
 }
 
 .fe-question__heading:focus-visible {
-  outline: 2px solid #ffffff;
+  outline: 2px solid var(--fe-focus-inner);
   outline-offset: 1px;
-  box-shadow: 0 0 0 4px var(--fe-ink);
+  box-shadow: 0 0 0 var(--fe-focus-width) var(--fe-ink);
   border-radius: 4px;
 }
 
@@ -188,13 +174,13 @@
 
 .fe-question__help,
 .fe-question__footnote {
-  font-size: 1rem;
+  font-size: calc(1rem * var(--fe-scale, 1));
   color: var(--fe-ink-secondary);
   margin: 0;
 }
 
 .fe-question__footnote {
-  font-size: 0.875rem;
+  font-size: calc(0.875rem * var(--fe-scale, 1));
   color: var(--fe-ink-muted);
 }
 
@@ -206,7 +192,7 @@
   border-inline-start: 3px solid var(--fe-accent);
   background-color: var(--fe-surface-sunken);
   border-radius: 4px;
-  font-size: 0.9375rem;
+  font-size: calc(0.9375rem * var(--fe-scale, 1));
   color: var(--fe-ink-secondary);
 }
 
@@ -303,9 +289,9 @@ textarea.fe-input {
 
 .fe-option:focus-visible,
 .fe-option:has(.fe-option__input:focus-visible) {
-  outline: 2px solid #ffffff;
+  outline: 2px solid var(--fe-focus-inner);
   outline-offset: 1px;
-  box-shadow: 0 0 0 4px var(--fe-ink);
+  box-shadow: 0 0 0 var(--fe-focus-width) var(--fe-ink);
 }
 
 .fe-option__input {
@@ -328,7 +314,7 @@ textarea.fe-input {
 }
 
 .fe-option__label {
-  font-size: 1rem;
+  font-size: calc(1rem * var(--fe-scale, 1));
 }
 
 /* ---- Selection bar ---- */
@@ -386,7 +372,7 @@ textarea.fe-input {
 
 .fe-select__chevron {
   display: inline-block;
-  font-size: 1.25rem;
+  font-size: calc(1.25rem * var(--fe-scale, 1));
   transition: transform 150ms ease;
 }
 
@@ -429,7 +415,7 @@ textarea.fe-input {
 }
 
 .fe-consent__label {
-  font-size: 1rem;
+  font-size: calc(1rem * var(--fe-scale, 1));
   cursor: pointer;
 }
 
@@ -441,7 +427,7 @@ textarea.fe-input {
   border-radius: 4px;
   color: var(--fe-danger);
   font-weight: 600;
-  font-size: 0.9375rem;
+  font-size: calc(0.9375rem * var(--fe-scale, 1));
 }
 
 /* ---- Buttons ---- */
@@ -473,11 +459,11 @@ textarea.fe-input {
 .fe-button--primary {
   background-color: var(--fe-ink);
   border-color: var(--fe-ink);
-  color: #ffffff;
+  color: var(--fe-on-ink);
 }
 
 .fe-button--primary:hover {
-  background-color: #001a35;
+  background-color: var(--fe-ink-strong);
 }
 
 .fe-button--quiet {
@@ -498,7 +484,7 @@ textarea.fe-input {
   min-height: var(--fe-target);
   padding-inline: 0.75rem;
   font: inherit;
-  font-size: 0.875rem;
+  font-size: calc(0.875rem * var(--fe-scale, 1));
   font-weight: 600;
   color: var(--fe-accent);
   background: none;
@@ -550,7 +536,7 @@ textarea.fe-input {
 
 .fe-voice__heard {
   margin: 0 0 0.75rem;
-  font-size: 1rem;
+  font-size: calc(1rem * var(--fe-scale, 1));
 }
 
 .fe-voice__actions {
@@ -562,7 +548,7 @@ textarea.fe-input {
 .fe-voice__note,
 .fe-voice__status {
   margin: 0;
-  font-size: 0.875rem;
+  font-size: calc(0.875rem * var(--fe-scale, 1));
   color: var(--fe-ink-muted);
 }
 
@@ -593,7 +579,7 @@ textarea.fe-input {
 
 .fe-review__term {
   grid-column: 1;
-  font-size: 0.875rem;
+  font-size: calc(0.875rem * var(--fe-scale, 1));
   font-weight: 600;
   color: var(--fe-ink-secondary);
 }
@@ -602,7 +588,7 @@ textarea.fe-input {
   grid-column: 1;
   grid-row: 2;
   margin: 0;
-  font-size: 1rem;
+  font-size: calc(1rem * var(--fe-scale, 1));
 }
 
 .fe-review__item > .fe-button {
@@ -617,7 +603,7 @@ textarea.fe-input {
   border-radius: 999px;
   background-color: var(--fe-selected);
   color: var(--fe-ink);
-  font-size: 0.75rem;
+  font-size: calc(0.75rem * var(--fe-scale, 1));
 }
 
 /* ---- Done ---- */
@@ -633,35 +619,35 @@ textarea.fe-input {
   height: 3rem;
   margin: 0 auto 1rem;
   border-radius: 999px;
-  background-color: var(--success-surface, #e6f4ec);
-  color: var(--success, #0f5132);
-  font-size: 1.5rem;
+  background-color: var(--fe-success-surface);
+  color: var(--fe-success);
+  font-size: calc(1.5rem * var(--fe-scale, 1));
   font-weight: 700;
 }
 
 .fe-done__heading {
   margin: 0 0 0.5rem;
-  font-size: 1.25rem;
+  font-size: calc(1.25rem * var(--fe-scale, 1));
 }
 
 /* ---- Simple words and icons ---- */
 .fe-form[data-low-literacy] .fe-question__heading {
-  font-size: 1.625rem;
+  font-size: calc(1.625rem * var(--fe-scale, 1));
 }
 
 .fe-form[data-low-literacy] .fe-option {
   min-height: 3.75rem;
-  font-size: 1.125rem;
+  font-size: calc(1.125rem * var(--fe-scale, 1));
 }
 
 .fe-form[data-low-literacy] .fe-option__label,
 .fe-form[data-low-literacy] .fe-question__help {
-  font-size: 1.125rem;
+  font-size: calc(1.125rem * var(--fe-scale, 1));
 }
 
 .fe-form[data-low-literacy] .fe-button {
   min-height: 3.5rem;
-  font-size: 1.125rem;
+  font-size: calc(1.125rem * var(--fe-scale, 1));
 }
 
 /* Narrow space - a phone, or 200% zoom - stacks each review row so the
@@ -715,7 +701,7 @@ textarea.fe-input {
 
 .fe-tools__status {
   margin: 0;
-  font-size: 0.875rem;
+  font-size: calc(0.875rem * var(--fe-scale, 1));
   color: var(--fe-ink-secondary);
 }
 
@@ -745,7 +731,7 @@ textarea.fe-input {
 
 .fe-referral__sent {
   font-weight: 700;
-  color: var(--success, #0f5132);
+  color: var(--fe-success);
 }
 
 .fe-referral__status {
@@ -794,7 +780,7 @@ textarea.fe-input {
 
 .fe-dialog__title {
   margin: 0;
-  font-size: 1.25rem;
+  font-size: calc(1.25rem * var(--fe-scale, 1));
   line-height: 1.3;
 }
 
@@ -813,7 +799,600 @@ textarea.fe-input {
 }
 
 .fe-dialog :is(button):focus-visible {
-  outline: 2px solid #ffffff;
+  outline: 2px solid var(--fe-focus-inner);
   outline-offset: 1px;
-  box-shadow: 0 0 0 4px var(--fe-ink);
+  box-shadow: 0 0 0 var(--fe-focus-width) var(--fe-ink);
+}
+
+/* ==========================================================
+   Learner display settings
+   ========================================================== */
+
+/* ---- Text size: A-, A, A+ ----
+   Every font size in this file is multiplied by --fe-scale, so the whole
+   form grows together and nothing is left behind at the old size. */
+.fe-form[data-text-size='small'] {
+  --fe-scale: 0.875;
+}
+
+.fe-form[data-text-size='large'] {
+  --fe-scale: 1.25;
+}
+
+/* ---- Contrast levels ----
+   Each level replaces the colour tokens and nothing else, so every part
+   of the form follows. Ratios are the lowest text-on-background pair at
+   each level and are checked by contrastLevels.test.js:
+     1 Standard  - WCAG AA:  text >= 4.5:1, controls and focus >= 3:1
+     2 Enhanced  - WCAG AAA: text >= 7:1, borders >= 4.5:1
+     3 Dark      - WCAG AAA: light text on near-black
+     4 Maximum   - yellow on black, about 19:1, thicker focus ring */
+.fe-form[data-contrast='2'] {
+  --fe-ink: #00152b;
+  --fe-ink-secondary: #1f2937;
+  --fe-ink-muted: #374151;
+  --fe-surface: #ffffff;
+  --fe-surface-sunken: #f3f4f6;
+  --fe-selected: #dbe4ef;
+  --fe-border: #4b5563;
+  --fe-border-subtle: #6b7280;
+  --fe-accent: #0b4f4a;
+  --fe-danger: #7f1010;
+  --fe-danger-surface: #fdf2f2;
+  --fe-success: #0b3d26;
+  --fe-success-surface: #e6f4ec;
+  --fe-on-ink: #ffffff;
+  --fe-ink-strong: #000000;
+  --fe-focus-inner: #ffffff;
+}
+
+.fe-form[data-contrast='3'] {
+  --fe-ink: #f8fafc;
+  --fe-ink-secondary: #e2e8f0;
+  --fe-ink-muted: #cbd5e1;
+  --fe-surface: #0b1220;
+  --fe-surface-sunken: #131c2e;
+  --fe-selected: #1e2d47;
+  --fe-border: #94a3b8;
+  --fe-border-subtle: #64748b;
+  --fe-accent: #5eead4;
+  --fe-danger: #fca5a5;
+  --fe-danger-surface: #2a0f12;
+  --fe-success: #86efac;
+  --fe-success-surface: #0f2a1a;
+  --fe-on-ink: #0b1220;
+  --fe-ink-strong: #cbd5e1;
+  --fe-focus-inner: #0b1220;
+}
+
+.fe-form[data-contrast='4'] {
+  --fe-ink: #ffff00;
+  --fe-ink-secondary: #ffff00;
+  --fe-ink-muted: #ffffff;
+  --fe-surface: #000000;
+  --fe-surface-sunken: #000000;
+  --fe-selected: #262600;
+  --fe-border: #ffff00;
+  --fe-border-subtle: #ffff00;
+  --fe-accent: #00ffff;
+  --fe-danger: #ff9999;
+  --fe-danger-surface: #000000;
+  --fe-success: #66ff66;
+  --fe-success-surface: #000000;
+  --fe-on-ink: #000000;
+  --fe-ink-strong: #ffffff;
+  --fe-focus-inner: #000000;
+  --fe-focus-width: 6px;
+}
+
+/* On a dark background the form needs its own edge. */
+.fe-form:is([data-contrast='3'], [data-contrast='4']) {
+  padding: 1rem;
+}
+
+.fe-form[data-contrast='4'] :is(.fe-button, .fe-input, .fe-option, .fe-select__bar) {
+  border-width: 2px;
+}
+
+.fe-form[data-contrast='4'] a {
+  text-decoration-thickness: 2px;
+}
+
+/* ---- The gear and its panel ---- */
+.fe-settings {
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+}
+
+.fe-settings__bar {
+  display: flex;
+  justify-content: flex-end;
+}
+
+.fe-settings__toggle {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  min-height: var(--fe-target);
+  padding: 0.25rem 1rem;
+  font: inherit;
+  font-weight: 600;
+  color: var(--fe-ink);
+  background-color: var(--fe-surface);
+  border: 1px solid var(--fe-border);
+  border-radius: 999px;
+  cursor: pointer;
+}
+
+.fe-settings__toggle svg {
+  transition: transform 300ms ease;
+}
+
+.fe-settings__toggle:hover {
+  background-color: var(--fe-surface-sunken);
+}
+
+.fe-settings__toggle--open {
+  background-color: var(--fe-selected);
+  border-color: var(--fe-ink);
+}
+
+.fe-settings__toggle--open svg {
+  transform: rotate(60deg);
+}
+
+.fe-settings__panel {
+  display: flex;
+  flex-direction: column;
+  gap: 1.25rem;
+  padding: 1.25rem;
+  border: 1px solid var(--fe-border);
+  border-radius: calc(var(--fe-radius) * 2);
+  background-color: var(--fe-surface);
+  box-shadow: 0 12px 32px rgb(0 0 0 / 0.16);
+  animation: fe-settings-in 180ms ease-out;
+}
+
+.fe-settings__panel[hidden] {
+  display: none;
+}
+
+.fe-settings__panel:focus {
+  outline: none;
+}
+
+.fe-settings__panel:focus-visible {
+  outline: 2px solid var(--fe-focus-inner);
+  box-shadow: 0 0 0 var(--fe-focus-width) var(--fe-ink);
+}
+
+@keyframes fe-settings-in {
+  from {
+    opacity: 0;
+    transform: translateY(-6px);
+  }
+}
+
+.fe-settings__title {
+  margin: 0;
+  font-size: calc(1.125rem * var(--fe-scale, 1));
+  line-height: 1.3;
+}
+
+.fe-settings__intro,
+.fe-settings__help,
+.fe-settings__now {
+  margin: 0;
+  font-size: calc(0.875rem * var(--fe-scale, 1));
+  color: var(--fe-ink-secondary);
+}
+
+.fe-settings__now {
+  font-weight: 600;
+  color: var(--fe-ink);
+}
+
+.fe-settings__group {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+  min-width: 0;
+}
+
+.fe-settings__fieldset {
+  margin: 0;
+  padding: 0;
+  border: 0;
+}
+
+.fe-settings__label {
+  margin: 0;
+  padding: 0;
+  font-weight: 700;
+}
+
+.fe-settings__range {
+  width: 100%;
+  min-height: var(--fe-target);
+  margin: 0;
+  accent-color: var(--fe-ink);
+  cursor: pointer;
+}
+
+.fe-settings__ticks {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  margin: -0.25rem 0 0;
+  padding: 0;
+  list-style: none;
+  text-align: center;
+  font-size: calc(0.75rem * var(--fe-scale, 1));
+  color: var(--fe-ink-secondary);
+}
+
+.fe-settings__ticks li {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.125rem;
+}
+
+.fe-settings__ticks li:first-child {
+  align-items: flex-start;
+}
+
+.fe-settings__ticks li:last-child {
+  align-items: flex-end;
+}
+
+.fe-settings__tick-number {
+  display: grid;
+  place-items: center;
+  width: 1.75em;
+  height: 1.75em;
+  border: 1px solid var(--fe-border);
+  border-radius: 999px;
+  font-weight: 700;
+}
+
+.fe-settings__tick--current {
+  color: var(--fe-ink);
+  font-weight: 700;
+}
+
+.fe-settings__tick--current .fe-settings__tick-number {
+  background-color: var(--fe-ink);
+  border-color: var(--fe-ink);
+  color: var(--fe-on-ink);
+}
+
+.fe-settings__segmented {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+}
+
+.fe-settings__size,
+.fe-settings__choice {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+  min-width: var(--fe-target);
+  min-height: var(--fe-target);
+  padding: 0.25rem 1rem;
+  font: inherit;
+  font-weight: 700;
+  color: var(--fe-ink);
+  background-color: var(--fe-surface);
+  border: 1px solid var(--fe-border);
+  border-radius: var(--fe-radius);
+  cursor: pointer;
+}
+
+.fe-settings__size--small {
+  font-size: calc(0.875rem * var(--fe-scale, 1));
+}
+
+.fe-settings__size--large {
+  font-size: calc(1.25rem * var(--fe-scale, 1));
+}
+
+/* Chosen is shown by a fill and a heavier border, not by colour alone. */
+.fe-settings__size[aria-pressed='true'],
+.fe-settings__choice:has(input:checked) {
+  background-color: var(--fe-selected);
+  border-color: var(--fe-ink);
+  box-shadow: inset 0 0 0 1px var(--fe-ink);
+}
+
+.fe-settings__size[aria-pressed='true']::after {
+  content: '✓';
+  font-size: 0.8em;
+}
+
+.fe-settings__choice input {
+  width: 1.25rem;
+  height: 1.25rem;
+  margin: 0;
+  accent-color: var(--fe-ink);
+}
+
+.fe-settings__choice:has(input:focus-visible) {
+  outline: 2px solid var(--fe-focus-inner);
+  outline-offset: 1px;
+  box-shadow: 0 0 0 var(--fe-focus-width) var(--fe-ink);
+}
+
+.fe-settings__switch-row {
+  flex-direction: row;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1rem;
+}
+
+.fe-settings__switch {
+  position: relative;
+  flex-shrink: 0;
+  width: 3.5rem;
+  height: 2rem;
+  padding: 0;
+  border: 2px solid var(--fe-ink);
+  border-radius: 999px;
+  background-color: var(--fe-surface-sunken);
+  cursor: pointer;
+}
+
+.fe-settings__switch-thumb {
+  position: absolute;
+  inset-block-start: 0.1875rem;
+  inset-inline-start: 0.1875rem;
+  width: 1.375rem;
+  height: 1.375rem;
+  border-radius: 999px;
+  background-color: var(--fe-ink);
+  transition: transform 150ms ease;
+}
+
+.fe-settings__switch[aria-checked='true'] {
+  background-color: var(--fe-ink);
+}
+
+.fe-settings__switch[aria-checked='true'] .fe-settings__switch-thumb {
+  background-color: var(--fe-on-ink);
+  transform: translateX(1.5rem);
+}
+
+.fe-settings__footer {
+  display: flex;
+  justify-content: flex-end;
+}
+
+/* The form behind the open panel: still there, clearly not in play. */
+.fe-form__body {
+  display: flex;
+  flex-direction: column;
+  gap: 1.5rem;
+  min-width: 0;
+  transition: filter 200ms ease, opacity 200ms ease;
+}
+
+.fe-form__body--blurred {
+  filter: blur(3px);
+  opacity: 0.55;
+  pointer-events: none;
+  user-select: none;
+}
+
+@container (max-width: 24rem) {
+  .fe-settings__switch-row {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+
+  .fe-settings__tick-name {
+    display: none;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .fe-settings__panel,
+  .fe-settings__toggle svg,
+  .fe-settings__switch-thumb,
+  .fe-form__body {
+    animation: none;
+    transition: none;
+  }
+}
+
+@media (forced-colors: active) {
+  .fe-settings__size[aria-pressed='true'],
+  .fe-settings__choice:has(input:checked),
+  .fe-settings__switch[aria-checked='true'] {
+    border: 3px solid Highlight;
+  }
+
+  .fe-settings__switch-thumb {
+    background-color: ButtonText;
+  }
+}
+
+/* ==========================================================
+   Sign up / Sign in
+   ========================================================== */
+.fe-account {
+  display: flex;
+  flex-direction: column;
+  gap: 1.25rem;
+}
+
+.fe-account__header {
+  display: flex;
+  flex-direction: column;
+  gap: 0.25rem;
+}
+
+.fe-account__title {
+  margin: 0;
+  font-size: calc(1.625rem * var(--fe-scale, 1));
+  line-height: 1.2;
+}
+
+.fe-account__summary {
+  padding: 1rem;
+  border: 2px solid var(--fe-danger);
+  border-inline-start-width: 6px;
+  border-radius: var(--fe-radius);
+  background-color: var(--fe-danger-surface);
+  color: var(--fe-ink);
+}
+
+.fe-account__summary:focus-visible {
+  outline: 2px solid var(--fe-focus-inner);
+  box-shadow: 0 0 0 var(--fe-focus-width) var(--fe-ink);
+}
+
+.fe-account__summary-title {
+  margin: 0 0 0.5rem;
+  font-weight: 700;
+}
+
+.fe-account__summary ul {
+  margin: 0;
+  padding-inline-start: 1.25rem;
+}
+
+.fe-account__summary a {
+  color: var(--fe-danger);
+  font-weight: 600;
+}
+
+.fe-social__list {
+  display: flex;
+  flex-direction: column;
+  gap: 0.625rem;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.fe-social__button {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.75rem;
+  min-height: var(--fe-target);
+  padding: 0.5rem 1rem;
+  font-weight: 600;
+  color: var(--fe-ink);
+  text-decoration: none;
+  background-color: var(--fe-surface);
+  border: 1px solid var(--fe-border);
+  border-radius: var(--fe-radius);
+}
+
+.fe-social__button:hover {
+  background-color: var(--fe-surface-sunken);
+  text-decoration: underline;
+}
+
+.fe-social__icon {
+  display: inline-grid;
+  place-items: center;
+  flex-shrink: 0;
+  width: 1.5rem;
+  height: 1.5rem;
+}
+
+.fe-social__icon svg {
+  width: 1.25rem;
+  height: 1.25rem;
+}
+
+/* Brand colours are kept, so a logo stays recognisable: on a dark
+   background it sits on a small white chip. */
+.fe-form:is([data-contrast='3'], [data-contrast='4']) .fe-social__icon {
+  border-radius: 4px;
+  background-color: #ffffff;
+  color: #000000;
+}
+
+.fe-account__divider {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  color: var(--fe-ink-secondary);
+  font-weight: 600;
+}
+
+.fe-account__divider::before,
+.fe-account__divider::after {
+  content: '';
+  flex: 1;
+  border-block-start: 1px solid var(--fe-border);
+}
+
+.fe-account__form {
+  display: flex;
+  flex-direction: column;
+  gap: 1.25rem;
+}
+
+.fe-account__form .fe-progress__note {
+  margin: 0;
+}
+
+.fe-account__field {
+  display: flex;
+  flex-direction: column;
+  gap: 0.375rem;
+  min-width: 0;
+}
+
+.fe-account__label {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 0.375rem;
+  font-weight: 700;
+}
+
+.fe-question__icon--small {
+  width: 1.75rem;
+  height: 1.75rem;
+}
+
+.fe-question__icon--small svg {
+  width: 1rem;
+  height: 1rem;
+}
+
+.fe-account__input-row {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+}
+
+.fe-account__input-row .fe-input {
+  flex: 1 1 12rem;
+  min-width: 0;
+}
+
+.fe-account__reveal {
+  flex: 0 0 auto;
+}
+
+.fe-account__reveal[aria-pressed='true'] {
+  background-color: var(--fe-selected);
+  border-color: var(--fe-ink);
+}
+
+.fe-account__submit {
+  width: 100%;
+}
+
+.fe-account__switch {
+  margin: 0;
+  text-align: center;
 }

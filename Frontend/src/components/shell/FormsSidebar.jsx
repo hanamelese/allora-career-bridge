@@ -11,12 +11,16 @@ import './FormsSidebar.css';
  * the keyboard and a screen reader expect from navigation. Each entry
  * carries a one-line summary so staff can tell the four forms apart
  * without opening them.
+ *
+ * It is static: always shown, never collapsed, and it stays in place while
+ * the workspace beside it scrolls. On a phone-width screen it becomes a
+ * strip of links across the top instead, so the workspace keeps its width.
  */
-export function FormsSidebar({ id, isOpen = false, onNavigate }) {
+export function FormsSidebar({ id }) {
   return (
     <nav
       id={id}
-      className={['forms-sidebar', isOpen ? 'forms-sidebar--open' : ''].filter(Boolean).join(' ')}
+      className="forms-sidebar"
       aria-label="Dashboard"
     >
       <h2 className="forms-sidebar__heading">Organisation</h2>
@@ -30,7 +34,6 @@ export function FormsSidebar({ id, isOpen = false, onNavigate }) {
                 .filter(Boolean)
                 .join(' ')
             }
-            onClick={onNavigate}
           >
             <Building className="forms-sidebar__icon" aria-hidden="true" />
             <span className="forms-sidebar__text">
@@ -56,8 +59,7 @@ export function FormsSidebar({ id, isOpen = false, onNavigate }) {
                     .filter(Boolean)
                     .join(' ')
                 }
-                onClick={onNavigate}
-              >
+                  >
                 <Icon className="forms-sidebar__icon" aria-hidden="true" />
                 <span className="forms-sidebar__text">
                   <span className="forms-sidebar__name">{formType.name}</span>

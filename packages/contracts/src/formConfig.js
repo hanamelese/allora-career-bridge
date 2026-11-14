@@ -1,12 +1,15 @@
 
 import { z } from 'zod';
 import { IDENTITY_ROUTES, fieldCatalog } from './fieldCatalog.js';
+import { accountSettingsSchema } from './socialProviders.js';
 
 // ==========================================
 // 1. Supported form types
 // ==========================================
 
 export const FORM_TYPES = [
+  /* The accessible Sign up / Sign in component. */
+  'account',
   /* Retired: merged into 'signup' (Learner Registration & Profile). Kept
      valid so stored drafts and published versions still parse. */
   'learner',
@@ -307,7 +310,26 @@ export const formConfigBaseSchema = z.object({
     customFieldSchema
   ).default([]),
 
+  /* Only on the Sign up / Sign in form: its title and sign-in options. */
+  account: accountSettingsSchema.optional(),
+
 }).strict().superRefine((config, ctx) => {
+  if (config.type === 'account' && !config.account) {
+    ctx.addIssue({
+      code: 'custom',
+      path: ['account'],
+      message: 'The Sign up / Sign in form needs its sign-in options.',
+    });
+  }
+
+  if (config.type !== 'account' && config.account) {
+    ctx.addIssue({
+      code: 'custom',
+      path: ['account'],
+      message: 'Only the Sign up / Sign in form has sign-in options.',
+    });
+  }
+
   config.fields.forEach((field, index) => {
     if (field.locked && !field.enabled) {
       ctx.addIssue({

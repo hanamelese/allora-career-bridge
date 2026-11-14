@@ -7,7 +7,7 @@ import { createDatabase } from './db/client.js';
 import { seedDatabase } from './db/seed.js';
 import { partnerForms, referrals } from './db/schema.js';
 import { createRateLimiter } from './referrals.js';
-import { upgradeStoredDrafts } from './db/upgrades.js';
+import { ensurePartnerForms, upgradeStoredDrafts } from './db/upgrades.js';
 import { createApp } from './app.js';
 
 /* NODE_ENV=test makes the config use a fixed signing secret, so these
@@ -98,6 +98,7 @@ describe('reaching the dashboard API', () => {
 
     expect(response.status).toBe(200);
     expect(response.body.map((form) => form.type).sort()).toEqual([
+      'account',
       'employer',
       'jobApplication',
       'signup',
@@ -657,5 +658,125 @@ describe('referral links', () => {
     const response = await request(app).get('/api/v1/public/referrals/abcdefghijklmnopqrstuvwxyz012345');
 
     expect(response.status).toBe(404);
+  });
+});
+
+describe('partner sign-up', () => {
+  const details = {
+    organisationName: 'Hope NGO',
+    email: 'Staff@Hope.example',
+    password: 'a-long-enough-password',
+  };
+
+  it('creates the organisation, signs it in, and gives it every form', async () => {
+    const response = await request(app).post('/api/v1/auth/signup').send(details);
+
+    expect(response.status).toBe(201);
+    expect(response.body.partner.name).toBe('Hope NGO');
+    expect(response.body.user.email).toBe('staff@hope.example');
+
+    const forms = await request(app)
+      .get('/api/v1/forms')
+      .set('authorization', `Bearer ${response.body.token}`);
+
+    expect(forms.body.map((form) => form.type).sort()).toEqual([
+      'account',
+      'employer',
+      'jobApplication',
+      'signup',
+    ]);
+  });
+
+  it('can sign in afterwards with the same details', async () => {
+    await request(app).post('/api/v1/auth/signup').send(details);
+    const response = await signIn('staff@hope.example', details.password);
+
+    expect(response.status).toBe(200);
+    expect(response.body.partner.name).toBe('Hope NGO');
+  });
+
+  it('keeps a new organisation apart from every other', async () => {
+    const created = await request(app).post('/api/v1/auth/signup').send(details);
+    const theirs = await request(app)
+      .get('/api/v1/forms')
+      .set('authorization', `Bearer ${created.body.token}`);
+    const ours = await authed('get', '/api/v1/forms');
+
+    const theirIds = new Set(theirs.body.map((form) => form.formId ?? form.id));
+    for (const form of ours.body) expect(theirIds.has(form.formId ?? form.id)).toBe(false);
+  });
+
+  it('refuses an email address already in use', async () => {
+    const response = await request(app)
+      .post('/api/v1/auth/signup')
+      .send({ ...details, email: 'partner@alx.example' });
+
+    expect(response.status).toBe(409);
+    expect(response.body.error).toBe('email_taken');
+  });
+
+  it('says which details need fixing', async () => {
+    const response = await request(app)
+      .post('/api/v1/auth/signup')
+      .send({ organisationName: '', email: 'nope', password: 'short' });
+
+    expect(response.status).toBe(422);
+    expect(response.body.issues.map((issue) => issue.path).sort()).toEqual([
+      'email',
+      'organisationName',
+      'password',
+    ]);
+  });
+
+  it('limits how many accounts one address can create', async () => {
+    const { db } = app.locals;
+    const limited = createApp(db, { signupLimiter: createRateLimiter({ limit: 1, windowMs: 60_000 }) });
+
+    const first = await request(limited).post('/api/v1/auth/signup').send(details);
+    const second = await request(limited)
+      .post('/api/v1/auth/signup')
+      .send({ ...details, email: 'other@hope.example' });
+
+    expect(first.status).toBe(201);
+    expect(second.status).toBe(429);
+  });
+});
+
+describe('upgrading existing data', () => {
+  it('gives an existing partner the Sign up / Sign in form once', () => {
+    const { db } = app.locals;
+    db.delete(partnerForms)
+      .where(eq(partnerForms.type, 'account'))
+      .run();
+
+    expect(ensurePartnerForms(db).created).toBe(1);
+    expect(ensurePartnerForms(db).created).toBe(0);
+
+    const form = db.select().from(partnerForms).where(eq(partnerForms.type, 'account')).get();
+    expect(form.draftConfig.account.mode).toBe('signUp');
+    expect(form.draftConfig.formId).toBe(form.id);
+  });
+
+  it('moves the identity questions to the end of an older learner draft', () => {
+    const { db } = app.locals;
+    const template = FORM_TEMPLATES.signup;
+    const identity = template.fields.filter((f) => ['identityRoute', 'documentId'].includes(f.key));
+    const rest = template.fields.filter((f) => !['identityRoute', 'documentId'].includes(f.key));
+    const oldOrder = [...rest.slice(0, 5), ...identity, ...rest.slice(5)];
+
+    db.update(partnerForms)
+      .set({ draftConfig: { ...template, formId, fields: oldOrder } })
+      .where(eq(partnerForms.id, formId))
+      .run();
+
+    expect(upgradeStoredDrafts(db).upgraded).toBe(1);
+
+    const after = db.select().from(partnerForms).where(eq(partnerForms.id, formId)).get();
+    expect(after.draftConfig.fields.map((f) => f.key).slice(-4)).toEqual([
+      'consent',
+      'identityRoute',
+      'documentId',
+      'referral',
+    ]);
   });
 });

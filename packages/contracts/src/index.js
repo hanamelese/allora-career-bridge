@@ -62,7 +62,20 @@ export {
   formConfigSchema,
 } from './formConfig.js';
 
-export { upgradeLearnerDraft } from './formUpgrades.js';
+export { upgradeLearnerDraft, moveIdentityToEnd } from './formUpgrades.js';
+
+export {
+  SOCIAL_PROVIDERS,
+  SOCIAL_PROVIDER_KEYS,
+  ACCOUNT_MODES,
+  getSocialProvider,
+  isSignInUrl,
+  socialProviderConfigSchema,
+  accountSettingsSchema,
+  defaultAccountSettings,
+} from './socialProviders.js';
+
+export { partnerSignupSchema } from './partnerSignup.js';
 
 export {
   REFERRAL_PHONE_PATTERN,

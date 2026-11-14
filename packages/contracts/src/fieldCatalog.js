@@ -328,6 +328,28 @@ export const fieldCatalog = {
     needsReview: true,
   },
 
+  // ----- Sign up / Sign in -----
+  /* Never read aloud, never spoken, never shown back: the review step and
+     Read my answer both skip it. Not `private`, because it has to reach the
+     partner's own sign-in system - that is the whole point of the form. */
+  password: {
+    key: 'password',
+    type: 'password',
+    label: { en: 'Password', am: 'የይለፍ ቃል' },
+    simpleLabel: { en: 'Your secret word', am: 'ሚስጥራዊ ቃልዎ' },
+    helpText: {
+      en: 'At least 8 characters.',
+      am: 'ቢያንስ 8 ፊደላት።',
+    },
+    icon: 'lock',
+    autocomplete: 'current-password',
+    rules: { minLength: 8, maxLength: 128 },
+    sensitive: true,
+    private: false,
+    voiceInput: false,
+    needsReview: true,
+  },
+
   // ----- Partner-assisted registration -----
   assistedBy: {
     key: 'assistedBy',

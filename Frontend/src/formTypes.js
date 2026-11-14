@@ -1,4 +1,4 @@
-import { ClipboardList, Briefcase, Building2 } from 'lucide-react';
+import { ClipboardList, Briefcase, Building2, LogIn } from 'lucide-react';
 
 /**
  * The form types, as partner staff see them.
@@ -15,6 +15,16 @@ import { ClipboardList, Briefcase, Building2 } from 'lucide-react';
 
  */
 export const FORM_TYPES = [
+  {
+    /* Listed first: the door into everything else. */
+    id: 'account',
+    slug: 'sign-up-sign-in',
+    name: 'Sign up / Sign in',
+    summary: 'An accessible sign-in for your own site',
+    purpose: '',
+    audience: 'Completed by anyone signing up or in',
+    icon: LogIn,
+  },
   {
     /* One learner form. It replaced the separate Learner Registration and
        Learner Profile & Support forms; the old profile link still works. */

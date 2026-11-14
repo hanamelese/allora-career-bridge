@@ -4,6 +4,9 @@ import { getFieldComponent } from './fields/index.js';
 import { ReadAloudButton } from './ReadAloudButton.jsx';
 import { AnswerTools } from './AnswerTools.jsx';
 import { ReviewStep } from './ReviewStep.jsx';
+import { FormSettings } from './FormSettings.jsx';
+import { AccountForm } from './AccountForm.jsx';
+import { useLearnerPreferences } from './learnerPreferences.js';
 import './form-engine.css';
 
 const COPY = {
@@ -16,7 +19,6 @@ const COPY = {
     doneDetail: 'Thank you. There is nothing more you need to do.',
     empty: 'This form has no questions switched on yet.',
     noTimeLimit: 'There is no time limit. You can take as long as you need.',
-    simpleWords: 'Simple words and pictures',
     requiredNote: 'Questions marked * must be answered. All other questions are optional.',
     required: '(required)',
     optional: '(optional)',
@@ -30,7 +32,6 @@ const COPY = {
     doneDetail: 'እናመሰግናለን። ከዚህ በላይ ማድረግ ያለብዎት ነገር የለም።',
     empty: 'በዚህ ቅጽ ላይ ገና የበራ ጥያቄ የለም።',
     noTimeLimit: 'የጊዜ ገደብ የለም። የሚፈልጉትን ያህል ጊዜ መውሰድ ይችላሉ።',
-    simpleWords: 'ቀላል ቃላትና ሥዕሎች',
     requiredNote: '* ምልክት ያላቸው ጥያቄዎች መመለስ አለባቸው። ሌሎቹ ጥያቄዎች አማራጭ ናቸው።',
     required: '(ግዴታ)',
     optional: '(አማራጭ)',
@@ -56,23 +57,38 @@ const COPY = {
  * dashboard preview its signed-in test endpoint); the form never holds a
  * phone number or a credential.
  */
-export function FormRenderer({ config, settings = {}, onSubmit, renderIcon, referral }) {
-  /* Simple words are the learner's own choice, made on the form itself.
-     The host may only suggest where it starts. */
-  const [lowLiteracy, setLowLiteracy] = useState(Boolean(settings.lowLiteracy));
+export function FormRenderer({
+  config,
+  settings = {},
+  onSubmit,
+  renderIcon,
+  referral,
+  onSocialSignIn,
+  onSwitchMode,
+}) {
+  /* The learner's own display choices: contrast, text size and simple
+     words. The host may only suggest where simple words start. */
+  const [preferences, setPreferences] = useLearnerPreferences(settings);
+  const languages = config.languages?.length ? config.languages : ['en'];
+  const [language, setLanguage] = useState(() => {
+    const wanted = settings.language ?? config.defaultLanguage ?? 'en';
+    return languages.includes(wanted) ? wanted : languages[0];
+  });
+  const [isSettingsOpen, setIsSettingsOpen] = useState(false);
+  const { lowLiteracy } = preferences;
+
   /* Which referral partners a link has already gone to. Held here so it
      survives moving between questions. */
   const [referralStatus, setReferralStatus] = useState({});
   const engine = useFormEngine(
     config,
-    { ...settings, lowLiteracy, referralPartners: referral?.partners },
+    { language, lowLiteracy, referralPartners: referral?.partners },
     { onSubmit },
   );
   const headingRef = useRef(null);
   const fieldRef = useRef(null);
   const hasNavigatedRef = useRef(false);
 
-  const language = settings.language ?? config.defaultLanguage ?? 'en';
   const copy = COPY[language] ?? COPY.en;
 
   const { question, isReviewing, isSubmitted, error, progress } = engine;
@@ -94,39 +110,69 @@ export function FormRenderer({ config, settings = {}, onSubmit, renderIcon, refe
     hasNavigatedRef.current = true;
   }, [stepKey]);
 
-  const simpleWordsSwitch = (
-    <div className="fe-toolbar">
-      <label className="fe-toolbar__option" htmlFor="fe-simple-words">
-        <input
-          type="checkbox"
-          id="fe-simple-words"
-          className="fe-toolbar__input"
-          checked={lowLiteracy}
-          onChange={(event) => setLowLiteracy(event.target.checked)}
+  /**
+   * Every screen of the form shares one frame: the settings gear and panel
+   * on top, and the form itself below. While the panel is open the form is
+   * blurred and `inert`, so it neither distracts nor takes focus.
+   */
+  function frame(content) {
+    return (
+      <div
+        className="fe-form"
+        lang={language}
+        data-language={language}
+        data-low-literacy={lowLiteracy || undefined}
+        data-contrast={preferences.contrast}
+        data-text-size={preferences.textSize}
+      >
+        <FormSettings
+          open={isSettingsOpen}
+          onOpenChange={setIsSettingsOpen}
+          preferences={preferences}
+          onChange={setPreferences}
+          language={language}
+          languages={languages}
+          onLanguageChange={setLanguage}
         />
-        <span>{copy.simpleWords}</span>
-      </label>
-    </div>
-  );
+
+        <div
+          className={`fe-form__body${isSettingsOpen ? ' fe-form__body--blurred' : ''}`}
+          inert={isSettingsOpen}
+        >
+          {content}
+        </div>
+      </div>
+    );
+  }
+
+  if (config.type === 'account') {
+    return frame(
+      <AccountForm
+        config={config}
+        language={language}
+        lowLiteracy={lowLiteracy}
+        onSubmit={onSubmit}
+        onSocialSignIn={onSocialSignIn}
+        onSwitchMode={onSwitchMode}
+        renderIcon={renderIcon}
+      />,
+    );
+  }
 
   if (isSubmitted) {
-    return (
-      <div className="fe-form" data-language={language}>
+    return frame(
         <div className="fe-done" role="status">
           <p className="fe-done__icon" aria-hidden="true">
             ✓
           </p>
           <h2 className="fe-done__heading">{copy.done}</h2>
           <p className="fe-question__help">{copy.doneDetail}</p>
-        </div>
-      </div>
+        </div>,
     );
   }
 
   if (isReviewing) {
-    return (
-      <div className="fe-form" data-language={language} data-low-literacy={lowLiteracy || undefined}>
-        {simpleWordsSwitch}
+    return frame(
         <ReviewStep
           items={engine.reviewItems}
           summary={engine.reviewSummary}
@@ -134,17 +180,12 @@ export function FormRenderer({ config, settings = {}, onSubmit, renderIcon, refe
           onEdit={engine.goTo}
           onSubmit={engine.submit}
           onBack={engine.back}
-        />
-      </div>
+        />,
     );
   }
 
   if (!question) {
-    return (
-      <div className="fe-form" data-language={language}>
-        <p className="fe-question__help">{copy.empty}</p>
-      </div>
-    );
+    return frame(<p className="fe-question__help">{copy.empty}</p>);
   }
 
   const FieldComponent = getFieldComponent(question.type);
@@ -161,14 +202,8 @@ export function FormRenderer({ config, settings = {}, onSubmit, renderIcon, refe
      once, so nothing starts talking the instant the page opens. */
   const autoPlayAudio = Boolean(lowLiteracy && hasNavigatedRef.current);
 
-  return (
-    <div
-      className="fe-form"
-      data-language={language}
-      data-low-literacy={lowLiteracy || undefined}
-    >
-      {simpleWordsSwitch}
-
+  return frame(
+    <>
       <div className="fe-progress">
         <p className="fe-progress__label">{copy.progress(progress.position, progress.total)}</p>
         <div
@@ -189,7 +224,7 @@ export function FormRenderer({ config, settings = {}, onSubmit, renderIcon, refe
 
       <div className="fe-question">
         <div className="fe-question__title">
-          {lowLiteracy && question.icon && renderIcon ? (
+          {question.icon && renderIcon ? (
             <span className="fe-question__icon" aria-hidden="true">
               {renderIcon(question.icon)}
             </span>
@@ -293,6 +328,6 @@ export function FormRenderer({ config, settings = {}, onSubmit, renderIcon, refe
       </div>
 
       <p className="fe-question__footnote">{copy.noTimeLimit}</p>
-    </div>
+    </>,
   );
 }

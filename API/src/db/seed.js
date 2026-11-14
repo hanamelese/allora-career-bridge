@@ -1,15 +1,8 @@
 import { eq } from 'drizzle-orm';
-import { FORM_TEMPLATES } from '@onboarding/contracts';
 import { createDatabase } from './client.js';
 import { config } from '../config.js';
-import {
-  partners,
-  partnerUsers,
-  apiKeys,
-  formTemplates,
-  partnerForms,
-} from './schema.js';
-import { newId, createKeyPair, hashSecretKey, hashPassword } from './keys.js';
+import { partnerUsers } from './schema.js';
+import { createPartnerAccount } from './partners.js';
 
 /**
  * Puts one partner in place with one form of each type.
@@ -22,7 +15,6 @@ import { newId, createKeyPair, hashSecretKey, hashPassword } from './keys.js';
  * readable form. Only its hash is stored.
  */
 export function seedDatabase(db, { partnerName, email, password }) {
-  const now = new Date().toISOString();
 
   const existing = db.select().from(partnerUsers).where(eq(partnerUsers.email, email)).get();
 
@@ -30,63 +22,11 @@ export function seedDatabase(db, { partnerName, email, password }) {
     return { alreadySeeded: true, partnerId: existing.partnerId, secretKey: null };
   }
 
-  const partnerId = newId('ptn');
-
-  db.insert(partners).values({ id: partnerId, name: partnerName, status: 'active', createdAt: now }).run();
-
-  db.insert(partnerUsers)
-    .values({
-      id: newId('usr'),
-      partnerId,
-      email,
-      passwordHash: hashPassword(password),
-      role: 'owner',
-      createdAt: now,
-    })
-    .run();
-
-  const { publicKey, secretKey } = createKeyPair();
-
-  db.insert(apiKeys)
-    .values({
-      id: newId('key'),
-      partnerId,
-      publicKey,
-      secretKeyHash: hashSecretKey(secretKey),
-      status: 'active',
-      createdAt: now,
-    })
-    .run();
-
-  const formIds = {};
-
-  for (const [type, template] of Object.entries(FORM_TEMPLATES)) {
-    db.insert(formTemplates)
-      .values({ id: newId('tpl'), type, defaultConfig: template })
-      .onConflictDoNothing()
-      .run();
-
-    /* Form ids are generated, not derived from the type: every partner
-       gets their own forms, and one partner's id must never collide
-       with another's. The dashboard finds a form by its type. */
-    const formId = newId('frm');
-    formIds[type] = formId;
-
-    db.insert(partnerForms)
-      .values({
-        id: formId,
-        partnerId,
-        type,
-        /* The stored draft names the form it belongs to, which is what the
-           draft endpoint checks before accepting an update. */
-        draftConfig: { ...template, formId },
-        currentVersion: null,
-        status: 'draft',
-        updatedAt: null,
-        publishedAt: null,
-      })
-      .run();
-  }
+  const { partnerId, publicKey, secretKey, formIds } = createPartnerAccount(db, {
+    partnerName,
+    email,
+    password,
+  });
 
   return { alreadySeeded: false, partnerId, publicKey, secretKey, formIds };
 }

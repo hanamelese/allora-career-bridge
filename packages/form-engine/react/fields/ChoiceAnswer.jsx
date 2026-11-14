@@ -19,7 +19,8 @@ import { SelectionBar } from './SelectionBar.jsx';
  */
 export function ChoiceAnswer({ question, value, onChange, onCommit, describedBy, hasError, renderIcon }) {
   const optionRefs = useRef([]);
-  const showIcons = question.lowLiteracy;
+  /* Pictures help everyone, so they are always shown, not only with simple words. */
+  const showIcons = true;
   const selected = question.options.find((option) => String(option.value) === String(value));
 
   function focusOption(index) {

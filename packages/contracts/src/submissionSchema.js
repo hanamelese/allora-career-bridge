@@ -81,6 +81,12 @@ function getBuiltInFieldSchema(fieldConfig, config) {
       );
     }
 
+    case 'password':
+      return z
+        .string()
+        .min(definition.rules?.minLength ?? 8, 'Use at least 8 characters.')
+        .max(definition.rules?.maxLength ?? 128);
+
     case 'email':
       return z.email('Enter an email address, like name@example.com.');
 

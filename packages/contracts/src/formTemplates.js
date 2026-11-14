@@ -8,6 +8,7 @@
 // the server seeds `form_templates` from them.
 
 import { IDENTITY_ROUTES, fieldCatalog } from './fieldCatalog.js';
+import { defaultAccountSettings } from './socialProviders.js';
 
 const LANGUAGES = ['en', 'am'];
 
@@ -56,6 +57,18 @@ function template(type, formId, fields) {
 export const LEGACY_FORM_TYPES = ['learner'];
 
 export const FORM_TEMPLATES = {
+  /* ---- Sign up / Sign in ----
+     An accessible sign-in component for the partner's own site. The name
+     is only asked when the form is set to Sign up. */
+  account: {
+    ...template('account', 'frm_account', [
+      field('name', { required: true }),
+      field('email', { required: true, locked: true }),
+      field('password', { required: true, locked: true }),
+    ]),
+    account: defaultAccountSettings(),
+  },
+
   /* ---- Learner Registration & Profile ----
      One learner form: who they are, how they can be identified, their
      background, and a private way to ask for support. */
@@ -68,12 +81,6 @@ export const FORM_TEMPLATES = {
       field('email'),
       field('location'),
       field('address', { enabled: false }),
-      field('identityRoute', { required: true, locked: true }),
-      /* Only asked when the chosen document actually carries a number, so a
-         learner with no document never meets it. */
-      field('documentId', {
-        showIf: { field: 'identityRoute', in: ['kebele_id', 'passport', 'refugee_id'] },
-      }),
       field('education'),
       field('currentLevel', { required: true }),
       field('skills'),
@@ -85,9 +92,18 @@ export const FORM_TEMPLATES = {
       field('assistedBy', { enabled: false }),
       field('assistedConsent', { enabled: false }),
       field('consent', { required: true, locked: true }),
-      /* Last, after every ordinary question and after consent: a learner
-         with no document can ask a partner organisation to help. Their
-         name and phone are already known, so nothing is asked twice. */
+      /* The identity questions come last, after consent, so that "How can
+         we identify you?" -> ID number, or -> referral, is one unbroken
+         run at the end rather than interrupting the ordinary questions. */
+      field('identityRoute', { required: true, locked: true }),
+      /* Only asked when the chosen document actually carries a number, so a
+         learner with no document never meets it. */
+      field('documentId', {
+        showIf: { field: 'identityRoute', in: ['kebele_id', 'passport', 'refugee_id'] },
+      }),
+      /* A learner with no document can ask a partner organisation to
+         help. Their name and phone are already known, so nothing is asked
+         twice. */
       field('referral', {
         locked: true,
         showIf: { field: 'identityRoute', in: ['no_document', 'partner_referral'] },
@@ -137,6 +153,10 @@ export const FORM_TEMPLATES = {
  * act on. Dashboard copy, so it is not part of the published config.
  */
 export const LOCK_REASONS = {
+  account: {
+    email: 'People need an email address to sign up or sign in with a password.',
+    password: 'A password is how an email sign-up or sign-in is checked. It is never read aloud or shown back.',
+  },
   signup: {
     name: 'A registration cannot be completed without a name.',
     identityRoute:

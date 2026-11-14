@@ -17,9 +17,17 @@
 }
 
 .sign-in__brand {
+  display: block;
+  color: var(--ink);
+  text-decoration: none;
   padding-block-end: var(--space-md);
   margin-block-end: var(--space-lg);
   border-block-end: 1px solid var(--border-subtle);
+}
+
+.sign-in__product,
+.sign-in__tagline {
+  display: block;
 }
 
 .sign-in__product {
@@ -57,4 +65,22 @@
   color: var(--danger);
   font-size: var(--font-size-sm);
   font-weight: var(--font-weight-medium);
+}
+
+.sign-in__switch {
+  margin-block-start: var(--space-lg);
+  padding-block-start: var(--space-md);
+  border-block-start: 1px solid var(--border-subtle);
+  font-size: var(--font-size-sm);
+  color: var(--ink-secondary);
+}
+
+.sign-in__switch a {
+  color: var(--ink);
+  font-weight: var(--font-weight-semibold);
+}
+
+.sign-in__form .sign-in__errors {
+  margin: 0;
+  padding-inline-start: var(--space-lg);
 }

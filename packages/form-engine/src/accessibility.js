@@ -187,6 +187,12 @@ export function formatAnswerText(question, value, language = 'en') {
     return notAnswered[language] ?? notAnswered.en;
   }
 
+  /* A password is never shown back or spoken aloud. */
+  if (question.type === 'password') {
+    const hidden = { en: 'Entered (hidden)', am: 'ገብቷል (የተደበቀ)' };
+    return hidden[language] ?? hidden.en;
+  }
+
   const labelFor = (optionValue) =>
     question.options?.find((option) => option.value === optionValue)?.label ??
     String(optionValue);

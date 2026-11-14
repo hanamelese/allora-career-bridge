@@ -1,4 +1,5 @@
 import { useState } from 'react';
+import { Link } from 'react-router-dom';
 import { useAuth } from '../auth/authContext.js';
 import { Button } from '../components/ui/Button.jsx';
 import { TextInput } from '../components/ui/TextInput.jsx';
@@ -34,14 +35,14 @@ export function SignInPage() {
   return (
     <main className="sign-in" id="main-content">
       <div className="sign-in__card">
-        <div className="sign-in__brand">
-          <p className="sign-in__product">Partner Dashboard</p>
-          <p className="sign-in__tagline">Accessible Onboarding</p>
-        </div>
+        <Link to="/" className="sign-in__brand">
+          <span className="sign-in__product">Partner Dashboard</span>
+          <span className="sign-in__tagline">Accessible Onboarding</span>
+        </Link>
 
         <h1 className="sign-in__heading">Sign in</h1>
         <p className="sign-in__intro">
-          Use the account your organisation was given, so we can show you your own forms.
+          Sign in with your organisation’s account to see your own forms.
         </p>
 
         <form className="sign-in__form" onSubmit={handleSubmit}>
@@ -75,6 +76,10 @@ export function SignInPage() {
             {isSigningIn ? 'Signing in…' : 'Sign in'}
           </Button>
         </form>
+
+        <p className="sign-in__switch">
+          New here? <Link to="/signup">Create a partner account</Link>
+        </p>
       </div>
     </main>
   );

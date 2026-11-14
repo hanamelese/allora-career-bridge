@@ -1,7 +1,15 @@
 .forms-sidebar {
   flex-shrink: 0;
   width: var(--sidebar-width);
-  align-self: stretch;
+  /* Static: it stays in place under the header while the workspace
+     scrolls, and scrolls on its own if it is ever taller than the screen. */
+  position: sticky;
+  inset-block-start: var(--header-height);
+  align-self: flex-start;
+  height: calc(100vh - var(--header-height));
+  height: calc(100dvh - var(--header-height));
+  overflow-y: auto;
+  overscroll-behavior: contain;
   padding: var(--space-lg) var(--space-md);
   background-color: var(--surface);
   border-inline-end: 1px solid var(--border-subtle);
@@ -81,19 +89,57 @@
   }
 }
 
+.forms-sidebar__list--section {
+  margin-block-end: var(--space-lg);
+}
+
+/* Phone width: a strip of links across the top, still always visible. */
 @media (max-width: 55rem) {
   .forms-sidebar {
+    position: static;
     width: 100%;
+    height: auto;
+    display: flex;
+    gap: var(--space-xs, 0.5rem);
+    padding: var(--space-sm) var(--space-md);
+    overflow-x: auto;
+    overflow-y: hidden;
     border-inline-end: none;
     border-block-end: 1px solid var(--border-subtle);
   }
 
-  /* Collapsed by default on narrow screens; the header button opens it. */
-  .forms-sidebar:not(.forms-sidebar--open) {
+  .forms-sidebar__heading {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    overflow: hidden;
+    clip-path: inset(50%);
+    white-space: nowrap;
+  }
+
+  .forms-sidebar__list,
+  .forms-sidebar__list--section {
+    flex-direction: row;
+    margin: 0;
+  }
+
+  .forms-sidebar__link {
+    align-items: center;
+    white-space: nowrap;
+    border-inline-start: none;
+    border-block-end: 3px solid transparent;
+    border-radius: var(--radius-md) var(--radius-md) 0 0;
+  }
+
+  .forms-sidebar__link--active {
+    border-block-end-color: var(--navy-800);
+  }
+
+  .forms-sidebar__summary {
     display: none;
   }
-}
 
-.forms-sidebar__list--section {
-  margin-block-end: var(--space-lg);
+  .forms-sidebar__icon {
+    margin-block-start: 0;
+  }
 }

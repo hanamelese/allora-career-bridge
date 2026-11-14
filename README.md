@@ -53,3 +53,15 @@ fails with `sms_not_configured` and nothing is reported as sent. To enable
 it, add a provider in `API/src/sms/index.js` and put its credentials in
 `API/.env` (never in the frontend). Set `PUBLIC_APP_URL` to where the
 dashboard is served so links in messages point to it.
+
+## Partner accounts and the Sign up / Sign in form
+
+- **Partner sign-up.** `/` is the public landing page. `/signup` creates a partner organisation (`POST /api/v1/auth/signup`) with its own key pair and one draft of every form, and signs it in. The seed script still creates the demo partner.
+- **Sign up / Sign in form** (`account` type, listed first). It is a component for a partner's own site and does no authentication itself:
+  - Email and password are passed to the host's `onSubmit`.
+  - Each social button (Google, LinkedIn, Facebook, Microsoft, Apple) is a link to an `https` address the partner configures, normally the start of their own OAuth flow.
+  - No OAuth secrets are stored here.
+- **Existing databases** are brought forward at API start:
+  - partners created earlier get the new form;
+  - learner drafts get the identity questions moved to the end, beside the referral step.
+- **Landing image.** `Frontend/src/assets/landing-hero.jpg` is the watermarked Adobe Stock preview (#563796331). License it, or replace the file, before going public.

@@ -1,6 +1,5 @@
-import { useState } from 'react';
 import { Outlet, useLocation } from 'react-router-dom';
-import { LogOut, Menu } from 'lucide-react';
+import { LogOut } from 'lucide-react';
 import { Button } from '../ui/Button.jsx';
 import { LiveRegion } from '../ui/LiveRegion.jsx';
 import { SkipLink } from '../ui/SkipLink.jsx';
@@ -21,7 +20,6 @@ import './AppShell.css';
  */
 export function AppShell() {
   const { partner, signOut } = useAuth();
-  const [isNavOpen, setIsNavOpen] = useState(false);
   const location = useLocation();
 
   // Read the slug from the path rather than useParams: this is the layout
@@ -44,15 +42,6 @@ export function AppShell() {
 
       <header className="app-shell__header">
         <div className="app-shell__brand">
-          <Button
-            className="app-shell__nav-toggle"
-            variant="quiet-inverse"
-            icon={Menu}
-            label={isNavOpen ? 'Hide navigation' : 'Show navigation'}
-            aria-expanded={isNavOpen}
-            aria-controls="forms-navigation"
-            onClick={() => setIsNavOpen((open) => !open)}
-          />
           <div>
             <p className="app-shell__product">Partner Dashboard</p>
             <p className="app-shell__tagline">Accessible Onboarding</p>
@@ -68,11 +57,7 @@ export function AppShell() {
       </header>
 
       <div className="app-shell__body">
-        <FormsSidebar
-          id="forms-navigation"
-          isOpen={isNavOpen}
-          onNavigate={() => setIsNavOpen(false)}
-        />
+        <FormsSidebar id="forms-navigation" />
 
         <main className="app-shell__main" id="main-content" tabIndex={-1}>
           <div className="app-shell__content">
