@@ -19,11 +19,13 @@ html {
    scrollbar, and a 320px floor would then scroll sideways (WCAG 1.4.10). */
 body {
   font-family: var(--font-sans);
-  font-size: var(--font-size-base);
-  line-height: var(--line-height-base);
+  font-size: var(--text-body);
+  line-height: var(--leading-body);
   color: var(--ink);
-  background-color: var(--surface-sunken);
+  background-color: var(--surface-canvas);
+  font-optical-sizing: auto;
   -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
 }
 
 /* Stop media forcing sideways scroll at 320px or at 200% zoom. */
@@ -55,8 +57,9 @@ h1,
 h2,
 h3,
 h4 {
-  line-height: var(--line-height-tight);
+  line-height: var(--leading-title);
   font-weight: var(--font-weight-semibold);
+  letter-spacing: var(--tracking-title);
   text-wrap: balance;
 }
 

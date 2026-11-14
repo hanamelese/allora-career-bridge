@@ -2,13 +2,13 @@ import { BrowserRouter, Navigate, Route, Routes } from 'react-router-dom';
 import { AuthProvider } from './auth/AuthProvider.jsx';
 import { useAuth } from './auth/authContext.js';
 import { AppShell } from './components/shell/AppShell.jsx';
-import { SignInPage } from './pages/SignInPage.jsx';
-import { SignUpPage } from './pages/SignUpPage.jsx';
+import { SignInPage, SignUpPage } from './pages/AuthPage.jsx';
 import { LandingPage } from './pages/LandingPage.jsx';
 import { FormWorkspace } from './pages/FormWorkspace.jsx';
 import { ConfigurePage } from './pages/ConfigurePage.jsx';
 import { PreviewPage } from './pages/PreviewPage.jsx';
 import { PublishPage } from './pages/PublishPage.jsx';
+import { EmbedPage } from './pages/EmbedPage.jsx';
 import { NotFoundPage } from './pages/NotFoundPage.jsx';
 import { OrganisationPage } from './pages/OrganisationPage.jsx';
 import { ReferralPage } from './pages/ReferralPage.jsx';
@@ -44,6 +44,7 @@ function DashboardRoutes() {
           <Route path="configure" element={<ConfigurePage />} />
           <Route path="preview" element={<PreviewPage />} />
           <Route path="publish" element={<PublishPage />} />
+          <Route path="embed" element={<EmbedPage />} />
         </Route>
 
         <Route path="*" element={<NotFoundPage />} />

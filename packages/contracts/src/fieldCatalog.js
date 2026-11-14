@@ -33,22 +33,30 @@ export const IDENTITY_ROUTES = [
     icon: 'file',
     needsNumber: false,
   },
+  /* Retired: "Refer me" and "I have no document" led to the same
+     referral step, so they are one option now ("I have no document, refer
+     me"). Kept here only so versions published before the merge still
+     render; it is never offered again and a draft may not use it. */
   {
     key: 'partner_referral',
     label: { en: 'Refer me through a partner', am: 'በአጋር ድርጅት በኩል ይላኩኝ' },
     simpleLabel: { en: 'A partner helps me', am: 'አጋር ድርጅት ይርዳኝ' },
     icon: 'handshake',
     needsNumber: false,
+    retired: true,
   },
   {
     key: 'no_document',
-    label: { en: 'I have no document', am: 'ምንም ሰነድ የለኝም' },
-    simpleLabel: { en: 'I have no papers', am: 'ምንም ወረቀት የለኝም' },
+    label: { en: 'I have no document, refer me', am: 'ምንም ሰነድ የለኝም፤ ወደ አጋር ድርጅት ይላኩኝ' },
+    simpleLabel: { en: 'I have no papers, help me', am: 'ምንም ወረቀት የለኝም፤ እርዱኝ' },
     icon: 'no-document',
     needsNumber: false,
     alwaysAvailable: true,
   },
 ];
+
+/** The identity routes a form can offer today (the retired one left out). */
+export const OFFERED_IDENTITY_ROUTES = IDENTITY_ROUTES.filter((route) => !route.retired);
 
 export const LEVEL_OPTIONS = [
   {
@@ -193,7 +201,9 @@ export const fieldCatalog = {
     simpleLabel: { en: 'Your name', am: 'ስምዎ' },
     icon: 'user',
     autocomplete: 'name',
-    rules: { minLength: 1, maxLength: 100 },
+    /* Two letters at least, counted after trimming, so a stray letter or
+       a few spaces cannot pass as a name. */
+    rules: { minLength: 2, maxLength: 100 },
     sensitive: false,
     private: false,
     voiceInput: true,
@@ -223,6 +233,51 @@ export const fieldCatalog = {
     sensitive: true,
     private: false,
     voiceInput: true,
+    needsReview: true,
+  },
+  /* ----- Uploads -----
+     A file the learner picks is checked in the browser against the
+     partner's restrictions and handed, with the other answers, to the
+     partner's website. It is never stored by this system. Speaking an
+     answer makes no sense for a file, so voice is off. */
+  identityDocumentFile: {
+    key: 'identityDocumentFile',
+    type: 'file',
+    label: { en: 'Upload your document', am: 'ሰነድዎን ይጫኑ' },
+    simpleLabel: { en: 'A photo of your paper', am: 'የወረቀትዎ ፎቶ' },
+    helpText: {
+      en: 'A photo or scan of the document you chose. Any document you have is fine. If you do not have it with you, you can skip this.',
+      am: 'የመረጡት ሰነድ ፎቶ ወይም ስካን። ያለዎት ማንኛውም ሰነድ ይበቃል። አሁን ከእርስዎ ጋር ከሌለ ይህን መዝለል ይችላሉ።',
+    },
+    notice: {
+      en: 'Private. The file is sent to the organisation only when you send the form, and is not shared with employers.',
+      am: 'የግል። ፋይሉ የሚላከው ቅጹን ሲልኩ ለድርጅቱ ብቻ ነው፤ ለአሠሪዎች አይጋራም።',
+    },
+    icon: 'file',
+    upload: { maxSizeMb: 10, accept: ['pdf', 'jpg', 'png'] },
+    uploadEditable: true,
+    skippable: true,
+    sensitive: true,
+    private: true,
+    voiceInput: false,
+    needsReview: true,
+  },
+  cvFile: {
+    key: 'cvFile',
+    type: 'file',
+    label: { en: 'Your CV or résumé', am: 'የሕይወት ታሪክዎ (CV)' },
+    simpleLabel: { en: 'A paper about your work', am: 'ስለ ሥራዎ የሚገልጽ ወረቀት' },
+    helpText: {
+      en: 'If you have a CV, you can add it here. It is sent to the organisation with your application.',
+      am: 'CV ካለዎት እዚህ ማከል ይችላሉ። ከማመልከቻዎ ጋር ለድርጅቱ ይላካል።',
+    },
+    icon: 'file',
+    upload: { maxSizeMb: 10, accept: ['pdf', 'docx'] },
+    uploadEditable: true,
+    skippable: true,
+    sensitive: true,
+    private: false,
+    voiceInput: false,
     needsReview: true,
   },
   documentId: {
@@ -266,6 +321,7 @@ export const fieldCatalog = {
   },
   supportNeeds: {
     key: 'supportNeeds',
+    section: 'support',
     type: 'multiChoice',
     label: { en: 'What support do you need?', am: 'ምን ድጋፍ ይፈልጋሉ?' },
     simpleLabel: { en: 'What help do you want?', am: 'ምን እርዳታ ይፈልጋሉ?' },
@@ -385,21 +441,21 @@ export const fieldCatalog = {
   },
 
   // ----- Referral (learners with no identity document) -----
-  /* Asked last, and only of a learner who has no document or asked to be
-     referred. Its options are the partner's registered referral partners,
+  /* Asked last, and only of a learner who chose "I have no document,
+     refer me". Its options are the partner's registered referral partners,
      which the host supplies at run time - they are not part of the form
      configuration. The answer is the list of partner ids chosen. */
   referral: {
     key: 'referral',
     type: 'referral',
     label: {
-      en: 'Ask a partner organisation to help you register',
-      am: 'እንዲመዘገቡ እንዲረዳዎ አጋር ድርጅት ይጠይቁ',
+      en: 'Ask a partner organisation to help you',
+      am: 'እንዲረዳዎ አጋር ድርጅት ይጠይቁ',
     },
     simpleLabel: { en: 'Who can help you?', am: 'ማን ሊረዳዎት ይችላል?' },
     helpText: {
-      en: 'You told us you have no identity document. Choose one or more organisations, and we will send them a text message with your name and a link, so they can help you finish registering.',
-      am: 'የመታወቂያ ሰነድ እንደሌለዎት ነግረውናል። አንድ ወይም ከዚያ በላይ ድርጅት ይምረጡ፤ ምዝገባዎን እንዲጨርሱ እንዲረዱዎት ስምዎንና ማስፈንጠሪያ የያዘ የጽሑፍ መልዕክት እንልክላቸዋለን።',
+      en: 'You told us you have no identity document. Choose one or more organisations, and we will send them a text message with your name and a link, so they can help you finish registering or applying.',
+      am: 'የመታወቂያ ሰነድ እንደሌለዎት ነግረውናል። አንድ ወይም ከዚያ በላይ ድርጅት ይምረጡ፤ ምዝገባዎን ወይም ማመልከቻዎን እንዲጨርሱ እንዲረዱዎት ስምዎንና ማስፈንጠሪያ የያዘ የጽሑፍ መልዕክት እንልክላቸዋለን።',
     },
     notice: {
       en: 'Nothing is sent until you check the message and agree. Only your name and phone number are shared.',
@@ -457,6 +513,7 @@ export const fieldCatalog = {
   },
   supportNote: {
     key: 'supportNote',
+    section: 'support',
     type: 'longText',
     label: { en: 'Anything else you want to tell us about the support you need', am: 'ስለሚፈልጉት ድጋፍ ሌላ ማከል የሚፈልጉት ነገር' },
     simpleLabel: { en: 'Tell us what helps you', am: 'ምን እንደሚረዳዎት ይንገሩን' },
@@ -535,8 +592,9 @@ export const fieldCatalog = {
   interviewAccommodations: {
     key: 'interviewAccommodations',
     type: 'multiChoice',
-    label: { en: 'What would help you at the interview?', am: 'በቃለ መጠይቁ ወቅት ምን ይረዳዎታል?' },
-    simpleLabel: { en: 'What helps you at the interview?', am: 'በቃለ መጠይቁ ምን ይረዳዎታል?' },
+    label: { en: 'What would help you at this job?', am: 'በዚህ ሥራ ላይ ምን ይረዳዎታል?' },
+    simpleLabel: { en: 'What helps you at this job?', am: 'በዚህ ሥራ ምን ይረዳዎታል?' },
+    section: 'support',
     notice: {
       en: 'This is private. You do not need to name a disability or show medical proof, and the employer is not told why you asked.',
       am: 'ይህ በግል ይቀመጣል። የአካል ጉዳት መጥቀስ ወይም የሕክምና ማስረጃ ማሳየት አያስፈልግዎትም፤ ለምን እንደጠየቁም ለአሠሪው አይነገርም።',

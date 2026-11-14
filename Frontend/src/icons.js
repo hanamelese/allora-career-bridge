@@ -1,3 +1,4 @@
+import { createElement } from 'react';
 import {
   Accessibility,
   Armchair,
@@ -101,4 +102,10 @@ const ICONS = {
 /** Returns a component for a catalogue icon name, or a neutral fallback. */
 export function getIcon(name) {
   return ICONS[name] ?? CircleHelp;
+}
+
+/* The form engine names icons as strings so it needs no icon library of
+   its own; the dashboard supplies the components through this. */
+export function renderIcon(name) {
+  return createElement(getIcon(name));
 }

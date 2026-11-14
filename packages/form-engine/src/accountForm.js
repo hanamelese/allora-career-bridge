@@ -1,12 +1,11 @@
 /**
  * The Sign up / Sign in form, without any rendering.
  *
- * Unlike the other forms it is one screen, not one question per screen:
- * that is what people expect of a sign-in, and what assistive technology
- * users already know how to move through. The questions, wording and
- * checks still come from the same catalogue and schema as every other
- * form, so a partner's reworded label shows here exactly as it would
- * anywhere else.
+ * Like every other form it asks one thing per screen: first the social
+ * sign-in choices (when the partner switched any on), then each input on
+ * its own screen with Back and Next. The questions, wording and checks
+ * come from the same catalogue and schema as every other form, so a
+ * partner's reworded label shows here exactly as it would anywhere else.
  */
 
 import { fieldCatalog } from '@onboarding/contracts/fieldCatalog.js';
@@ -25,6 +24,13 @@ export const ACCOUNT_COPY = {
     or: 'or',
     orLong: (mode) => `Or ${mode === 'signIn' ? 'sign in' : 'sign up'} with your email address`,
     showPassword: 'Show password',
+    next: 'Next',
+    back: 'Back',
+    sending: 'Please wait…',
+    progress: (position, total) => `Step ${position} of ${total}`,
+    socialHeading: (mode) => `${mode === 'signIn' ? 'Sign in' : 'Sign up'} with another account`,
+    socialNext: (mode) => `To ${mode === 'signIn' ? 'sign in' : 'sign up'} with your email address instead, choose Next.`,
+    hostFailed: 'That did not work. Please try again.',
     submitSignUp: 'Create account',
     submitSignIn: 'Sign in',
     toSignIn: 'Already have an account? Sign in',
@@ -33,6 +39,9 @@ export const ACCOUNT_COPY = {
       count === 1 ? 'There is 1 problem to fix before you continue.' : `There are ${count} problems to fix before you continue.`,
     errors: {
       nameEmpty: 'Enter your full name.',
+      nameShort: 'Write your full name. It needs at least 2 letters.',
+      answerEmpty: 'Please answer this before moving on.',
+      answerShort: 'Use at least 2 letters.',
       emailEmpty: 'Enter your email address.',
       emailInvalid: 'Enter an email address, like name@example.com.',
       passwordEmpty: 'Enter your password.',
@@ -52,6 +61,13 @@ export const ACCOUNT_COPY = {
     or: 'ወይም',
     orLong: (mode) => `ወይም በኢሜይል አድራሻዎ ${mode === 'signIn' ? 'ይግቡ' : 'ይመዝገቡ'}`,
     showPassword: 'የይለፍ ቃሉን አሳይ',
+    next: 'ቀጣይ',
+    back: 'ተመለስ',
+    sending: 'እባክዎ ይጠብቁ…',
+    progress: (position, total) => `ደረጃ ${position} ከ${total}`,
+    socialHeading: (mode) => `በሌላ መለያ ${mode === 'signIn' ? 'ይግቡ' : 'ይመዝገቡ'}`,
+    socialNext: (mode) => `በምትኩ በኢሜይል አድራሻዎ ${mode === 'signIn' ? 'ለመግባት' : 'ለመመዝገብ'} ቀጣይን ይምረጡ።`,
+    hostFailed: 'አልተሳካም። እባክዎ እንደገና ይሞክሩ።',
     submitSignUp: 'መለያ ፍጠር',
     submitSignIn: 'ግባ',
     toSignIn: 'መለያ አለዎት? ይግቡ',
@@ -59,6 +75,9 @@ export const ACCOUNT_COPY = {
     errorSummary: (count) => `ከመቀጠልዎ በፊት መስተካከል ያለባቸው ${count} ችግሮች አሉ።`,
     errors: {
       nameEmpty: 'ሙሉ ስምዎን ያስገቡ።',
+      nameShort: 'ሙሉ ስምዎን ይጻፉ። ቢያንስ 2 ፊደላት ያስፈልጋሉ።',
+      answerEmpty: 'ከመቀጠልዎ በፊት እባክዎ ይህን ይመልሱ።',
+      answerShort: 'ቢያንስ 2 ፊደላት ይጠቀሙ።',
       emailEmpty: 'የኢሜይል አድራሻዎን ያስገቡ።',
       emailInvalid: 'እንደ name@example.com ያለ የኢሜይል አድራሻ ያስገቡ።',
       passwordEmpty: 'የይለፍ ቃልዎን ያስገቡ።',
@@ -139,6 +158,9 @@ export function validateAccount(config, answers, { language = 'en', labels = {} 
   if (result.success) return { valid: true, data: result.data };
 
   const errors = {};
+  /* A partner who renamed the name question ("Organisation name") gets
+     wording that does not talk about a person's name. */
+  const nameRenamed = Boolean(config.fields.find((field) => field.key === 'name')?.label);
 
   for (const issue of result.error.issues) {
     const key = issue.path[0];
@@ -147,7 +169,13 @@ export function validateAccount(config, answers, { language = 'en', labels = {} 
     const empty = cleaned[key] === undefined;
     const message =
       key === 'name'
-        ? copy.nameEmpty
+        ? empty
+          ? nameRenamed
+            ? copy.answerEmpty
+            : copy.nameEmpty
+          : nameRenamed
+            ? copy.answerShort
+            : copy.nameShort
         : key === 'email'
           ? empty
             ? copy.emailEmpty
@@ -166,4 +194,14 @@ export function validateAccount(config, answers, { language = 'en', labels = {} 
   for (const key of enabledKeys) if (errors[key]) ordered[key] = errors[key];
 
   return { valid: false, errors: ordered };
+}
+
+/**
+ * Checks one screen's answer - what Next needs before it moves on.
+ * Returns the message for that question, or null when it is fine. The
+ * wording is exactly what the full check gives for the same answer.
+ */
+export function validateAccountField(config, key, answers, options = {}) {
+  const result = validateAccount(config, answers, options);
+  return result.valid ? null : (result.errors[key] ?? null);
 }

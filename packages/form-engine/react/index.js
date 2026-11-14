@@ -19,6 +19,7 @@ export {
   stopSpeaking,
 } from './speech.js';
 export { AccountForm } from './AccountForm.jsx';
+export { clearProgress, progressKeyFor } from './progressStore.js';
 export { FormSettings } from './FormSettings.jsx';
 export { BrandIcon } from './brandIcons.jsx';
 export { useLearnerPreferences, CONTRAST_LEVELS, TEXT_SIZES } from './learnerPreferences.js';

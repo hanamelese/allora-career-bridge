@@ -1,8 +1,9 @@
 /* The public front page. Uses the dashboard's design tokens throughout. */
 
 .landing {
-  --landing-blue: #3f5bd9;
-  --landing-blue-soft: #e9edff;
+  /* The landing page's own names, pointing at the shared tokens. */
+  --landing-blue: var(--highlight);
+  --landing-blue-soft: var(--highlight-surface);
   --landing-max: 72rem;
 
   min-height: 100vh;
@@ -16,18 +17,18 @@
 }
 
 .landing h2 {
-  font-size: clamp(1.5rem, 1.1rem + 1.6vw, 2.25rem);
-  line-height: 1.2;
-  letter-spacing: -0.01em;
+  font-size: var(--text-headline);
+  line-height: var(--leading-title);
+  letter-spacing: var(--tracking-title);
 }
 
 .landing h3 {
-  font-size: var(--font-size-md);
-  line-height: var(--line-height-tight);
+  font-size: var(--text-card-title);
+  line-height: var(--leading-title);
 }
 
 .landing p {
-  line-height: var(--line-height-relaxed);
+  line-height: var(--leading-body);
 }
 
 /* ---- Header ---- */
@@ -35,9 +36,26 @@
   position: sticky;
   inset-block-start: 0;
   z-index: 10;
-  background-color: rgb(255 255 255 / 0.92);
-  backdrop-filter: blur(8px);
-  border-block-end: 1px solid var(--border-subtle);
+  /* Frosted glass, like the dashboard's bar. */
+  background-color: var(--surface-glass);
+  backdrop-filter: saturate(180%) blur(14px);
+  -webkit-backdrop-filter: saturate(180%) blur(14px);
+  border-block-end: 1px solid var(--border-glass);
+  box-shadow: var(--shadow-glass);
+}
+
+@media (prefers-reduced-transparency: reduce) {
+  .landing__header {
+    background-color: var(--surface);
+    backdrop-filter: none;
+    -webkit-backdrop-filter: none;
+  }
+}
+
+@supports not ((backdrop-filter: blur(1px)) or (-webkit-backdrop-filter: blur(1px))) {
+  .landing__header {
+    background-color: var(--surface);
+  }
 }
 
 .landing__bar {
@@ -134,8 +152,10 @@
 }
 
 .landing__title {
-  font-size: clamp(2.125rem, 1.4rem + 3vw, 3.5rem);
-  line-height: 1.08;
+  font-size: var(--text-display);
+  font-weight: var(--font-weight-bold);
+  line-height: var(--leading-display);
+  letter-spacing: var(--tracking-display);
   letter-spacing: -0.02em;
   isolation: isolate;
 }
@@ -487,7 +507,7 @@
   color: #e2e8f0;
   font-family: var(--font-mono);
   font-size: var(--font-size-sm);
-  line-height: 1.7;
+  line-height: var(--leading-body);
 }
 
 .landing__code:focus-visible {
@@ -541,9 +561,21 @@
   font-size: var(--font-size-sm);
 }
 
-.landing__footer a {
+.landing__footer a,
+.landing__text-button {
   color: var(--ink);
   font-weight: var(--font-weight-semibold);
+}
+
+/* A button that reads as a link: it opens the sign-in popup. */
+.landing__text-button {
+  padding: 0;
+  border: 0;
+  background: none;
+  font: inherit;
+  font-weight: var(--font-weight-semibold);
+  text-decoration: underline;
+  cursor: pointer;
 }
 
 /* ---- Narrower screens, and 200% zoom ---- */

@@ -3,6 +3,7 @@ import { ChoiceAnswer } from './ChoiceAnswer.jsx';
 import { MultiChoiceAnswer } from './MultiChoiceAnswer.jsx';
 import { ConsentAnswer } from './ConsentAnswer.jsx';
 import { ReferralAnswer } from './ReferralAnswer.jsx';
+import { FileAnswer } from './FileAnswer.jsx';
 
 /**
  * Which component answers which kind of question.
@@ -22,6 +23,7 @@ const FIELD_COMPONENTS = {
   multiChoice: MultiChoiceAnswer,
   consent: ConsentAnswer,
   referral: ReferralAnswer,
+  file: FileAnswer,
 };
 
 export function getFieldComponent(type) {

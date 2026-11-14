@@ -10,6 +10,7 @@
  * dashboard preview and the embedded form can never word it differently.
  */
 
+import { formatFileSize, isFileLike, resolveUploadRules } from '@onboarding/contracts/uploads.js';
 import { getCatalogItems } from '@onboarding/contracts/optionCatalogs.js';
 
 export const DEFAULT_ACCESSIBILITY_SETTINGS = {
@@ -156,6 +157,11 @@ export function getQuestionContent(question, settings = {}, config = null) {
     rules: question.rules ?? null,
     options: resolveOptions(question, accessibility, config),
     isPrivate: question.visibility === 'private' || question.private === true,
+    /* 'support' groups the private support and accommodation questions in
+       a section of their own, on screen and on the review. */
+    section: question.section ?? null,
+    /* The size and kinds of file allowed, for an upload question. */
+    upload: question.type === 'file' ? resolveUploadRules(question.upload) : null,
     icon: question.icon ?? null,
     language,
     lowLiteracy,
@@ -185,6 +191,11 @@ export function formatAnswerText(question, value, language = 'en') {
 
   if (isEmpty) {
     return notAnswered[language] ?? notAnswered.en;
+  }
+
+  /* A file is described, never opened. */
+  if (question.type === 'file') {
+    return isFileLike(value) ? `${value.name} (${formatFileSize(value.size)})` : notAnswered[language] ?? notAnswered.en;
   }
 
   /* A password is never shown back or spoken aloud. */

@@ -198,3 +198,38 @@ describe('Partner-safe answers', () => {
     expect(safeAnswers).not.toHaveProperty('identityNumber');
   });
 });
+
+describe('Full name', () => {
+  const config = {
+    fields: [
+      { key: 'name', enabled: true, required: true },
+      { key: 'location', enabled: true, required: false },
+    ],
+    identityRoutes: ['no_document'],
+    customFields: [],
+  };
+  const schema = buildSubmissionSchema(config);
+
+  it('needs at least two letters', () => {
+    expect(schema.safeParse({ name: 'A' }).success).toBe(false);
+    expect(schema.safeParse({ name: 'Al' }).success).toBe(true);
+  });
+
+  it('trims before measuring, so spaces cannot pad it out', () => {
+    expect(schema.safeParse({ name: '   ' }).success).toBe(false);
+    expect(schema.safeParse({ name: ' A ' }).success).toBe(false);
+    expect(schema.safeParse({ name: '  Abebe Kebede  ' }).data).toEqual({ name: 'Abebe Kebede' });
+  });
+
+  it('reports a name of spaces as missing, and a one-letter name as too short', () => {
+    const blank = schema.safeParse({ name: '   ' });
+    const short = schema.safeParse({ name: 'A' });
+
+    expect(blank.error.issues[0]).toMatchObject({ code: 'custom', path: ['name'] });
+    expect(short.error.issues[0]).toMatchObject({ code: 'too_small', path: ['name'] });
+  });
+
+  it('treats an optional question answered with spaces as unanswered', () => {
+    expect(schema.safeParse({ name: 'Abebe', location: '   ' }).success).toBe(true);
+  });
+});

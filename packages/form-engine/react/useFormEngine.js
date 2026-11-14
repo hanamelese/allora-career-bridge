@@ -1,6 +1,7 @@
-import { useCallback, useMemo, useReducer, useRef, useState } from 'react';
+import { useCallback, useEffect, useMemo, useReducer, useRef, useState } from 'react';
 import { createFormEngine } from '../src/formEngine.js';
 import { formatAnswerText } from '../src/accessibility.js';
+import { canSave, clearProgress, loadProgress, saveProgress } from './progressStore.js';
 
 /**
  * React binding for the headless form engine.
@@ -14,18 +15,25 @@ import { formatAnswerText } from '../src/accessibility.js';
  * embedded form will use exactly this hook. That is what makes "the
  * preview is what the learner sees" true rather than a promise.
  */
-export function useFormEngine(config, settings = {}, { onSubmit } = {}) {
+export function useFormEngine(config, settings = {}, { onSubmit, progressKey = null } = {}) {
   /* Read-aloud and voice input are always on. Only the language and the
      learner's own choice of simple words vary. */
   const { language = 'en', lowLiteracy = false, referralPartners } = settings;
   const readAloud = true;
   const voiceInput = true;
 
-  const answersRef = useRef({});
-  const currentKeyRef = useRef(null);
+  /* What this tab remembered from before a reload, read once. */
+  const [restored, setRestored] = useState(() => loadProgress(progressKey, config));
+  const [canRemember] = useState(() => Boolean(progressKey) && canSave());
+  const [hasSaved, setHasSaved] = useState(false);
+  /* Bumped by "Start over", which builds a fresh engine. */
+  const [generation, restart] = useReducer((count) => count + 1, 0);
+
+  const answersRef = useRef(restored?.answers ?? {});
+  const currentKeyRef = useRef(restored?.currentKey ?? null);
   const [revision, bump] = useReducer((count) => count + 1, 0);
 
-  const [isReviewing, setIsReviewing] = useState(false);
+  const [isReviewing, setIsReviewing] = useState(restored?.isReviewing === true);
   const [isSubmitted, setIsSubmitted] = useState(false);
   const [error, setError] = useState(null);
 
@@ -50,7 +58,8 @@ export function useFormEngine(config, settings = {}, { onSubmit } = {}) {
     }
 
     return next;
-  }, [config, language, lowLiteracy, readAloud, voiceInput, referralPartners]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps -- `generation` forces a fresh engine
+  }, [config, language, lowLiteracy, readAloud, voiceInput, referralPartners, generation]);
 
   /** Record where we are and redraw. */
   const sync = useCallback(() => {
@@ -163,10 +172,45 @@ export function useFormEngine(config, settings = {}, { onSubmit } = {}) {
     }
 
     setIsSubmitted(true);
+    /* Sent: nothing is left behind in the browser. */
+    clearProgress(progressKey);
     onSubmit?.(result.data);
 
     return result;
-  }, [engine, sync, onSubmit]);
+  }, [engine, sync, onSubmit, progressKey]);
+
+  /* Remember the learner's place after every answer and every move. Only
+     what may be kept is written (see progressStore.js). */
+  useEffect(() => {
+    if (!canRemember || isSubmitted) return;
+    if (revision === 0 && !isReviewing) return;
+
+    saveProgress(progressKey, config, {
+      answers: answersRef.current,
+      currentKey: currentKeyRef.current,
+      isReviewing,
+    });
+    setHasSaved(true);
+  }, [canRemember, isSubmitted, revision, isReviewing, progressKey, config]);
+
+  /** Forget everything and begin again at the first question. */
+  const startOver = useCallback(() => {
+    clearProgress(progressKey);
+    answersRef.current = {};
+    currentKeyRef.current = null;
+    setIsReviewing(false);
+    setError(null);
+    setRestored(null);
+    setHasSaved(false);
+    restart();
+  }, [progressKey]);
+
+  /* The questions whose answers were not kept, as the learner knows them. */
+  const notKept = useMemo(() => {
+    if (!restored?.notKept?.length) return [];
+    const labels = new Map(engine.getVisibleQuestions().map((item) => [item.key, item.label]));
+    return restored.notKept.map((key) => labels.get(key)).filter(Boolean);
+  }, [restored, engine]);
 
   /** Every question and its answer, for the review step. */
   const reviewItems = useMemo(() => {
@@ -178,6 +222,7 @@ export function useFormEngine(config, settings = {}, { onSubmit } = {}) {
       key: item.key,
       label: item.label,
       isPrivate: item.isPrivate,
+      section: item.section,
       answerText: formatAnswerText(item, answers[item.key], language),
     }));
     /* `revision` is bumped by every answer and every move, and the engine
@@ -193,6 +238,13 @@ export function useFormEngine(config, settings = {}, { onSubmit } = {}) {
   return {
     question,
     progress: status.progress,
+    /* Saving in this tab: whether it can, whether it has, and what came
+       back after a reload. */
+    canRemember,
+    hasSaved,
+    wasRestored: Boolean(restored) && Object.keys(restored.answers).length + restored.notKept.length > 0,
+    notKept,
+    startOver,
     isFirst: status.isFirst,
     isLast: status.isLast,
     isReviewing,

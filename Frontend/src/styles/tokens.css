@@ -41,7 +41,15 @@
   --amber-800: #8a5300;
   --amber-050: #fef6e7;
 
+  --indigo-600: #3f5bd9;
+  --indigo-050: #eef1ff;
+
   /* ---------- Semantic: surfaces ---------- */
+  --surface-canvas: #f5f7fb;
+  /* The frosted navigation bars: mostly white, so text keeps its contrast
+     whatever scrolls underneath. */
+  --surface-glass: rgb(255 255 255 / 0.8);
+  --border-glass: rgb(15 23 42 / 0.08);
   --surface: #ffffff;
   --surface-sunken: var(--slate-050);
   --surface-raised: #ffffff;
@@ -59,6 +67,8 @@
   --border-subtle: var(--slate-200);
   --border-default: var(--slate-300);
   --border-strong: var(--slate-600);
+  /* Edges of inputs and secondary buttons: 3.7:1 on white (WCAG 1.4.11). */
+  --border-control: #7c8698;
 
   /* ---------- Semantic: intent ---------- */
   --accent: var(--teal-700);
@@ -69,13 +79,18 @@
   --success-surface: var(--green-050);
   --warning: var(--amber-800);
   --warning-surface: var(--amber-050);
+  /* A second, cooler accent for highlights on the landing page. */
+  --highlight: var(--indigo-600);
+  --highlight-surface: var(--indigo-050);
 
   /* ---------- Focus ring (double ring: readable on any background) ---------- */
   --focus-ring-inner: #ffffff;
   --focus-ring-outer: var(--navy-800);
 
   /* ---------- Typography ---------- */
-  --font-sans: ui-sans-serif, system-ui, -apple-system, "Segoe UI", Roboto,
+  /* Inter, served from this site (see main.jsx), for Latin text; Amharic
+     falls through to Noto Sans Ethiopic or the system's Ethiopic font. */
+  --font-sans: "Inter Variable", ui-sans-serif, system-ui, -apple-system, "Segoe UI", Roboto,
     "Noto Sans Ethiopic", "Helvetica Neue", Arial, sans-serif;
   --font-mono: ui-monospace, SFMono-Regular, "SF Mono", Menlo, Consolas,
     "Liberation Mono", monospace;
@@ -87,6 +102,25 @@
   --font-size-lg: 1.25rem;
   --font-size-xl: 1.5rem;
   --font-size-2xl: 1.875rem;
+
+  /* The type scale, by role. Components use these names, so a page title
+     is the same size on every page. */
+  --text-display: clamp(2.25rem, 1.55rem + 2.4vw, 3.25rem);
+  --text-headline: clamp(1.625rem, 1.3rem + 1.1vw, 2.125rem);
+  --text-page-title: 1.75rem;
+  --text-section-title: 1.25rem;
+  --text-card-title: 1.0625rem;
+  --text-body: 1rem;
+  --text-body-sm: 0.9375rem;
+  --text-label: 0.9375rem;
+  --text-caption: 0.8125rem;
+
+  --leading-display: 1.1;
+  --leading-title: 1.25;
+  --leading-body: 1.6;
+
+  --tracking-display: -0.025em;
+  --tracking-title: -0.015em;
 
   --font-weight-regular: 400;
   --font-weight-medium: 500;
@@ -114,6 +148,7 @@
   --radius-lg: 12px;
   --radius-xl: 16px;
   --radius-pill: 999px;
+  --radius-card: 14px;
 
   /* ---------- Elevation ---------- */
   --shadow-sm: 0 1px 2px rgba(15, 23, 42, 0.06),
@@ -122,6 +157,10 @@
     0 4px 12px rgba(15, 23, 42, 0.07);
   --shadow-lg: 0 8px 24px rgba(15, 23, 42, 0.1),
     0 2px 6px rgba(15, 23, 42, 0.05);
+  /* A card sits just above the page: a hairline and a soft, low shadow. */
+  --shadow-card: 0 1px 2px rgb(15 23 42 / 0.04), 0 8px 24px -12px rgb(15 23 42 / 0.12);
+  --shadow-card-raised: 0 1px 2px rgb(15 23 42 / 0.05), 0 14px 32px -14px rgb(15 23 42 / 0.2);
+  --shadow-glass: 0 1px 0 rgb(255 255 255 / 0.7) inset, 0 10px 30px -18px rgb(15 23 42 / 0.25);
 
   /* ---------- Targets and motion ---------- */
   --target-min-size: 48px;

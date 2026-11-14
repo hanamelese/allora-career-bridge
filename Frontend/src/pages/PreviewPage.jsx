@@ -2,10 +2,9 @@ import { useOutletContext } from 'react-router-dom';
 import { Card } from '../components/ui/Card.jsx';
 import { SectionHeading } from '../components/ui/SectionHeading.jsx';
 import { PreviewPane } from '../components/preview/PreviewPane.jsx';
-import { EmbedTagBox } from '../components/preview/EmbedTagBox.jsx';
 
 /**
- * What the learner will see, and the tag that puts it on a partner's site.
+ * What the learner will see.
  */
 export function PreviewPage() {
   const { form, formType, configState } = useOutletContext();
@@ -19,7 +18,7 @@ export function PreviewPage() {
           title="Live preview"
           description={
             config.type === 'account'
-              ? `This is ${formType.name} exactly as people on your site will meet it: one screen, every option reachable by keyboard and named for screen readers. It updates as you change the settings.`
+              ? `This is ${formType.name} exactly as people on your site will meet it: the social sign-in choices first, then one question per screen, every option reachable by keyboard and named for screen readers. It updates as you change the settings.`
               : `This is ${formType.name} exactly as a learner meets it: one question per screen, with a chance to check every answer before sending. It updates as you change the settings.`
           }
         />
@@ -27,20 +26,6 @@ export function PreviewPage() {
         <PreviewPane config={config} formId={form.formId} />
       </Card>
 
-      <Card as="section" aria-labelledby="embed-heading">
-        <SectionHeading
-          id="embed-heading"
-          title="Embed tag"
-          description="Paste this into your website where the form should appear."
-        />
-
-        <EmbedTagBox
-          formId={form.formId}
-          formVersion={form.currentVersion}
-          language={config.defaultLanguage}
-          publicKey={form.publicKey}
-        />
-      </Card>
     </div>
   );
 }

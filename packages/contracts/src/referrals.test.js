@@ -12,16 +12,16 @@ import {
 const referralField = FORM_TEMPLATES.signup.fields.find((field) => field.key === 'referral');
 
 describe('the referral step', () => {
-  it('comes last, after consent', () => {
+  it('comes last, right after the identity question', () => {
     const keys = FORM_TEMPLATES.signup.fields.map((field) => field.key);
 
     expect(keys.at(-1)).toBe('referral');
-    expect(keys.indexOf('consent')).toBeLessThan(keys.indexOf('referral'));
+    expect(keys.indexOf('identityRoute')).toBeLessThan(keys.indexOf('referral'));
   });
 
-  it('is only asked of a learner with no document, or who asked to be referred', () => {
+  it('is only asked of a learner who chose "I have no document, refer me"', () => {
     expect(isFieldVisible(referralField, { identityRoute: 'no_document' })).toBe(true);
-    expect(isFieldVisible(referralField, { identityRoute: 'partner_referral' })).toBe(true);
+    expect(isFieldVisible(referralField, { identityRoute: 'partner_referral' })).toBe(false);
     expect(isFieldVisible(referralField, { identityRoute: 'passport' })).toBe(false);
     expect(isFieldVisible(referralField, {})).toBe(false);
   });
@@ -32,7 +32,7 @@ describe('the referral step', () => {
 
   it('accepts the chosen partner ids as the answer', () => {
     const schema = buildSubmissionSchema(FORM_TEMPLATES.signup);
-    const answers = { name: 'Abebe', phone: '0911234567', identityRoute: 'no_document', currentLevel: 'beginner', consent: true };
+    const answers = { name: 'Abebe', phone: '0911234567', identityRoute: 'no_document', currentLevel: 'beginner' };
 
     expect(schema.safeParse({ ...answers, referral: ['rp_1', 'rp_2'] }).success).toBe(true);
     expect(schema.safeParse({ ...answers, referral: ['rp_1', 'rp_1'] }).success).toBe(false);

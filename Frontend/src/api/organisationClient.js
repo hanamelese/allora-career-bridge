@@ -26,3 +26,22 @@ export function updateReferralPartner(id, details) {
 export function removeReferralPartner(id) {
   return apiFetch(`${BASE}/${encodeURIComponent(id)}`, { method: 'DELETE' });
 }
+
+/*
+ *   listAllowedOrigins()     GET    /api/v1/organisation/allowed-origins
+ *   addAllowedOrigin(origin) POST   /api/v1/organisation/allowed-origins
+ *   removeAllowedOrigin(id)  DELETE /api/v1/organisation/allowed-origins/:id
+ */
+const ORIGINS = '/organisation/allowed-origins';
+
+export function listAllowedOrigins() {
+  return apiFetch(ORIGINS);
+}
+
+export function addAllowedOrigin(origin) {
+  return apiFetch(ORIGINS, { method: 'POST', body: { origin } });
+}
+
+export function removeAllowedOrigin(id) {
+  return apiFetch(`${ORIGINS}/${encodeURIComponent(id)}`, { method: 'DELETE' });
+}

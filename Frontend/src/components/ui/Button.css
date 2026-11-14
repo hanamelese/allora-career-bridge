@@ -6,7 +6,8 @@
   border-radius: var(--radius-md);
   border: 1px solid transparent;
   font-weight: var(--font-weight-semibold);
-  font-size: var(--font-size-sm);
+  font-size: var(--text-body-sm);
+  letter-spacing: -0.005em;
   text-decoration: none;
   white-space: nowrap;
   transition: background-color var(--transition-fast),
@@ -39,6 +40,7 @@
 .button--primary {
   background-color: var(--navy-800);
   color: var(--ink-inverse);
+  box-shadow: 0 1px 2px rgb(0 26 53 / 0.2), 0 4px 12px -6px rgb(0 26 53 / 0.45);
 }
 
 .button--primary:hover:not(:disabled) {
@@ -47,8 +49,9 @@
 
 .button--secondary {
   background-color: var(--surface);
-  border-color: var(--border-default);
+  border-color: var(--border-control);
   color: var(--ink);
+  box-shadow: 0 1px 2px rgb(15 23 42 / 0.05);
 }
 
 .button--secondary:hover:not(:disabled) {

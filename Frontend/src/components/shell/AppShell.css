@@ -15,8 +15,48 @@
   gap: var(--space-md);
   min-height: var(--header-height);
   padding-inline: var(--space-lg);
-  background-color: var(--surface-inverse);
+  /* Frosted glass: the page shows through softly as it scrolls under. */
+  background-color: var(--surface-glass);
+  backdrop-filter: saturate(180%) blur(14px);
+  -webkit-backdrop-filter: saturate(180%) blur(14px);
+  border-block-end: 1px solid var(--border-glass);
+  box-shadow: var(--shadow-glass);
+  color: var(--ink);
+}
+
+.app-shell__logo {
+  display: grid;
+  place-items: center;
+  width: 2.25rem;
+  height: 2.25rem;
+  flex-shrink: 0;
+  border-radius: 10px;
+  background: linear-gradient(135deg, var(--navy-800), var(--teal-700));
   color: var(--ink-inverse);
+  font-size: var(--text-caption);
+  font-weight: var(--font-weight-bold);
+  letter-spacing: 0.02em;
+}
+
+/* Solid where see-through is unwanted or unsupported. */
+@media (prefers-reduced-transparency: reduce) {
+  .app-shell__header {
+    background-color: var(--surface);
+    backdrop-filter: none;
+    -webkit-backdrop-filter: none;
+  }
+}
+
+@supports not ((backdrop-filter: blur(1px)) or (-webkit-backdrop-filter: blur(1px))) {
+  .app-shell__header {
+    background-color: var(--surface);
+  }
+}
+
+@media (forced-colors: active) {
+  .app-shell__header {
+    border-block-end: 1px solid CanvasText;
+  }
 }
 
 .app-shell__brand {
@@ -27,14 +67,17 @@
 }
 
 .app-shell__product {
-  font-size: var(--font-size-base);
-  font-weight: var(--font-weight-semibold);
+  font-size: var(--text-body);
+  font-weight: var(--font-weight-bold);
+  letter-spacing: var(--tracking-title);
   line-height: var(--line-height-tight);
 }
 
 .app-shell__tagline {
-  font-size: var(--font-size-xs);
-  color: rgba(255, 255, 255, 0.72);
+  font-size: var(--text-caption);
+  /* Secondary, not muted: it must stay readable over whatever dark
+     content scrolls under the glass. */
+  color: var(--ink-secondary);
   line-height: var(--line-height-tight);
 }
 
@@ -46,7 +89,8 @@
 }
 
 .app-shell__org {
-  color: rgba(255, 255, 255, 0.85);
+  color: var(--ink-secondary);
+  font-weight: var(--font-weight-medium);
 }
 
 /* ---- Body ---- */

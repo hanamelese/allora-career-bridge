@@ -5,6 +5,7 @@ import {
   getAccountQuestions,
   getEnabledProviders,
   validateAccount,
+  validateAccountField,
 } from './accountForm.js';
 
 const template = FORM_TEMPLATES.account;
@@ -66,5 +67,25 @@ describe('Sign up / Sign in form', () => {
 
   it('never reads a password back', () => {
     expect(formatAnswerText({ type: 'password' }, 'hunter22')).toBe('Entered (hidden)');
+  });
+});
+
+describe('one screen at a time', () => {
+  it('checks only the question on screen', () => {
+    expect(validateAccountField(template, 'name', { name: 'Abebe' })).toBeNull();
+    expect(validateAccountField(template, 'name', { name: ' A ' })).toBe(
+      'Write your full name. It needs at least 2 letters.',
+    );
+    expect(validateAccountField(template, 'email', { email: 'nope' })).toBe(
+      'Enter an email address, like name@example.com.',
+    );
+    expect(validateAccountField(template, 'email', { email: 'a@example.org' })).toBeNull();
+    expect(validateAccountField(template, 'password', { password: 'short' })).toBe('Use at least 8 characters.');
+  });
+
+  it('names the question when labels are given, like the full check', () => {
+    expect(
+      validateAccountField(template, 'email', {}, { labels: { email: 'Email address' } }),
+    ).toBe('Email address: Enter your email address.');
   });
 });

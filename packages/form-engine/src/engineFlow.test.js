@@ -32,7 +32,8 @@ describe('conditional questions', () => {
 
     engine.answerQuestion('identityRoute', 'passport');
 
-    expect(engine.getProgress().total).toBe(before + 1);
+    /* The ID number, and the chance to upload the document. */
+    expect(engine.getProgress().total).toBe(before + 2);
   });
 });
 
@@ -62,7 +63,7 @@ describe('question content', () => {
     const question = engine.getCurrentQuestion();
 
     expect(question.label).toBe('Which paper do you have?');
-    expect(question.options.map((option) => option.label)).toContain('I have no papers');
+    expect(question.options.map((option) => option.label)).toContain('I have no papers, help me');
   });
 
   it('offers only the identity documents the partner accepts', () => {
@@ -183,19 +184,32 @@ describe('answers written out for the review step', () => {
 
 describe('plain-language validation', () => {
   it('explains a missing answer in the learner‘s language, naming the question', () => {
-    expect(engineFor('signup', {}, { language: 'en' }).validateAnswer('name')).toBe(
-      'Full name: Please answer this question before moving on.',
+    expect(engineFor('signup', {}, { language: 'en' }).validateAnswer('phone')).toBe(
+      'Phone number: Please answer this question before moving on.',
     );
+    expect(engineFor('signup', {}, { language: 'am' }).validateAnswer('phone')).toMatch(
+      /ከመቀጠልዎ በፊት እባክዎ ይህን ጥያቄ ይመልሱ።$/,
+    );
+  });
+
+  it('asks for a full name of at least two letters, typed or spoken', () => {
+    const expected = 'Full name: Write your full name. It needs at least 2 letters.';
+
+    expect(engineFor('signup', {}).validateAnswer('name')).toBe(expected);
+    expect(engineFor('signup', { name: '    ' }).validateAnswer('name')).toBe(expected);
+    expect(engineFor('signup', { name: 'A' }).validateAnswer('name')).toBe(expected);
+    expect(engineFor('signup', { name: ' A ' }).validateAnswer('name')).toBe(expected);
     expect(engineFor('signup', {}, { language: 'am' }).validateAnswer('name')).toBe(
-      'ሙሉ ስም: ከመቀጠልዎ በፊት እባክዎ ይህን ጥያቄ ይመልሱ።',
+      'ሙሉ ስም: ሙሉ ስምዎን ይጻፉ። ቢያንስ 2 ፊደላት ያስፈልጋሉ።',
     );
+    expect(engineFor('signup', { name: 'Al' }).validateAnswer('name')).toBeNull();
   });
 
   it('names the question in every error from a full check', () => {
     const { errors } = engineFor('signup').validateSubmission();
 
     expect(errors.name).toMatch(/^Full name: /);
-    expect(errors.consent).toMatch(/^Your permission: /);
+    expect(errors.phone).toMatch(/^Phone number: /);
   });
 
   it('says how to fix an email address rather than that it is invalid', () => {
@@ -211,7 +225,7 @@ describe('plain-language validation', () => {
   });
 
   it('asks for permission rather than reporting a type error', () => {
-    const message = engineFor('signup', { consent: false }).validateAnswer('consent');
+    const message = engineFor('employer', { consent: false }).validateAnswer('consent');
 
     expect(message).toBe('Your permission: Tick the box to give your permission before moving on.');
   });

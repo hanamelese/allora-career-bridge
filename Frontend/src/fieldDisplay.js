@@ -1,4 +1,4 @@
-import { fieldCatalog, getCatalogItems } from '@onboarding/contracts';
+import { fieldCatalog, getCatalogItems, listFileTypes, resolveUploadRules } from '@onboarding/contracts';
 import { getIcon } from './icons.js';
 
 /**
@@ -45,4 +45,10 @@ export function describeField(fieldConfig, { language = 'en', isCustom = false }
     isPrivateByCatalog: definition?.private === true,
     supportsVoice: isCustom ? true : definition?.voiceInput !== false,
   };
+}
+
+/** What applicants will be told about an upload question, in one sentence. */
+export function describeUploadRules(settings) {
+  const rules = resolveUploadRules(settings);
+  return `Applicants can upload a ${listFileTypes(rules)} file, up to ${rules.maxSizeMb} MB.`;
 }

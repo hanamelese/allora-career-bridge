@@ -1,7 +1,7 @@
 import { Router } from 'express';
 import { and, asc, eq, desc } from 'drizzle-orm';
 import { referralRequestSchema } from '@onboarding/contracts';
-import { partnerForms, formVersions, apiKeys, referralPartners, referrals } from '../db/schema.js';
+import { partnerForms, formVersions, apiKeys, partners, referralPartners, referrals } from '../db/schema.js';
 import { ApiError } from '../middleware/errors.js';
 import { validateBody } from '../middleware/validate.js';
 import {
@@ -98,13 +98,19 @@ export function publicFormRoutes(db, { sms = null, rateLimiter = createRateLimit
       (field) => field.key === 'referral' && field.enabled,
     );
 
-    /* The config itself never changes; the referral partner list can, so
-       the response is cached only briefly. */
-    response.set('Cache-Control', 'public, max-age=60');
+    /* Checked with the server each time (cheaply: the ETag answers 304
+       when nothing changed), so a referral partner added, or a website
+       removed from the allowed list, takes effect at once. */
+    response.set('Cache-Control', 'no-cache');
+
+    /* The organisation's name is public anyway (it is on the form), and
+       the learner's SMS preview needs it to match the message sent. */
+    const organisation = db.select({ name: partners.name }).from(partners).where(eq(partners.id, key.partnerId)).get();
 
     response.json({
       formId: form.id,
       type: form.type,
+      organisationName: organisation?.name ?? '',
       version: version.version,
       publishedAt: version.publishedAt,
       config: version.config,

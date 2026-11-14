@@ -22,6 +22,13 @@
       "when": 1794653707186,
       "tag": "0002_referrals",
       "breakpoints": true
+    },
+    {
+      "idx": 3,
+      "version": "6",
+      "when": 1794680207270,
+      "tag": "0003_allowed_origins",
+      "breakpoints": true
     }
   ]
 }

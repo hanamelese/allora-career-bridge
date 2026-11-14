@@ -7,7 +7,13 @@ import { ReviewStep } from './ReviewStep.jsx';
 import { FormSettings } from './FormSettings.jsx';
 import { AccountForm } from './AccountForm.jsx';
 import { useLearnerPreferences } from './learnerPreferences.js';
+import { progressKeyFor } from './progressStore.js';
 import './form-engine.css';
+
+/* A full stop, unless the text already ends a sentence ("…need?"). */
+function endSentence(text, stop = '.') {
+  return /[.?!።?]$/.test(text) ? text : `${text}${stop}`;
+}
 
 const COPY = {
   en: {
@@ -17,9 +23,16 @@ const COPY = {
     progress: (position, total) => `Question ${position} of ${total}`,
     done: 'Your answers have been sent',
     doneDetail: 'Thank you. There is nothing more you need to do.',
+    saved: 'Saved in this browser tab until you send the form or close the tab. Private answers and files are not saved.',
+    welcomeBack: 'Welcome back. We kept your answers from before, so you can carry on where you stopped.',
+    notKept: (labels) => `To protect your privacy these were not kept, so please add them again: ${endSentence(labels)}`,
+    startOver: 'Start over',
+    startOverDetail: 'Start over and clear the answers kept in this tab',
     empty: 'This form has no questions switched on yet.',
     noTimeLimit: 'There is no time limit. You can take as long as you need.',
     requiredNote: 'Questions marked * must be answered. All other questions are optional.',
+    supportSection: 'Support and accommodations',
+    supportSectionNote: 'Private. Only the organisation sees these answers, and you never have to explain why.',
     required: '(required)',
     optional: '(optional)',
   },
@@ -30,9 +43,16 @@ const COPY = {
     progress: (position, total) => `ጥያቄ ${position} ከ${total}`,
     done: 'መልሶችዎ ተልከዋል',
     doneDetail: 'እናመሰግናለን። ከዚህ በላይ ማድረግ ያለብዎት ነገር የለም።',
+    saved: 'ቅጹን እስኪልኩ ወይም ይህን ትር እስኪዘጉ ድረስ በዚህ ትር ተቀምጧል። የግል መልሶችና ፋይሎች አይቀመጡም።',
+    welcomeBack: 'እንኳን ደህና መጡ። ካቆሙበት እንዲቀጥሉ የቀድሞ መልሶችዎን አስቀምጠናል።',
+    notKept: (labels) => `ግላዊነትዎን ለመጠበቅ እነዚህ አልተቀመጡም፤ እባክዎ እንደገና ያስገቡ፦ ${endSentence(labels, '።')}`,
+    startOver: 'እንደገና ጀምር',
+    startOverDetail: 'እንደገና ይጀምሩ እና በዚህ ትር የተቀመጡትን መልሶች ያጥፉ',
     empty: 'በዚህ ቅጽ ላይ ገና የበራ ጥያቄ የለም።',
     noTimeLimit: 'የጊዜ ገደብ የለም። የሚፈልጉትን ያህል ጊዜ መውሰድ ይችላሉ።',
     requiredNote: '* ምልክት ያላቸው ጥያቄዎች መመለስ አለባቸው። ሌሎቹ ጥያቄዎች አማራጭ ናቸው።',
+    supportSection: 'ድጋፍ እና ማመቻቻዎች',
+    supportSectionNote: 'የግል። እነዚህን መልሶች የሚያየው ድርጅቱ ብቻ ነው፤ ምክንያቱን ማስረዳት አያስፈልግዎትም።',
     required: '(ግዴታ)',
     optional: '(አማራጭ)',
   },
@@ -65,6 +85,9 @@ export function FormRenderer({
   referral,
   onSocialSignIn,
   onSwitchMode,
+  /* Where this tab keeps the learner's place; by default one per form
+     version. `null` turns saving off. */
+  progressKey,
 }) {
   /* The learner's own display choices: contrast, text size and simple
      words. The host may only suggest where simple words start. */
@@ -83,8 +106,31 @@ export function FormRenderer({
   const engine = useFormEngine(
     config,
     { language, lowLiteracy, referralPartners: referral?.partners },
-    { onSubmit },
+    {
+      onSubmit,
+      /* Never for the sign-in form: it holds a password. */
+      progressKey:
+        config.type === 'account' ? null : progressKey === undefined ? progressKeyFor(config) : progressKey,
+    },
   );
+
+  /* "Welcome back" shows on the screen the learner returns to, and goes
+     once they move on. */
+  const restoredStepRef = useRef(engine.isReviewing ? 'review' : engine.question?.key);
+  const currentStep = engine.isReviewing ? 'review' : engine.question?.key;
+  const restoreNotice =
+    engine.wasRestored && currentStep === restoredStepRef.current ? (
+      <div className="fe-restored" role="status">
+        <p>{(COPY[language] ?? COPY.en).welcomeBack}</p>
+        {engine.notKept.length > 0 ? (
+          <p>{(COPY[language] ?? COPY.en).notKept(engine.notKept.join(', '))}</p>
+        ) : null}
+        <button type="button" className="fe-button fe-button--quiet" onClick={engine.startOver}>
+          {(COPY[language] ?? COPY.en).startOver}
+          <span className="fe-visually-hidden">: {(COPY[language] ?? COPY.en).startOverDetail}</span>
+        </button>
+      </div>
+    ) : null;
   const headingRef = useRef(null);
   const fieldRef = useRef(null);
   const hasNavigatedRef = useRef(false);
@@ -98,16 +144,19 @@ export function FormRenderer({
      so focus goes to the new question's heading. Without it, focus would
      stay on the Next button and a screen-reader user would never hear the
      question they just moved to. */
+  /* Compared with the screen last shown rather than set as a flag, so a
+     second run of the effect (React's development mode does that) never
+     counts as moving. */
+  const lastStepRef = useRef(stepKey);
+
   useEffect(() => {
-    if (!stepKey) return;
+    if (!stepKey || stepKey === lastStepRef.current) return;
+
+    lastStepRef.current = stepKey;
+    hasNavigatedRef.current = true;
 
     const heading = headingRef.current ?? document.querySelector('[data-question-heading]');
-
-    if (heading && hasNavigatedRef.current) {
-      heading.focus();
-    }
-
-    hasNavigatedRef.current = true;
+    heading?.focus();
   }, [stepKey]);
 
   /**
@@ -173,6 +222,8 @@ export function FormRenderer({
 
   if (isReviewing) {
     return frame(
+      <>
+        {restoreNotice}
         <ReviewStep
           items={engine.reviewItems}
           summary={engine.reviewSummary}
@@ -180,7 +231,8 @@ export function FormRenderer({
           onEdit={engine.goTo}
           onSubmit={engine.submit}
           onBack={engine.back}
-        />,
+        />
+      </>,
     );
   }
 
@@ -220,9 +272,27 @@ export function FormRenderer({
           />
         </div>
         <p className="fe-progress__note">{copy.requiredNote}</p>
+        {engine.hasSaved ? (
+          <p className="fe-progress__saved">
+            <span aria-hidden="true">✓ </span>
+            {copy.saved}
+          </p>
+        ) : null}
       </div>
 
+      {restoreNotice}
+
       <div className="fe-question">
+        {/* The support and accommodation questions sit in a section of
+            their own. The band is for the eye; the heading carries the
+            section's name for a screen reader, which lands on it. */}
+        {question.section === 'support' ? (
+          <div className="fe-section-band" aria-hidden="true">
+            <span className="fe-section-band__name">{copy.supportSection}</span>
+            <span className="fe-section-band__note">{copy.supportSectionNote}</span>
+          </div>
+        ) : null}
+
         <div className="fe-question__title">
           {question.icon && renderIcon ? (
             <span className="fe-question__icon" aria-hidden="true">
@@ -236,6 +306,9 @@ export function FormRenderer({
             tabIndex={-1}
             data-question-heading
           >
+            {question.section === 'support' ? (
+              <span className="fe-visually-hidden">{copy.supportSection}, {copy.supportSectionNote} </span>
+            ) : null}
             {question.label}
             {/* Required status is said in words as well as shown, so it
                 never depends on the asterisk or on colour. */}
@@ -293,6 +366,9 @@ export function FormRenderer({
           </p>
         ) : null}
 
+        {/* An upload has its own Remove and status; reading back or
+            speaking a file makes no sense. */}
+        {question.type === 'file' ? null : (
         <AnswerTools
           key={question.key}
           question={
@@ -313,6 +389,7 @@ export function FormRenderer({
             });
           }}
         />
+        )}
       </div>
 
       <div className="fe-actions">

@@ -18,6 +18,11 @@ export default defineConfig({
         target: process.env.VITE_API_PROXY ?? 'http://localhost:3001',
         changeOrigin: true,
       },
+      /* The embeddable widget script, which the API serves. */
+      '/widget': {
+        target: process.env.VITE_API_PROXY ?? 'http://localhost:3001',
+        changeOrigin: true,
+      },
     },
   },
 });

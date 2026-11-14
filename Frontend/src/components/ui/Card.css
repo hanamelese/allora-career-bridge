@@ -1,8 +1,14 @@
 .card {
   background-color: var(--surface-raised);
-  border: 1px solid var(--border-subtle);
-  border-radius: var(--radius-lg);
-  box-shadow: var(--shadow-sm);
+  border: 1px solid var(--border-glass);
+  border-radius: var(--radius-card);
+  box-shadow: var(--shadow-card);
+}
+
+@media (forced-colors: active) {
+  .card {
+    border-color: CanvasText;
+  }
 }
 
 .card--pad-none {

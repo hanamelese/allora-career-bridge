@@ -4,6 +4,57 @@ import { z } from 'zod';
 import { fieldCatalog } from './fieldCatalog.js';
 import { getCatalogKeys } from './optionCatalogs.js';
 import { matchesShowIf } from './fieldVisibility.js';
+import { checkFile } from './uploads.js';
+
+// ==========================================
+// 1. Written answers
+// ==========================================
+
+/**
+ * A written answer, trimmed before it is measured - so "   " is no answer
+ * at all, and " A " is one letter, whether it was typed or spoken.
+ *
+ * Only a non-empty answer is held to the length rules. Whether an empty
+ * one is allowed is the required check's decision (below), so an optional
+ * question left blank, or answered with spaces, is simply unanswered.
+ */
+function trimmedText(rules = {}) {
+  const { minLength, maxLength } = rules;
+
+  return z
+    .string()
+    .trim()
+    .superRefine((value, context) => {
+      if (value === '') return;
+
+      if (minLength !== undefined && value.length < minLength) {
+        context.addIssue({
+          code: 'too_small',
+          origin: 'string',
+          minimum: minLength,
+          inclusive: true,
+          input: value,
+          message: `Use at least ${minLength} characters.`,
+        });
+      }
+
+      if (maxLength !== undefined && value.length > maxLength) {
+        context.addIssue({
+          code: 'too_big',
+          origin: 'string',
+          maximum: maxLength,
+          inclusive: true,
+          input: value,
+          message: `Use at most ${maxLength} characters.`,
+        });
+      }
+    });
+}
+
+/** Nothing written: missing, null, or only spaces. */
+export function isBlankAnswer(value) {
+  return value === undefined || value === null || (typeof value === 'string' && value.trim() === '');
+}
 
 // ==========================================
 // 2. Built-in field validation
@@ -19,19 +70,8 @@ function getBuiltInFieldSchema(fieldConfig, config) {
 
   switch (definition.type) {
     case 'text':
-    case 'longText': {
-      let schema = z.string();
-
-      if (definition.rules?.minLength !== undefined) {
-        schema = schema.min(definition.rules.minLength);
-      }
-
-      if (definition.rules?.maxLength !== undefined) {
-        schema = schema.max(definition.rules.maxLength);
-      }
-
-      return schema;
-    }
+    case 'longText':
+      return trimmedText(definition.rules);
 
     case 'phone': {
       let schema = z.string();
@@ -96,6 +136,30 @@ function getBuiltInFieldSchema(fieldConfig, config) {
     case 'consent':
       return z.boolean();
 
+    /* A chosen file, kept as it is (the File itself goes on to the host).
+       The partner's restrictions override the catalogue's defaults. Each
+       problem carries `params.fileProblem`, so the learner is told what to
+       do about it in their own language. */
+    case 'file': {
+      const settings = fieldConfig.upload ?? definition.upload;
+
+      return z.custom(() => true).superRefine((value, context) => {
+        const found = checkFile(value, settings);
+        if (!found) return;
+
+        context.addIssue({
+          code: 'custom',
+          message:
+            found.problem === 'tooBig'
+              ? `This file is ${found.size}. Files can be up to ${found.maxSizeMb} MB.`
+              : found.problem === 'wrongType'
+                ? `This kind of file cannot be used. Choose a ${found.allowed} file.`
+                : 'Choose a file.',
+          params: { fileProblem: found.problem, ...found },
+        });
+      });
+    }
+
     /* The partner ids the learner chose. Which ids exist is only known to
        the server, which checks them when a referral is actually sent. */
     case 'referral':
@@ -121,7 +185,7 @@ function getBuiltInFieldSchema(fieldConfig, config) {
 function getCustomFieldSchema(customField) {
   switch (customField.type) {
     case 'text':
-      return z.string().min(1, 'This answer cannot be empty.');
+      return trimmedText({ minLength: 1 });
 
     case 'choice': {
       const allowedValues = (customField.options ?? []).map(
@@ -231,11 +295,7 @@ function addRequiredFieldValidation(
         continue;
       }
 
-      if (
-        value === undefined ||
-        value === null ||
-        value === ''
-      ) {
+      if (isBlankAnswer(value)) {
         context.addIssue({
           code: 'custom',
           path: [fieldConfig.key],
@@ -255,11 +315,7 @@ function addRequiredFieldValidation(
 
       const value = answers[customField.key];
 
-      if (
-        value === undefined ||
-        value === null ||
-        value === ''
-      ) {
+      if (isBlankAnswer(value)) {
         context.addIssue({
           code: 'custom',
           path: [customField.key],

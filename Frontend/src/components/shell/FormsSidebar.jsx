@@ -37,8 +37,8 @@ export function FormsSidebar({ id }) {
           >
             <Building className="forms-sidebar__icon" aria-hidden="true" />
             <span className="forms-sidebar__text">
-              <span className="forms-sidebar__name">Referral partners</span>
-              <span className="forms-sidebar__summary">Organisations learners can be referred to</span>
+              <span className="forms-sidebar__name">Your organisation</span>
+              <span className="forms-sidebar__summary">Referral partners and the websites that show your forms</span>
             </span>
           </NavLink>
         </li>

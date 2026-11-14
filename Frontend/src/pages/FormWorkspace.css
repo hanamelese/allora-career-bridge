@@ -11,12 +11,13 @@
 }
 
 .form-workspace__title {
-  font-size: var(--font-size-xl);
+  font-size: var(--text-page-title);
+  font-weight: var(--font-weight-bold);
 }
 
 .form-workspace__audience {
   margin-block-start: var(--space-2xs);
-  font-size: var(--font-size-sm);
+  font-size: var(--text-body-sm);
   color: var(--ink-muted);
 }
 
@@ -24,7 +25,7 @@
   margin-block-start: var(--space-sm);
   max-width: 70ch;
   color: var(--ink-secondary);
-  line-height: var(--line-height-relaxed);
+  line-height: var(--leading-body);
 }
 
 .form-workspace__panel {

@@ -70,7 +70,7 @@ export function buildReferralMessage({
   if (language === 'am') {
     return [
       isTest ? '[ሙከራ]' : null,
-      `${organisationName}፦ ${learnerName} የመታወቂያ ሰነድ የላቸውም፤ ለመመዝገብ የእርስዎን እርዳታ ጠይቀዋል።`,
+      `${organisationName}፦ ${learnerName} የመታወቂያ ሰነድ የላቸውም፤ ለመመዝገብ ወይም ለማመልከት የእርስዎን እርዳታ ጠይቀዋል።`,
       phone ? `ስልክ፦ ${phone}።` : null,
       `ለመቀጠል፦ ${link}`,
     ]
@@ -80,7 +80,7 @@ export function buildReferralMessage({
 
   return [
     isTest ? '[TEST]' : null,
-    `${organisationName}: ${learnerName} has no identity document and has asked for your help to register.`,
+    `${organisationName}: ${learnerName} has no identity document and has asked for your help to register or apply.`,
     phone ? `Phone: ${phone}.` : null,
     `Continue the referral: ${link}`,
   ]

@@ -12,6 +12,7 @@ const COPY = {
     intro: 'Change how this form looks. Your choices are kept for next time on this device.',
     contrast: 'Contrast',
     contrastHelp: 'Slide right for stronger contrast.',
+    contrastKeys: 'With a keyboard, use the left and right arrow keys, or Home and End.',
     contrastLevels: {
       1: 'Standard. Meets WCAG AA (text at least 4.5 to 1).',
       2: 'Enhanced. Meets WCAG AAA (text at least 7 to 1).',
@@ -39,6 +40,7 @@ const COPY = {
     intro: 'ይህ ቅጽ የሚታይበትን መንገድ ይቀይሩ። ምርጫዎችዎ በዚህ መሣሪያ ላይ ለሚቀጥለው ጊዜ ይቀመጣሉ።',
     contrast: 'ንፅፅር',
     contrastHelp: 'ለጠንካራ ንፅፅር ወደ ቀኝ ያንሸራትቱ።',
+    contrastKeys: 'በቁልፍ ሰሌዳ፣ የግራ እና የቀኝ ቀስት ቁልፎችን ወይም Home እና End ይጠቀሙ።',
     contrastLevels: {
       1: 'መደበኛ። የWCAG AA ደረጃን ያሟላል።',
       2: 'የተሻሻለ። የWCAG AAA ደረጃን ያሟላል።',
@@ -107,12 +109,17 @@ export function FormSettings({
   const titleId = `${id}-title`;
   const buttonRef = useRef(null);
   const panelRef = useRef(null);
+  const contrastRef = useRef(null);
   const wasOpenRef = useRef(open);
   const [announcement, setAnnouncement] = useState('');
 
   useEffect(() => {
+    /* Straight to the first setting - the contrast slider - so a
+       keyboard user can change it at once. The panel is a labelled
+       region, so a screen reader still announces "Display settings" on
+       the way in. */
     if (open && !wasOpenRef.current) {
-      panelRef.current?.focus();
+      (contrastRef.current ?? panelRef.current)?.focus();
     }
 
     if (!open && wasOpenRef.current) {
@@ -124,6 +131,8 @@ export function FormSettings({
 
   function handleKeyDown(event) {
     if (event.key === 'Escape') {
+      /* Closes only this panel - not a dialog the form may sit in. */
+      event.preventDefault();
       event.stopPropagation();
       onOpenChange(false);
     }
@@ -173,6 +182,7 @@ export function FormSettings({
           <input
             type="range"
             id={`${id}-contrast`}
+            ref={contrastRef}
             className="fe-settings__range"
             min={CONTRAST_LEVELS[0]}
             max={CONTRAST_LEVELS[CONTRAST_LEVELS.length - 1]}
@@ -180,7 +190,8 @@ export function FormSettings({
             value={preferences.contrast}
             list={`${id}-contrast-ticks`}
             aria-valuetext={`${preferences.contrast}: ${copy.contrastLevels[preferences.contrast]}`}
-            aria-describedby={`${id}-contrast-help ${id}-contrast-now`}
+            aria-describedby={`${id}-contrast-help ${id}-contrast-keys ${id}-contrast-now`}
+            style={{ '--fe-range-value': preferences.contrast }}
             onChange={(event) => {
               const level = Number(event.target.value);
               set({ contrast: level }, copy.changed.contrast(copy.contrastShort[level]));
@@ -204,6 +215,9 @@ export function FormSettings({
           </ol>
           <p className="fe-settings__help" id={`${id}-contrast-help`}>
             {copy.contrastHelp}
+          </p>
+          <p className="fe-settings__help" id={`${id}-contrast-keys`}>
+            {copy.contrastKeys}
           </p>
           <p className="fe-settings__now" id={`${id}-contrast-now`}>
             {copy.contrastLevels[preferences.contrast]}

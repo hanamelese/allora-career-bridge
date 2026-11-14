@@ -2,7 +2,14 @@ import { describe, it, expect } from 'vitest';
 
 import { formConfigSchema } from './formConfig.js';
 import { FORM_TEMPLATES } from './formTemplates.js';
-import { upgradeLearnerDraft } from './formUpgrades.js';
+import {
+  addJobIdentityQuestions,
+  mergeReferralRoutes,
+  removeLearnerConsent,
+  upgradeLearnerDraft,
+} from './formUpgrades.js';
+import { fieldCatalog } from './fieldCatalog.js';
+import { buildReferralMessage } from './referrals.js';
 
 /* The two learner templates as they were before the merge. */
 const OLD_FEATURES = { voiceInput: true, readAloud: true, lowLiteracy: false };
@@ -87,8 +94,14 @@ describe('upgrading a stored learner registration draft', () => {
     expect(result.error?.issues ?? []).toEqual([]);
   });
 
-  it('adds every profile question, once', () => {
+  it('adds every profile question, once, keeping what the template no longer names at the end', () => {
     const keys = upgraded.fields.map((item) => item.key);
+
+    expect(keys).toEqual([...FORM_TEMPLATES.signup.fields.map((item) => item.key), 'consent']);
+  });
+
+  it('then matches the template once the learner permission question is dropped', () => {
+    const keys = removeLearnerConsent(upgraded).fields.map((item) => item.key);
 
     expect(keys).toEqual(FORM_TEMPLATES.signup.fields.map((item) => item.key));
   });
@@ -128,5 +141,133 @@ describe('older configurations', () => {
 
   it('still accept the retired profile form type', () => {
     expect(formConfigSchema.safeParse(oldLearner).success).toBe(true);
+  });
+});
+
+describe('dropping the learner permission question', () => {
+  const withConsent = (type) => ({
+    ...FORM_TEMPLATES[type],
+    fields: [...FORM_TEMPLATES[type].fields, field('consent', { required: true, locked: true })],
+  });
+
+  it('is no longer part of the learner or job application templates', () => {
+    for (const type of ['signup', 'jobApplication']) {
+      expect(FORM_TEMPLATES[type].fields.map((item) => item.key)).not.toContain('consent');
+    }
+  });
+
+  it('removes it from stored learner and job application drafts', () => {
+    for (const type of ['signup', 'jobApplication']) {
+      const next = removeLearnerConsent(withConsent(type));
+
+      expect(next.fields.map((item) => item.key)).not.toContain('consent');
+      expect(formConfigSchema.safeParse(next).success).toBe(true);
+    }
+  });
+
+  it('keeps the staff permission question and the employer contact permission', () => {
+    const signup = removeLearnerConsent(withConsent('signup'));
+    expect(signup.fields.map((item) => item.key)).toContain('assistedConsent');
+
+    const employer = FORM_TEMPLATES.employer;
+    expect(removeLearnerConsent(employer)).toBe(employer);
+    expect(employer.fields.map((item) => item.key)).toContain('consent');
+  });
+
+  it('returns the same draft when there is nothing to remove', () => {
+    expect(removeLearnerConsent(FORM_TEMPLATES.signup)).toBe(FORM_TEMPLATES.signup);
+  });
+});
+
+describe('one "I have no document, refer me" option', () => {
+  const before = {
+    ...FORM_TEMPLATES.signup,
+    identityRoutes: ['kebele_id', 'partner_referral', 'no_document'],
+    fields: FORM_TEMPLATES.signup.fields.map((item) =>
+      item.key === 'referral'
+        ? { ...item, showIf: { field: 'identityRoute', in: ['no_document', 'partner_referral'] } }
+        : item,
+    ),
+    customFields: [
+      {
+        key: 'helper',
+        type: 'text',
+        label: { en: 'Who suggested you ask?' },
+        enabled: true,
+        required: false,
+        visibility: 'public',
+        showIf: { field: 'identityRoute', equals: 'partner_referral' },
+      },
+    ],
+  };
+
+  it('is the label of the no-document route, and the only referral route offered', () => {
+    expect(FORM_TEMPLATES.signup.identityRoutes).toContain('no_document');
+    expect(FORM_TEMPLATES.signup.identityRoutes).not.toContain('partner_referral');
+  });
+
+  it('no longer lets a draft offer the retired route', () => {
+    expect(formConfigSchema.safeParse(before).success).toBe(false);
+  });
+
+  it('upgrades a draft that offered both, pointing everything at no_document', () => {
+    const after = mergeReferralRoutes(before);
+
+    expect(after.identityRoutes).toEqual(['kebele_id', 'no_document']);
+    expect(after.fields.find((item) => item.key === 'referral').showIf).toEqual({
+      field: 'identityRoute',
+      in: ['no_document'],
+    });
+    expect(after.customFields[0].showIf).toEqual({ field: 'identityRoute', equals: 'no_document' });
+    expect(formConfigSchema.safeParse(after).success).toBe(true);
+  });
+
+  it('returns the same draft when it never used the retired route', () => {
+    expect(mergeReferralRoutes(FORM_TEMPLATES.signup)).toBe(FORM_TEMPLATES.signup);
+  });
+});
+
+describe('job application: identity and referral', () => {
+  const job = FORM_TEMPLATES.jobApplication;
+  const keys = job.fields.map((item) => item.key);
+
+  it('ends with the identity question, the ID number, the document upload and the referral', () => {
+    expect(keys.slice(-4)).toEqual(['identityRoute', 'documentId', 'identityDocumentFile', 'referral']);
+    expect(job.fields.find((item) => item.key === 'referral').showIf).toEqual({
+      field: 'identityRoute',
+      in: ['no_document'],
+    });
+    expect(job.identityRoutes).toContain('no_document');
+    expect(formConfigSchema.safeParse(job).success).toBe(true);
+  });
+
+  it('asks name and phone earlier, so the referral never asks for them again', () => {
+    expect(keys.indexOf('name')).toBeLessThan(keys.indexOf('referral'));
+    expect(keys.indexOf('phone')).toBeLessThan(keys.indexOf('referral'));
+  });
+
+  it('adds them to an older job draft, at the end', () => {
+    const older = { ...job, fields: job.fields.filter((item) => !['identityRoute', 'documentId', 'identityDocumentFile', 'referral'].includes(item.key)) };
+    const after = addJobIdentityQuestions(older);
+
+    expect(after.fields.map((item) => item.key)).toEqual(keys);
+    expect(formConfigSchema.safeParse(after).success).toBe(true);
+    expect(addJobIdentityQuestions(after)).toBe(after);
+    expect(addJobIdentityQuestions(FORM_TEMPLATES.signup)).toBe(FORM_TEMPLATES.signup);
+  });
+
+  it('words the accommodation question for the job, in its own private section', () => {
+    const question = fieldCatalog.interviewAccommodations;
+
+    expect(question.label.en).toBe('What would help you at this job?');
+    expect(question.section).toBe('support');
+    expect(question.private).toBe(true);
+    expect(fieldCatalog.supportNeeds.section).toBe('support');
+    expect(fieldCatalog.supportNote.section).toBe('support');
+  });
+
+  it('words the referral SMS for applying as well as registering', () => {
+    const message = buildReferralMessage({ organisationName: 'Hope', learnerName: 'Abebe', link: 'https://x.example/r/1' });
+    expect(message).toContain('to register or apply');
   });
 });

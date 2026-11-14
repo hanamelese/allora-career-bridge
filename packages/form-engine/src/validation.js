@@ -45,6 +45,10 @@ const MESSAGES = {
     en: 'Write a phone number using digits only, for example 0911234567',
     am: 'የስልክ ቁጥሩን በቁጥሮች ብቻ ይጻፉ፤ ለምሳሌ 0911234567',
   },
+  nameTooShort: {
+    en: 'Write your full name. It needs at least 2 letters.',
+    am: 'ሙሉ ስምዎን ይጻፉ። ቢያንስ 2 ፊደላት ያስፈልጋሉ።',
+  },
   tooShort: {
     en: 'This answer is too short. Please add a little more.',
     am: 'ይህ መልስ በጣም አጭር ነው። እባክዎ ትንሽ ይጨምሩ።',
@@ -53,14 +57,31 @@ const MESSAGES = {
     en: 'This answer is too long. Please shorten it.',
     am: 'ይህ መልስ በጣም ረጅም ነው። እባክዎ ያሳጥሩት።',
   },
+  fileTooBig: {
+    en: (p) => `This file is ${p.size}. Choose a file of ${p.maxSizeMb} MB or less.`,
+    am: (p) => `ይህ ፋይል ${p.size} ነው። ${p.maxSizeMb} MB ወይም ከዚያ በታች የሆነ ፋይል ይምረጡ።`,
+  },
+  fileWrongType: {
+    en: (p) => `This kind of file cannot be used. Choose a ${p.allowed} file.`,
+    am: (p) => `ይህ ዓይነት ፋይል መጠቀም አይቻልም። ${p.allowed} ፋይል ይምረጡ።`,
+  },
+  fileEmpty: {
+    en: 'This file is empty. Choose another file.',
+    am: 'ይህ ፋይል ባዶ ነው። ሌላ ፋይል ይምረጡ።',
+  },
+  chooseFile: {
+    en: 'Choose a file before moving on.',
+    am: 'ከመቀጠልዎ በፊት ፋይል ይምረጡ።',
+  },
   unexpected: {
     en: 'This answer could not be read. Please try answering again.',
     am: 'ይህ መልስ ሊነበብ አልቻለም። እባክዎ እንደገና ይመልሱ።',
   },
 };
 
-function say(name, language) {
-  return MESSAGES[name][language] ?? MESSAGES[name].en;
+function say(name, language, params) {
+  const message = MESSAGES[name][language] ?? MESSAGES[name].en;
+  return typeof message === 'function' ? message(params) : message;
 }
 
 /** The type of the field an issue is about, built-in or custom. */
@@ -84,7 +105,7 @@ function formatIssue(issue, config, language) {
       return say('unexpected', language);
 
     case 'too_small':
-      return say('tooShort', language);
+      return say(fieldKey === 'name' ? 'nameTooShort' : 'tooShort', language);
 
     case 'too_big':
       return say('tooLong', language);
@@ -99,6 +120,10 @@ function formatIssue(issue, config, language) {
        required answer that is missing, a consent that is not given, and an
        empty multi-choice. The field's type says which of those it is. */
     case 'custom':
+      if (issue.params?.fileProblem === 'tooBig') return say('fileTooBig', language, issue.params);
+      if (issue.params?.fileProblem === 'wrongType') return say('fileWrongType', language, issue.params);
+      if (issue.params?.fileProblem === 'empty') return say('fileEmpty', language);
+      if (type === 'file') return say('chooseFile', language);
       if (type === 'consent') return say('consent', language);
       if (type === 'multiChoice') return say('chooseOne', language);
       if (type === 'choice' || type === 'identityRoute') {
@@ -165,10 +190,11 @@ export function validateAnswer(config, fieldKey, answers, language = 'en') {
      screen still has to ask for a required one before moving on. */
   if (required) {
     const value = answers[fieldKey];
+    /* Spaces alone are no answer, whether typed or heard. */
     const isEmpty =
       value === undefined ||
       value === null ||
-      value === '' ||
+      (typeof value === 'string' && value.trim() === '') ||
       (Array.isArray(value) && value.length === 0) ||
       (getFieldType(config, fieldKey) === 'consent' && value !== true);
 
@@ -176,6 +202,8 @@ export function validateAnswer(config, fieldKey, answers, language = 'en') {
       const type = getFieldType(config, fieldKey);
       if (type === 'consent') return say('consent', language);
       if (type === 'multiChoice') return say('chooseOne', language);
+      if (type === 'file') return say('chooseFile', language);
+      if (fieldKey === 'name') return say('nameTooShort', language);
       return say('required', language);
     }
   }

@@ -19,7 +19,7 @@
   gap: var(--space-gutter);
   min-height: var(--target-compact-size);
   cursor: pointer;
-  font-size: var(--font-size-sm);
+  font-size: var(--text-label);
   font-weight: var(--font-weight-medium);
 }
 

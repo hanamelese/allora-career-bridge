@@ -30,9 +30,9 @@ export function AppShell() {
   const activeFormType = section === 'forms' ? getFormTypeBySlug(formSlug) : null;
   const announcement =
     activeFormType && view
-      ? `${activeFormType.name}, ${view} view.`
+      ? `${activeFormType.name}, ${view === 'embed' ? 'embed tag' : view} view.`
       : section === 'organisation'
-        ? 'Your organisation: referral partners.'
+        ? 'Your organisation: referral partners and websites.'
         : '';
 
   return (
@@ -42,6 +42,9 @@ export function AppShell() {
 
       <header className="app-shell__header">
         <div className="app-shell__brand">
+          <span className="app-shell__logo" aria-hidden="true">
+            AO
+          </span>
           <div>
             <p className="app-shell__product">Partner Dashboard</p>
             <p className="app-shell__tagline">Accessible Onboarding</p>
@@ -50,7 +53,7 @@ export function AppShell() {
 
         <div className="app-shell__account">
           <span className="app-shell__org">{partner?.name}</span>
-          <Button variant="quiet-inverse" size="sm" icon={LogOut} onClick={signOut}>
+          <Button variant="secondary" size="sm" icon={LogOut} onClick={signOut}>
             Sign out
           </Button>
         </div>

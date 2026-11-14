@@ -8,10 +8,10 @@ import './SettingsPanel.css';
  * Order follows the configuration, which is the order a learner meets the
  * questions in.
  */
-export function SettingsPanel({ config, fieldErrors, lockReasons, onUpdateField }) {
+export function SettingsPanel({ config, fields = config.fields, fieldErrors, lockReasons, onUpdateField }) {
   return (
     <ul className="settings-panel" role="list">
-      {config.fields.map((fieldConfig) => (
+      {fields.map((fieldConfig) => (
         <FieldRow
           key={fieldConfig.key}
           fieldConfig={fieldConfig}

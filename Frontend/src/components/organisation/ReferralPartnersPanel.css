@@ -68,7 +68,7 @@
 
 .referral-partners__add-heading {
   margin-block-end: var(--space-sm);
-  font-size: var(--font-size-md, 1rem);
+  font-size: var(--text-card-title);
   font-weight: var(--font-weight-semibold);
 }
 

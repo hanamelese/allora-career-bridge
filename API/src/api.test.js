@@ -2,7 +2,7 @@ import { describe, it, expect, beforeEach } from 'vitest';
 import request from 'supertest';
 
 import { eq } from 'drizzle-orm';
-import { FORM_TEMPLATES } from '@onboarding/contracts';
+import { FORM_TEMPLATES, formConfigSchema } from '@onboarding/contracts';
 import { createDatabase } from './db/client.js';
 import { seedDatabase } from './db/seed.js';
 import { partnerForms, referrals } from './db/schema.js';
@@ -158,7 +158,7 @@ describe('saving a draft', () => {
       /* Switching off a locked question - the dashboard prevents it, and
          the server does not take the dashboard's word for it. */
       fields: before.body.draftConfig.fields.map((field) =>
-        field.key === 'consent' ? { ...field, enabled: false } : field,
+        field.key === 'identityRoute' ? { ...field, enabled: false } : field,
       ),
     };
 
@@ -773,10 +773,118 @@ describe('upgrading existing data', () => {
 
     const after = db.select().from(partnerForms).where(eq(partnerForms.id, formId)).get();
     expect(after.draftConfig.fields.map((f) => f.key).slice(-4)).toEqual([
-      'consent',
       'identityRoute',
       'documentId',
+      'identityDocumentFile',
       'referral',
     ]);
+  });
+
+  it('drops the learner permission question and merges "refer me" into "I have no document"', () => {
+    const { db } = app.locals;
+    const template = FORM_TEMPLATES.signup;
+    const consent = { key: 'consent', enabled: true, required: true, locked: true, visibility: 'public' };
+    const older = {
+      ...template,
+      formId,
+      identityRoutes: [...template.identityRoutes.filter((r) => r !== 'no_document'), 'partner_referral', 'no_document'],
+      fields: [
+        ...template.fields
+          .filter((f) => !['identityRoute', 'documentId', 'identityDocumentFile', 'referral'].includes(f.key))
+          .concat(consent),
+        ...template.fields
+          .filter((f) => ['identityRoute', 'documentId', 'identityDocumentFile', 'referral'].includes(f.key))
+          .map((f) =>
+            f.key === 'referral'
+              ? { ...f, showIf: { field: 'identityRoute', in: ['no_document', 'partner_referral'] } }
+              : f,
+          ),
+      ],
+    };
+
+    db.update(partnerForms).set({ draftConfig: older }).where(eq(partnerForms.id, formId)).run();
+
+    expect(upgradeStoredDrafts(db).upgraded).toBe(1);
+    expect(upgradeStoredDrafts(db).upgraded).toBe(0);
+
+    const { draftConfig } = db.select().from(partnerForms).where(eq(partnerForms.id, formId)).get();
+    expect(draftConfig.fields.map((f) => f.key)).not.toContain('consent');
+    expect(draftConfig.identityRoutes).not.toContain('partner_referral');
+    expect(draftConfig.fields.find((f) => f.key === 'referral').showIf.in).toEqual(['no_document']);
+    expect(formConfigSchema.safeParse(draftConfig).success).toBe(true);
+  });
+});
+
+describe('embedding on a partner’s website', () => {
+  const SITE = 'https://jobs.example.org';
+  const publicPath = () => `/api/v1/public/forms/${formId}?key=${seeded.publicKey}`;
+
+  it('lets a partner list, add and remove the websites that may show their forms', async () => {
+    const added = await authed('post', '/api/v1/organisation/allowed-origins').send({ origin: `${SITE}/apply/now` });
+    expect(added.status).toBe(201);
+    expect(added.body.origin).toBe(SITE);
+
+    const again = await authed('post', '/api/v1/organisation/allowed-origins').send({ origin: SITE });
+    expect(again.status).toBe(200);
+
+    const list = await authed('get', '/api/v1/organisation/allowed-origins');
+    expect(list.body.map((row) => row.origin)).toEqual([SITE]);
+
+    const bad = await authed('post', '/api/v1/organisation/allowed-origins').send({ origin: 'http://jobs.example.org' });
+    expect(bad.status).toBe(422);
+
+    const removed = await authed('delete', `/api/v1/organisation/allowed-origins/${added.body.id}`);
+    expect(removed.status).toBe(204);
+  });
+
+  it('refuses a website that is not on the list, and allows one that is', async () => {
+    await authed('post', `/api/v1/forms/${formId}/publish`);
+
+    const refused = await request(app).get(publicPath()).set('origin', SITE);
+    expect(refused.status).toBe(403);
+    expect(refused.body.error).toBe('origin_not_allowed');
+    expect(refused.headers['access-control-allow-origin']).toBeUndefined();
+
+    await authed('post', '/api/v1/organisation/allowed-origins').send({ origin: SITE });
+
+    const allowed = await request(app).get(publicPath()).set('origin', SITE);
+    expect(allowed.status).toBe(200);
+    expect(allowed.headers['access-control-allow-origin']).toBe(SITE);
+    expect(allowed.body.organisationName).toBe('ALX Ethiopia');
+
+    const preflight = await request(app)
+      .options(`/api/v1/public/forms/${formId}/referrals?key=${seeded.publicKey}`)
+      .set('origin', SITE)
+      .set('access-control-request-method', 'POST')
+      .set('access-control-request-headers', 'content-type');
+    expect(preflight.status).toBe(204);
+    expect(preflight.headers['access-control-allow-origin']).toBe(SITE);
+  });
+
+  it('does not let one partner’s website use another partner’s key', async () => {
+    await authed('post', `/api/v1/forms/${formId}/publish`);
+    await authed('post', '/api/v1/organisation/allowed-origins').send({ origin: SITE });
+
+    const other = await request(app)
+      .post('/api/v1/auth/signup')
+      .send({ organisationName: 'Other NGO', email: 'other@ngo.example', password: 'another long password' });
+    await request(app)
+      .post('/api/v1/organisation/allowed-origins')
+      .set('authorization', `Bearer ${other.body.token}`)
+      .send({ origin: 'https://other.example' });
+
+    const response = await request(app).get(publicPath()).set('origin', 'https://other.example');
+    expect(response.status).toBe(403);
+  });
+
+  it('serves the widget script to any site, or says it is not built', async () => {
+    const response = await request(app).get('/widget/v1/onboarding-widget.js');
+
+    if (response.status === 200) {
+      expect(response.headers['content-type']).toMatch(/javascript/);
+      expect(response.headers['cross-origin-resource-policy']).toBe('cross-origin');
+    } else {
+      expect(response.body.error).toBe('widget_not_built');
+    }
   });
 });

@@ -4,6 +4,8 @@ import { Checkbox } from '../ui/Checkbox.jsx';
 import { Switch } from '../ui/Switch.jsx';
 import { TextInput } from '../ui/TextInput.jsx';
 import { FieldOptionsEditor } from './FieldOptionsEditor.jsx';
+import { UploadRulesEditor } from './UploadRulesEditor.jsx';
+import { describeUploadRules } from '../../fieldDisplay.js';
 import './FieldRow.css';
 
 /**
@@ -101,6 +103,11 @@ export function FieldRow({ fieldConfig, field, lockReason, error, onUpdate }) {
 
       {field.notice ? <p className="field-row__notice">{field.notice}</p> : null}
 
+      {/* What applicants will be allowed to upload, always in view. */}
+      {field.type === 'file' && fieldConfig.enabled ? (
+        <p className="field-row__upload">{describeUploadRules(fieldConfig.upload ?? field.definition?.upload)}</p>
+      ) : null}
+
       {error ? (
         <p className="field-row__error" role="alert">
           {error}
@@ -109,7 +116,9 @@ export function FieldRow({ fieldConfig, field, lockReason, error, onUpdate }) {
 
       {canEditWording ? (
         <details className="field-row__details">
-          <summary className="field-row__summary">Wording, privacy and voice</summary>
+          <summary className="field-row__summary">
+            {field.type === 'file' ? 'Wording, upload restrictions and privacy' : 'Wording, privacy and voice'}
+          </summary>
 
           <div className="field-row__panel">
             <fieldset className="field-row__group">
@@ -169,6 +178,17 @@ export function FieldRow({ fieldConfig, field, lockReason, error, onUpdate }) {
                 />
               </div>
             </fieldset>
+
+            {field.type === 'file' ? (
+              <fieldset className="field-row__group">
+                <legend className="field-row__legend">Upload restrictions</legend>
+                <UploadRulesEditor
+                  idPrefix={idPrefix}
+                  settings={fieldConfig.upload ?? field.definition?.upload}
+                  onChange={(upload) => onUpdate({ upload })}
+                />
+              </fieldset>
+            ) : null}
 
             {field.optionsEditable ? (
               <fieldset className="field-row__group">

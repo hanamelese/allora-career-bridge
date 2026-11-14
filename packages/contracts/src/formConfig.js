@@ -1,6 +1,7 @@
 
 import { z } from 'zod';
 import { IDENTITY_ROUTES, fieldCatalog } from './fieldCatalog.js';
+import { uploadSettingsSchema } from './uploads.js';
 import { accountSettingsSchema } from './socialProviders.js';
 
 // ==========================================
@@ -40,6 +41,17 @@ export const identityRoutesSchema = z
         code: 'custom',
         message: 'The no_document identity route must always be available.',
       });
+    }
+
+    /* "Refer me through a partner" was merged into "I have no document,
+       refer me". Published versions may still carry it; a draft may not. */
+    for (const route of routes) {
+      if (IDENTITY_ROUTES.find((entry) => entry.key === route)?.retired) {
+        ctx.addIssue({
+          code: 'custom',
+          message: `The ${route} identity route is no longer offered; "I have no document, refer me" replaces it.`,
+        });
+      }
     }
 
     if (new Set(routes).size !== routes.length) {
@@ -131,6 +143,8 @@ export const formFieldConfigSchema = z.object({
   helpText: localizedTextSchema.optional(),
   options: z.array(builtInOptionSchema).min(1).optional(),
   voiceInput: z.boolean().optional(),
+  /* Restrictions on an upload question: largest size, kinds of file. */
+  upload: uploadSettingsSchema.optional(),
 }).strict().superRefine((field, ctx) => {
   const definition = fieldCatalog[field.key];
 
@@ -151,6 +165,14 @@ export const formFieldConfigSchema = z.object({
       code: 'custom',
       path: ['visibility'],
       message: `"${field.key}" holds private information and must stay private.`,
+    });
+  }
+
+  if (field.upload && definition.uploadEditable !== true) {
+    ctx.addIssue({
+      code: 'custom',
+      path: ['upload'],
+      message: `"${field.key}" is not an upload question.`,
     });
   }
 

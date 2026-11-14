@@ -1,8 +1,9 @@
 import { useMemo, useState } from 'react';
 import { RotateCcw } from 'lucide-react';
-import { FormRenderer } from '@onboarding/form-engine/react';
+import { formatFileSize, isFileLike } from '@onboarding/contracts';
+import { FormRenderer, clearProgress } from '@onboarding/form-engine/react';
 import { Button } from '../ui/Button.jsx';
-import { getIcon } from '../../icons.js';
+import { renderIcon } from '../../icons.js';
 import { sendTestReferral } from '../../api/formsClient.js';
 import { listReferralPartners } from '../../api/organisationClient.js';
 import { useAsync } from '../../hooks/useAsync.js';
@@ -18,15 +19,28 @@ import './PreviewPane.css';
  * here immediately.
  */
 
-/* The engine names icons as strings so it needs no icon library of its
-   own; the dashboard supplies the components. */
-function renderIcon(name) {
-  const Icon = getIcon(name);
-  return <Icon />;
+/* What the embedded form would hand to the partner's page. Files are
+   named, not opened: this system never uploads or keeps them. */
+function describeSubmission(data) {
+  const files = Object.entries(data)
+    .filter(([, value]) => isFileLike(value))
+    .map(([key, file]) => `${key}: ${file.name} (${formatFileSize(file.size)})`);
+  const count = Object.keys(data).length;
+
+  return [
+    `On your site, ${count} ${count === 1 ? 'answer goes' : 'answers go'} to your page in the onboarding-submit event.`,
+    files.length ? `Files passed with them: ${files.join('; ')}.` : null,
+    'Nothing was sent from this preview.',
+  ]
+    .filter(Boolean)
+    .join(' ');
 }
 
 export function PreviewPane({ config, formId }) {
   const [runId, setRunId] = useState(0);
+  /* The preview keeps its place across a reload too, as a learner's form
+     does - under its own key, so it never mixes with a published form. */
+  const progressKey = `fe-progress:preview:${formId}`;
   /* What a sign-in button or the sign-in form would have done on the
      partner's site; the preview reports it instead of leaving the page. */
   const [accountNote, setAccountNote] = useState('');
@@ -58,6 +72,9 @@ export function PreviewPane({ config, formId }) {
           icon={RotateCcw}
           onClick={() => {
             setAccountNote('');
+            /* What this preview kept in the tab goes too, so it really
+               starts again. */
+            clearProgress(progressKey);
             setRunId((current) => current + 1);
           }}
         >
@@ -78,11 +95,9 @@ export function PreviewPane({ config, formId }) {
         the top of the form.
       </p>
 
-      {config.type === 'account' ? (
-        <p className="preview-pane__note" role="status">
-          {accountNote}
-        </p>
-      ) : null}
+      <p className="preview-pane__note" role="status">
+        {accountNote}
+      </p>
 
       <div className="preview-pane__frame">
         <FormRenderer
@@ -90,6 +105,7 @@ export function PreviewPane({ config, formId }) {
              clears the answers without the engine needing a reset API. */
           key={`${runId}-${config.defaultLanguage}`}
           config={config}
+          progressKey={progressKey}
           settings={{ language: config.defaultLanguage }}
           referral={referral}
           onSocialSignIn={(provider) =>
@@ -103,7 +119,7 @@ export function PreviewPane({ config, formId }) {
                       .map((key) => (key === 'password' ? 'password (hidden)' : `${key} “${data[key]}”`))
                       .join(', ')}.`,
                   )
-              : undefined
+              : (data) => setAccountNote(describeSubmission(data))
           }
           renderIcon={renderIcon}
         />

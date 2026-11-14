@@ -147,3 +147,21 @@ export const referrals = sqliteTable(
   },
   (table) => [uniqueIndex('referrals_token_hash_idx').on(table.tokenHash)],
 );
+
+/**
+ * The websites allowed to show a partner's embedded forms. A browser on
+ * any other site is refused by the public API (CORS), so a partner's
+ * public key copied onto someone else's page does not work there.
+ */
+export const allowedOrigins = sqliteTable(
+  'allowed_origins',
+  {
+    id: text('id').primaryKey(),
+    partnerId: text('partner_id')
+      .notNull()
+      .references(() => partners.id),
+    origin: text('origin').notNull(),
+    createdAt: text('created_at').notNull(),
+  },
+  (table) => [uniqueIndex('allowed_origins_partner_origin').on(table.partnerId, table.origin)],
+);

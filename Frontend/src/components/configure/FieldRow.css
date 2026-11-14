@@ -35,7 +35,7 @@
 }
 
 .field-row__label {
-  font-size: var(--font-size-sm);
+  font-size: var(--text-card-title);
   font-weight: var(--font-weight-semibold);
 }
 
@@ -139,4 +139,48 @@
   display: grid;
   grid-template-columns: repeat(auto-fit, minmax(13rem, 1fr));
   gap: var(--space-md);
+}
+
+.field-row__upload {
+  margin-block-start: var(--space-sm);
+  margin-inline-start: calc(2rem + var(--space-gutter));
+  font-size: var(--font-size-sm);
+  font-weight: var(--font-weight-medium);
+  color: var(--ink);
+}
+
+.upload-rules {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-md);
+  max-width: 32rem;
+}
+
+.upload-rules__summary {
+  padding: var(--space-sm) var(--space-gutter);
+  border-radius: var(--radius-md);
+  background-color: var(--surface-sunken);
+  font-size: var(--font-size-sm);
+  font-weight: var(--font-weight-semibold);
+}
+
+.upload-rules__kinds {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-xs);
+  margin: 0;
+  padding: 0;
+  border: 0;
+}
+
+.upload-rules__legend {
+  margin-block-end: var(--space-xs);
+  font-size: var(--font-size-sm);
+  font-weight: var(--font-weight-semibold);
+}
+
+.upload-rules__note {
+  font-size: var(--font-size-xs);
+  color: var(--ink-secondary);
+  line-height: var(--line-height-relaxed);
 }

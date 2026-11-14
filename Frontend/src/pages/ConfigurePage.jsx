@@ -1,5 +1,5 @@
 import { useOutletContext } from 'react-router-dom';
-import { LOCK_REASONS } from '@onboarding/contracts';
+import { LOCK_REASONS, fieldCatalog } from '@onboarding/contracts';
 import { Card } from '../components/ui/Card.jsx';
 import { SectionHeading } from '../components/ui/SectionHeading.jsx';
 import { EmptyState } from '../components/ui/EmptyState.jsx';
@@ -36,6 +36,12 @@ export function ConfigurePage() {
     config.customFields.filter((field) => field.enabled).length;
 
   const hasIdentityQuestion = config.fields.some((field) => field.key === 'identityRoute');
+
+  /* Support and accommodation questions are kept in a section of their
+     own, as learners meet them. */
+  const isSupport = (field) => fieldCatalog[field.key]?.section === 'support';
+  const supportFields = config.fields.filter(isSupport);
+  const generalFields = config.fields.filter((field) => !isSupport(field));
 
   return (
     <div className="stack-lg">
@@ -77,11 +83,30 @@ export function ConfigurePage() {
 
         <SettingsPanel
           config={config}
+          fields={generalFields}
           fieldErrors={fieldErrors}
           lockReasons={LOCK_REASONS[formType.id]}
           onUpdateField={updateField}
         />
       </Card>
+
+      {supportFields.length > 0 ? (
+        <Card as="section" aria-labelledby="support-fields-heading">
+          <SectionHeading
+            id="support-fields-heading"
+            title="Support and accommodations"
+            description="Asked in a section of their own, marked private. Answers are never shared with employers, people are never asked for medical proof, and nobody has to say why they need something."
+          />
+
+          <SettingsPanel
+            config={config}
+            fields={supportFields}
+            fieldErrors={fieldErrors}
+            lockReasons={LOCK_REASONS[formType.id]}
+            onUpdateField={updateField}
+          />
+        </Card>
+      ) : null}
 
       {/* A sign-in form asks only for what signing in needs. */}
       {config.type !== 'account' ? (

@@ -1,0 +1,20 @@
+{
+  "name": "widget",
+  "private": true,
+  "version": "1.0.0",
+  "type": "module",
+  "description": "The embeddable <onboarding-form> element partners put on their own websites.",
+  "scripts": {
+    "build": "vite build"
+  },
+  "dependencies": {
+    "@onboarding/contracts": "*",
+    "@onboarding/form-engine": "*",
+    "react": "^19.3.1",
+    "react-dom": "^19.3.1"
+  },
+  "devDependencies": {
+    "@vitejs/plugin-react": "^6.3.0",
+    "vite": "^8.3.8"
+  }
+}

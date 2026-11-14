@@ -10,6 +10,7 @@ const COPY = {
     back: 'Back',
     private: 'Private',
     privateNote: 'Answers marked private are not shared with employers.',
+    supportSection: 'Support and accommodations (private)',
   },
   am: {
     heading: 'መልሶችዎን ያረጋግጡ',
@@ -20,6 +21,7 @@ const COPY = {
     back: 'ተመለስ',
     private: 'የግል',
     privateNote: 'የግል ተብለው የተመለከቱ መልሶች ለአሠሪዎች አይጋሩም።',
+    supportSection: 'ድጋፍ እና ማመቻቻዎች (የግል)',
   },
 };
 
@@ -34,20 +36,16 @@ const COPY = {
 export function ReviewStep({ items, summary, language, onEdit, onSubmit, onBack }) {
   const copy = COPY[language] ?? COPY.en;
   const hasPrivateAnswers = items.some((item) => item.isPrivate);
+  /* Support and accommodation answers are listed apart, as they were
+     asked apart. */
+  const supportItems = items.filter((item) => item.section === 'support');
 
-  return (
-    <div className="fe-review">
-      <div className="fe-question__title">
-        <h2 className="fe-question__heading" data-question-heading tabIndex={-1}>
-          {copy.heading}
-        </h2>
-        <ReadAloudButton text={`${copy.heading}. ${summary}`} language={language} />
-      </div>
+  function renderList(list) {
+    if (list.length === 0) return null;
 
-      <p className="fe-question__help">{copy.intro}</p>
-
+    return (
       <dl className="fe-review__list">
-        {items.map((item) => (
+        {list.map((item) => (
           <div className="fe-review__item" key={item.key}>
             <dt className="fe-review__term">
               {item.label}
@@ -65,6 +63,30 @@ export function ReviewStep({ items, summary, language, onEdit, onSubmit, onBack 
           </div>
         ))}
       </dl>
+    );
+  }
+
+  return (
+    <div className="fe-review">
+      <div className="fe-question__title">
+        <h2 className="fe-question__heading" data-question-heading tabIndex={-1}>
+          {copy.heading}
+        </h2>
+        <ReadAloudButton text={`${copy.heading}. ${summary}`} language={language} />
+      </div>
+
+      <p className="fe-question__help">{copy.intro}</p>
+
+      {renderList(items.filter((item) => item.section !== 'support'))}
+
+      {supportItems.length > 0 ? (
+        <section className="fe-review__section" aria-labelledby="fe-review-support">
+          <h3 className="fe-review__section-heading" id="fe-review-support">
+            {copy.supportSection}
+          </h3>
+          {renderList(supportItems)}
+        </section>
+      ) : null}
 
       {hasPrivateAnswers ? <p className="fe-question__note">{copy.privateNote}</p> : null}
 

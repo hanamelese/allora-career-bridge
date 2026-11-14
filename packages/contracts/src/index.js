@@ -9,6 +9,7 @@
 export {
   SUPPORTED_LANGUAGES,
   IDENTITY_ROUTES,
+  OFFERED_IDENTITY_ROUTES,
   LEVEL_OPTIONS,
   AVAILABILITY_OPTIONS,
   EDUCATION_OPTIONS,
@@ -40,6 +41,7 @@ export {
 
 export {
   FORM_TEMPLATES,
+  IDENTITY_FIELD_KEYS,
   LEGACY_FORM_TYPES,
   LOCK_REASONS,
   getTemplate,
@@ -62,7 +64,27 @@ export {
   formConfigSchema,
 } from './formConfig.js';
 
-export { upgradeLearnerDraft, moveIdentityToEnd } from './formUpgrades.js';
+export {
+  upgradeLearnerDraft,
+  moveIdentityToEnd,
+  mergeReferralRoutes,
+  removeLearnerConsent,
+  addJobIdentityQuestions,
+  addUploadQuestions,
+} from './formUpgrades.js';
+
+export {
+  UPLOAD_FILE_TYPES,
+  UPLOAD_FILE_TYPE_KEYS,
+  MAX_UPLOAD_MB,
+  uploadSettingsSchema,
+  resolveUploadRules,
+  acceptAttribute,
+  listFileTypes,
+  formatFileSize,
+  isFileLike,
+  checkFile,
+} from './uploads.js';
 
 export {
   SOCIAL_PROVIDERS,
@@ -96,3 +118,5 @@ export {
   buildProgressSchema,
   getPartnerSafeAnswers,
 } from './submissionSchema.js';
+
+export { normalizeOrigin, allowedOriginSchema, allowedOriginRequestSchema } from './origins.js';

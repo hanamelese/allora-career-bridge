@@ -1,3 +1,4 @@
+import { useState } from 'react';
 import { Link } from 'react-router-dom';
 import {
   ArrowRight,
@@ -15,6 +16,8 @@ import {
   Volume2,
 } from 'lucide-react';
 import { Button } from '../components/ui/Button.jsx';
+import { Modal } from '../components/ui/Modal.jsx';
+import { PartnerAuthForm } from '../auth/PartnerAuthForm.jsx';
 import { SkipLink } from '../components/ui/SkipLink.jsx';
 /* A licensed copy of Adobe Stock #563796331 should replace this file
    before the site is public; the one here is the watermarked preview. */
@@ -89,6 +92,13 @@ const FORMS = [
  * nothing to a published, accessible form, and a way to sign up.
  */
 export function LandingPage() {
+  /* Sign in and Create account open the shared sign-in form in a popup,
+     so nobody has to leave this page to start. /signin and /signup still
+     work as pages for links and bookmarks. */
+  const [authMode, setAuthMode] = useState(null);
+  const openSignIn = () => setAuthMode('signIn');
+  const openSignUp = () => setAuthMode('signUp');
+
   return (
     <div className="landing">
       <SkipLink />
@@ -120,10 +130,10 @@ export function LandingPage() {
           </nav>
 
           <div className="landing__auth">
-            <Button as={Link} to="/signin" variant="ghost">
+            <Button variant="ghost" onClick={openSignIn} aria-haspopup="dialog">
               Sign in
             </Button>
-            <Button as={Link} to="/signup" variant="primary">
+            <Button variant="primary" onClick={openSignUp} aria-haspopup="dialog">
               Create account
             </Button>
           </div>
@@ -145,11 +155,11 @@ export function LandingPage() {
             </p>
 
             <div className="landing__cta">
-              <Button as={Link} to="/signup" variant="primary" className="landing__big-button">
+              <Button variant="primary" className="landing__big-button" onClick={openSignUp} aria-haspopup="dialog">
                 Create a partner account
                 <ArrowRight className="button__icon" aria-hidden="true" />
               </Button>
-              <Button as={Link} to="/signin" variant="secondary" className="landing__big-button">
+              <Button variant="secondary" className="landing__big-button" onClick={openSignIn} aria-haspopup="dialog">
                 Sign in
               </Button>
             </div>
@@ -288,8 +298,9 @@ export function LandingPage() {
               secret key never leaves the server.
             </p>
             <p>
-              The Preview page gives you the embed tag for each form. The published configuration is
-              also available directly from the public API:
+              Each form’s Embed tag page gives you a two-line tag to paste into your site; the form then
+              hands each submission, with any files, to your page’s own code. The published
+              configuration is also available directly from the public API:
             </p>
           </div>
 
@@ -310,7 +321,7 @@ x-public-key: pk_live_…
         <section className="landing__closing" aria-labelledby="closing-heading">
           <h2 id="closing-heading">Ready to make your forms work for everyone?</h2>
           <p>It takes a minute to create an account, and your forms are ready to configure straight away.</p>
-          <Button as={Link} to="/signup" variant="primary" className="landing__big-button">
+          <Button variant="primary" className="landing__big-button" onClick={openSignUp} aria-haspopup="dialog">
             Create a partner account
             <ArrowRight className="button__icon" aria-hidden="true" />
           </Button>
@@ -320,9 +331,20 @@ x-public-key: pk_live_…
       <footer className="landing__footer">
         <p>Partner Dashboard · Accessible Onboarding</p>
         <p>
-          Already have an account? <Link to="/signin">Sign in</Link>
+          Already have an account?{' '}
+          <button type="button" className="landing__text-button" onClick={openSignIn} aria-haspopup="dialog">
+            Sign in
+          </button>
         </p>
       </footer>
+
+      <Modal
+        isOpen={authMode !== null}
+        onClose={() => setAuthMode(null)}
+        label={authMode === 'signIn' ? 'Sign in to the Partner Dashboard' : 'Create a partner account'}
+      >
+        {authMode ? <PartnerAuthForm mode={authMode} onModeChange={setAuthMode} /> : null}
+      </Modal>
     </div>
   );
 }

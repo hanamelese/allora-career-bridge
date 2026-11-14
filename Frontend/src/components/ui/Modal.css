@@ -1,0 +1,76 @@
+.modal {
+  width: min(30rem, calc(100vw - 1.5rem));
+  max-width: none;
+  max-height: calc(100dvh - 1.5rem);
+  padding: 0;
+  border: 1px solid var(--border-subtle);
+  border-radius: var(--radius-xl);
+  background-color: var(--surface);
+  color: var(--ink);
+  box-shadow: var(--shadow-lg);
+  overflow: auto;
+  overscroll-behavior: contain;
+}
+
+/* The dialog takes focus on opening only so its name is announced; it
+   needs no ring of its own. */
+.modal:focus {
+  outline: none;
+}
+
+.modal::backdrop {
+  background-color: rgba(15, 23, 42, 0.5);
+  backdrop-filter: blur(2px);
+}
+
+.modal__panel {
+  position: relative;
+  /* Room above the content for the close button, so it never covers
+     anything the content puts at its top. */
+  padding: calc(var(--target-min-size, 48px) + var(--space-md)) var(--space-lg) var(--space-lg);
+}
+
+.modal__close {
+  position: absolute;
+  inset-block-start: var(--space-sm);
+  inset-inline-end: var(--space-sm);
+  display: inline-grid;
+  place-items: center;
+  width: var(--target-min-size, 48px);
+  height: var(--target-min-size, 48px);
+  padding: 0;
+  border: 1px solid transparent;
+  border-radius: var(--radius-pill);
+  background: transparent;
+  color: var(--ink-secondary);
+  cursor: pointer;
+}
+
+.modal__close:hover {
+  background-color: var(--surface-sunken);
+  color: var(--ink);
+}
+
+.modal__close svg {
+  width: 1.25rem;
+  height: 1.25rem;
+}
+
+@media (max-width: 30rem) {
+  .modal__panel {
+    padding-inline: var(--space-md);
+  }
+}
+
+@media (prefers-reduced-motion: no-preference) {
+  .modal[open] {
+    animation: modal-in 160ms ease-out;
+  }
+}
+
+@keyframes modal-in {
+  from {
+    opacity: 0;
+    transform: translateY(8px);
+  }
+}

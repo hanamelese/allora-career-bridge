@@ -2,7 +2,7 @@
   width: min(32rem, calc(100vw - 2rem));
   padding: var(--space-xl);
   border: 1px solid var(--border-subtle);
-  border-radius: var(--radius-lg);
+  border-radius: var(--radius-xl);
   background-color: var(--surface);
   color: var(--ink);
   box-shadow: var(--shadow-lg);
@@ -13,7 +13,7 @@
 }
 
 .publish-dialog__title {
-  font-size: var(--font-size-md);
+  font-size: var(--text-section-title);
 }
 
 .publish-dialog__body {

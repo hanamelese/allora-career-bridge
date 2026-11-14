@@ -1012,12 +1012,98 @@ textarea.fe-input {
   font-weight: 700;
 }
 
+/* The contrast slider. Drawn explicitly - track, filled part and thumb -
+   rather than left to the browser, so its edges reach 3:1 at every
+   contrast level (WCAG 1.4.11) and the keyboard focus ring is unmistakable
+   (2.4.7, 2.4.13). It is a native range: Tab reaches it, and the arrow
+   keys, Home, End, Page Up and Page Down change it. */
 .fe-settings__range {
+  --fe-range-fill: calc((var(--fe-range-value, 1) - 1) / 3 * 100%);
+
   width: 100%;
   min-height: var(--fe-target);
   margin: 0;
-  accent-color: var(--fe-ink);
+  padding: 0 0.25rem;
+  background: transparent;
+  border-radius: 999px;
   cursor: pointer;
+  appearance: none;
+  -webkit-appearance: none;
+}
+
+.fe-settings__range::-webkit-slider-runnable-track {
+  height: 0.625rem;
+  border: 2px solid var(--fe-ink);
+  border-radius: 999px;
+  background: linear-gradient(
+    to right,
+    var(--fe-ink) 0 var(--fe-range-fill),
+    var(--fe-surface) var(--fe-range-fill) 100%
+  );
+}
+
+.fe-settings__range::-moz-range-track {
+  height: 0.375rem;
+  border: 2px solid var(--fe-ink);
+  border-radius: 999px;
+  background: var(--fe-surface);
+}
+
+.fe-settings__range::-moz-range-progress {
+  height: 0.375rem;
+  border: 2px solid var(--fe-ink);
+  border-radius: 999px;
+  background: var(--fe-ink);
+}
+
+.fe-settings__range::-webkit-slider-thumb {
+  width: 1.75rem;
+  height: 1.75rem;
+  margin-top: calc((0.625rem - 4px - 1.75rem) / 2);
+  border: 3px solid var(--fe-ink);
+  border-radius: 999px;
+  background: var(--fe-surface);
+  appearance: none;
+  -webkit-appearance: none;
+}
+
+.fe-settings__range::-moz-range-thumb {
+  width: 1.75rem;
+  height: 1.75rem;
+  box-sizing: border-box;
+  border: 3px solid var(--fe-ink);
+  border-radius: 999px;
+  background: var(--fe-surface);
+}
+
+/* Keyboard focus: a ring round the whole slider, and the thumb itself
+   filled in and ringed, so where the value is and that the slider has
+   focus are both obvious. */
+.fe-form .fe-settings__range:focus-visible {
+  outline: 2px solid var(--fe-focus-inner);
+  outline-offset: 2px;
+  box-shadow: 0 0 0 calc(var(--fe-focus-width) + 2px) var(--fe-ink);
+}
+
+.fe-settings__range:focus-visible::-webkit-slider-thumb {
+  background: var(--fe-ink);
+  box-shadow:
+    0 0 0 3px var(--fe-focus-inner),
+    0 0 0 calc(3px + var(--fe-focus-width)) var(--fe-ink);
+}
+
+.fe-settings__range:focus-visible::-moz-range-thumb {
+  background: var(--fe-ink);
+  box-shadow:
+    0 0 0 3px var(--fe-focus-inner),
+    0 0 0 calc(3px + var(--fe-focus-width)) var(--fe-ink);
+}
+
+@media (forced-colors: active) {
+  .fe-settings__range {
+    appearance: auto;
+    -webkit-appearance: auto;
+  }
 }
 
 .fe-settings__ticks {
@@ -1239,33 +1325,38 @@ textarea.fe-input {
   line-height: 1.2;
 }
 
-.fe-account__summary {
-  padding: 1rem;
+.fe-account__message {
+  margin: 0;
+  padding: 0.75rem 1rem;
   border: 2px solid var(--fe-danger);
   border-inline-start-width: 6px;
   border-radius: var(--fe-radius);
   background-color: var(--fe-danger-surface);
   color: var(--fe-ink);
+  font-weight: 600;
 }
 
-.fe-account__summary:focus-visible {
+/* One screen of the sign-up or sign-in. */
+.fe-account__screen {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+  min-width: 0;
+}
+
+.fe-account__step-heading {
+  margin: 0;
+  font-size: calc(1.25rem * var(--fe-scale, 1));
+  line-height: 1.3;
+}
+
+.fe-account__step-heading:focus {
+  outline: none;
+}
+
+.fe-account__step-heading:focus-visible {
   outline: 2px solid var(--fe-focus-inner);
   box-shadow: 0 0 0 var(--fe-focus-width) var(--fe-ink);
-}
-
-.fe-account__summary-title {
-  margin: 0 0 0.5rem;
-  font-weight: 700;
-}
-
-.fe-account__summary ul {
-  margin: 0;
-  padding-inline-start: 1.25rem;
-}
-
-.fe-account__summary a {
-  color: var(--fe-danger);
-  font-weight: 600;
 }
 
 .fe-social__list {
@@ -1333,31 +1424,6 @@ textarea.fe-input {
   border-block-start: 1px solid var(--fe-border);
 }
 
-.fe-account__form {
-  display: flex;
-  flex-direction: column;
-  gap: 1.25rem;
-}
-
-.fe-account__form .fe-progress__note {
-  margin: 0;
-}
-
-.fe-account__field {
-  display: flex;
-  flex-direction: column;
-  gap: 0.375rem;
-  min-width: 0;
-}
-
-.fe-account__label {
-  display: flex;
-  align-items: center;
-  flex-wrap: wrap;
-  gap: 0.375rem;
-  font-weight: 700;
-}
-
 .fe-question__icon--small {
   width: 1.75rem;
   height: 1.75rem;
@@ -1388,11 +1454,170 @@ textarea.fe-input {
   border-color: var(--fe-ink);
 }
 
-.fe-account__submit {
-  width: 100%;
-}
-
 .fe-account__switch {
   margin: 0;
   text-align: center;
+}
+
+/* ---- Support and accommodations: a section of its own ---- */
+.fe-section-band {
+  display: flex;
+  flex-direction: column;
+  gap: 0.125rem;
+  padding: 0.625rem 0.875rem;
+  border: 1px solid var(--fe-border);
+  border-inline-start: 6px solid var(--fe-accent);
+  border-radius: var(--fe-radius);
+  background-color: var(--fe-surface-sunken);
+}
+
+.fe-section-band__name {
+  font-size: calc(0.875rem * var(--fe-scale, 1));
+  font-weight: 700;
+  letter-spacing: 0.02em;
+  text-transform: uppercase;
+  color: var(--fe-ink);
+}
+
+.fe-section-band__note {
+  font-size: calc(0.875rem * var(--fe-scale, 1));
+  color: var(--fe-ink-secondary);
+}
+
+.fe-review__section {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+  padding: 0.75rem 0.875rem;
+  border: 1px solid var(--fe-border);
+  border-inline-start: 6px solid var(--fe-accent);
+  border-radius: var(--fe-radius);
+  background-color: var(--fe-surface-sunken);
+}
+
+.fe-review__section-heading {
+  margin: 0;
+  font-size: calc(1rem * var(--fe-scale, 1));
+}
+
+@media (forced-colors: active) {
+  .fe-section-band,
+  .fe-review__section {
+    border-inline-start-color: CanvasText;
+  }
+}
+
+/* ---- File upload ---- */
+.fe-file {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 0.75rem;
+}
+
+.fe-file__limits {
+  margin: 0;
+  font-size: calc(0.9375rem * var(--fe-scale, 1));
+  color: var(--fe-ink-secondary);
+}
+
+/* Hidden from view but not from the keyboard or a screen reader: the
+   input itself is what Tab reaches and what opens the file picker. */
+.fe-file__input {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  margin: -1px;
+  overflow: hidden;
+  clip-path: inset(50%);
+  white-space: nowrap;
+  opacity: 0;
+}
+
+.fe-file__button {
+  gap: 0.5rem;
+  min-height: calc(var(--fe-target) + 8px);
+  padding-inline: 1.25rem;
+  border-style: dashed;
+  border-width: 2px;
+  cursor: pointer;
+}
+
+.fe-file__input:focus-visible + .fe-file__button {
+  outline: 2px solid var(--fe-focus-inner);
+  outline-offset: 1px;
+  box-shadow: 0 0 0 var(--fe-focus-width) var(--fe-ink);
+}
+
+.fe-file__input[aria-invalid='true'] + .fe-file__button {
+  border-color: var(--fe-danger);
+}
+
+.fe-file__chosen {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.25rem 1rem;
+  width: 100%;
+  padding: 0.75rem 1rem;
+  border: 1px solid var(--fe-border);
+  border-radius: var(--fe-radius);
+  background-color: var(--fe-surface-sunken);
+}
+
+.fe-file__chosen--invalid {
+  border-color: var(--fe-danger);
+  border-width: 2px;
+}
+
+.fe-file__chosen-title {
+  flex-basis: 100%;
+  margin: 0;
+  font-size: calc(0.8125rem * var(--fe-scale, 1));
+  font-weight: 700;
+  color: var(--fe-ink-secondary);
+}
+
+.fe-file__details {
+  flex: 1 1 12rem;
+  min-width: 0;
+  margin: 0;
+}
+
+.fe-file__details dd {
+  margin: 0;
+}
+
+.fe-file__name {
+  font-weight: 700;
+  overflow-wrap: anywhere;
+}
+
+.fe-file__meta {
+  font-size: calc(0.875rem * var(--fe-scale, 1));
+  color: var(--fe-ink-secondary);
+  overflow-wrap: anywhere;
+}
+
+/* ---- Saved in this tab ---- */
+.fe-progress__saved {
+  margin: 0.25rem 0 0;
+  font-size: calc(0.8125rem * var(--fe-scale, 1));
+  color: var(--fe-ink-secondary);
+}
+
+.fe-restored {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 0.375rem;
+  padding: 0.75rem 1rem;
+  border: 1px solid var(--fe-border);
+  border-inline-start: 6px solid var(--fe-accent);
+  border-radius: var(--fe-radius);
+  background-color: var(--fe-surface-sunken);
+}
+
+.fe-restored p {
+  margin: 0;
 }

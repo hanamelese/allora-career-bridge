@@ -7,13 +7,13 @@
 // need the same defaults: the dashboard seeds a new form from them, and
 // the server seeds `form_templates` from them.
 
-import { IDENTITY_ROUTES, fieldCatalog } from './fieldCatalog.js';
+import { OFFERED_IDENTITY_ROUTES, fieldCatalog } from './fieldCatalog.js';
 import { defaultAccountSettings } from './socialProviders.js';
 
 const LANGUAGES = ['en', 'am'];
 
 /* Every identity route is offered by default, including "no document". */
-const ALL_IDENTITY_ROUTES = IDENTITY_ROUTES.map((route) => route.key);
+const ALL_IDENTITY_ROUTES = OFFERED_IDENTITY_ROUTES.map((route) => route.key);
 
 /**
  * One field entry.
@@ -56,6 +56,36 @@ function template(type, formId, fields) {
  */
 export const LEGACY_FORM_TYPES = ['learner'];
 
+/**
+ * How a person identifies themselves, shared by the learner and job
+ * application forms: the question, the ID number (only for a document that
+ * carries one) and - for "I have no document, refer me" - the referral to
+ * a partner organisation. Their name and phone are already known by then,
+ * so nothing is asked twice.
+ */
+export const IDENTITY_FIELD_KEYS = ['identityRoute', 'documentId', 'identityDocumentFile', 'referral'];
+
+/* Every route where the learner has some document to show. */
+const DOCUMENT_ROUTES = ['kebele_id', 'passport', 'refugee_id', 'other_document'];
+
+function IDENTITY_FIELDS() {
+  return [
+    field('identityRoute', { required: true, locked: true }),
+    field('documentId', {
+      showIf: { field: 'identityRoute', in: ['kebele_id', 'passport', 'refugee_id'] },
+    }),
+    /* Not everyone has a standard ID card, so any document can be
+       uploaded - but never has to be. */
+    field('identityDocumentFile', {
+      showIf: { field: 'identityRoute', in: DOCUMENT_ROUTES },
+    }),
+    field('referral', {
+      locked: true,
+      showIf: { field: 'identityRoute', in: ['no_document'] },
+    }),
+  ];
+}
+
 export const FORM_TEMPLATES = {
   /* ---- Sign up / Sign in ----
      An accessible sign-in component for the partner's own site. The name
@@ -91,23 +121,10 @@ export const FORM_TEMPLATES = {
       // Partner-assisted registration: an optional extra, off by default.
       field('assistedBy', { enabled: false }),
       field('assistedConsent', { enabled: false }),
-      field('consent', { required: true, locked: true }),
-      /* The identity questions come last, after consent, so that "How can
+      /* The identity questions come last, so that "How can
          we identify you?" -> ID number, or -> referral, is one unbroken
          run at the end rather than interrupting the ordinary questions. */
-      field('identityRoute', { required: true, locked: true }),
-      /* Only asked when the chosen document actually carries a number, so a
-         learner with no document never meets it. */
-      field('documentId', {
-        showIf: { field: 'identityRoute', in: ['kebele_id', 'passport', 'refugee_id'] },
-      }),
-      /* A learner with no document can ask a partner organisation to
-         help. Their name and phone are already known, so nothing is asked
-         twice. */
-      field('referral', {
-        locked: true,
-        showIf: { field: 'identityRoute', in: ['no_document', 'partner_referral'] },
-      }),
+      ...IDENTITY_FIELDS(),
     ],
   ),
 
@@ -123,9 +140,14 @@ export const FORM_TEMPLATES = {
       field('experience'),
       field('motivation'),
       field('skills'),
+      field('cvFile'),
       field('availability'),
       field('interviewAccommodations', { locked: true }),
-      field('consent', { required: true, locked: true }),
+      /* The same identity questions as the learner form, last, so "How can
+         we identify you?" -> ID number, or -> referral, is one unbroken run
+         at the end. Name and phone are already asked above, so a referral
+         never asks for them again. */
+      ...IDENTITY_FIELDS(),
     ],
   ),
 
@@ -163,15 +185,17 @@ export const LOCK_REASONS = {
       'Every learner must be offered a way to identify themselves, including the option of having no document at all.',
     supportNeeds:
       'Learners must always be able to ask for support. It stays optional to answer, and private when they do.',
-    consent: 'Learners must agree before any of their answers are submitted.',
     referral:
-      'A learner with no identity document must always have a way forward. It is only asked of learners who have no document or ask to be referred, and it never has to be answered.',
+      'A learner with no identity document must always have a way forward. It is only asked of learners who choose "I have no document, refer me", and it never has to be answered.',
   },
   jobApplication: {
     name: 'An employer cannot act on an application with no name.',
     interviewAccommodations:
-      'Applicants must always be able to ask for interview accommodations. The request is private and never shown to the employer as a disability.',
-    consent: 'Applicants must agree before their application is submitted.',
+      'Applicants must always be able to say what would help them at the job. The request is private and never shown to the employer as a disability.',
+    identityRoute:
+      'Every applicant must be offered a way to identify themselves, including the option of having no document at all.',
+    referral:
+      'An applicant with no identity document must always have a way forward. It is only asked of applicants who choose "I have no document, refer me", and it never has to be answered.',
   },
   employer: {
     organisationName: 'An opportunity must say which organisation is offering it.',

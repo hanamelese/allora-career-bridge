@@ -1,7 +1,7 @@
 import { Router } from 'express';
 import { and, asc, eq } from 'drizzle-orm';
-import { referralPartnerSchema } from '@onboarding/contracts';
-import { referralPartners } from '../db/schema.js';
+import { allowedOriginRequestSchema, referralPartnerSchema } from '@onboarding/contracts';
+import { allowedOrigins, referralPartners } from '../db/schema.js';
 import { newId } from '../db/keys.js';
 import { validateBody } from '../middleware/validate.js';
 import { ApiError } from '../middleware/errors.js';
@@ -100,6 +100,52 @@ export function organisationRoutes(db) {
       .set({ status: 'archived', updatedAt: new Date().toISOString() })
       .where(eq(referralPartners.id, existing.id))
       .run();
+
+    response.status(204).end();
+  });
+
+  /* ---- Websites allowed to show this partner's embedded forms ---- */
+
+  function listOrigins(partnerId) {
+    return db
+      .select({ id: allowedOrigins.id, origin: allowedOrigins.origin, createdAt: allowedOrigins.createdAt })
+      .from(allowedOrigins)
+      .where(eq(allowedOrigins.partnerId, partnerId))
+      .orderBy(asc(allowedOrigins.origin))
+      .all();
+  }
+
+  router.get('/allowed-origins', (request, response) => {
+    response.json(listOrigins(request.auth.partnerId));
+  });
+
+  router.post(
+    '/allowed-origins',
+    validateBody(allowedOriginRequestSchema, 'That website address was rejected.'),
+    (request, response) => {
+      const { origin } = request.validated;
+      const partnerId = request.auth.partnerId;
+      const existing = listOrigins(partnerId).find((row) => row.origin === origin);
+
+      /* Adding one that is already there is harmless. */
+      if (existing) return response.status(200).json(existing);
+
+      const row = { id: newId('org'), partnerId, origin, createdAt: new Date().toISOString() };
+      db.insert(allowedOrigins).values(row).run();
+
+      response.status(201).json({ id: row.id, origin: row.origin, createdAt: row.createdAt });
+    },
+  );
+
+  router.delete('/allowed-origins/:id', (request, response) => {
+    const result = db
+      .delete(allowedOrigins)
+      .where(and(eq(allowedOrigins.id, request.params.id), eq(allowedOrigins.partnerId, request.auth.partnerId)))
+      .run();
+
+    if (result.changes === 0) {
+      throw new ApiError(404, 'allowed_origin_not_found', 'That website is not on your list.');
+    }
 
     response.status(204).end();
   });

@@ -67,7 +67,7 @@ describe('Sign up / Sign in form', () => {
 describe('learner form order', () => {
   it('asks the identity questions last, just before the referral', () => {
     const keys = FORM_TEMPLATES.signup.fields.map((field) => field.key);
-    expect(keys.slice(-4)).toEqual(['consent', 'identityRoute', 'documentId', 'referral']);
+    expect(keys.slice(-4)).toEqual(['identityRoute', 'documentId', 'identityDocumentFile', 'referral']);
   });
 
   it('moves identity questions in an older draft and keeps everything else', () => {
