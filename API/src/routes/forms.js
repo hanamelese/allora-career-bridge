@@ -1,10 +1,11 @@
 import { Router } from 'express';
 import { and, eq, asc } from 'drizzle-orm';
-import { formConfigSchema } from '@onboarding/contracts';
+import { formConfigSchema, LEGACY_FORM_TYPES, referralRequestSchema } from '@onboarding/contracts';
 import { partnerForms, formVersions, apiKeys } from '../db/schema.js';
 import { newId } from '../db/keys.js';
 import { validateBody } from '../middleware/validate.js';
 import { ApiError } from '../middleware/errors.js';
+import { sendReferrals } from '../referrals.js';
 
 /**
  * The dashboard API.
@@ -12,7 +13,7 @@ import { ApiError } from '../middleware/errors.js';
  * Every read and write is filtered by the signed-in partner, so a form id
  * from another partner is simply not found rather than forbidden.
  */
-export function formRoutes(db) {
+export function formRoutes(db, { sms = null } = {}) {
   const router = Router();
 
   /** Find one of this partner's forms, or fail cleanly. */
@@ -74,7 +75,9 @@ export function formRoutes(db) {
       .select()
       .from(partnerForms)
       .where(eq(partnerForms.partnerId, request.auth.partnerId))
-      .all();
+      .all()
+      /* A retired form type is kept in the database but no longer offered. */
+      .filter((form) => !LEGACY_FORM_TYPES.includes(form.type));
 
     response.json(
       forms.map((form) => ({
@@ -183,6 +186,28 @@ export function formRoutes(db) {
       ),
     );
   });
+
+  /**
+   * The live preview's Send link. It really sends - to the partner's own
+   * registered referral partners only - so staff can try the whole flow;
+   * the message is marked as a test.
+   */
+  router.post(
+    '/:id/referrals/test',
+    validateBody(referralRequestSchema, 'This referral request was rejected.'),
+    async (request, response) => {
+      const form = findForm(request.auth.partnerId, request.params.id);
+
+      const result = await sendReferrals(db, sms, {
+        partnerId: request.auth.partnerId,
+        partnerFormId: form.id,
+        request: request.validated,
+        isTest: true,
+      });
+
+      response.json(result);
+    },
+  );
 
   router.get('/:id/versions', (request, response) => {
     const form = findForm(request.auth.partnerId, request.params.id);

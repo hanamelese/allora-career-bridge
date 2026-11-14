@@ -15,7 +15,11 @@ import { formatAnswerText } from '../src/accessibility.js';
  * preview is what the learner sees" true rather than a promise.
  */
 export function useFormEngine(config, settings = {}, { onSubmit } = {}) {
-  const { language = 'en', lowLiteracy = false, readAloud = false, voiceInput = true } = settings;
+  /* Read-aloud and voice input are always on. Only the language and the
+     learner's own choice of simple words vary. */
+  const { language = 'en', lowLiteracy = false, referralPartners } = settings;
+  const readAloud = true;
+  const voiceInput = true;
 
   const answersRef = useRef({});
   const currentKeyRef = useRef(null);
@@ -38,6 +42,7 @@ export function useFormEngine(config, settings = {}, { onSubmit } = {}) {
       lowLiteracy,
       readAloud,
       voiceInput,
+      referralPartners,
     });
 
     if (currentKeyRef.current) {
@@ -45,7 +50,7 @@ export function useFormEngine(config, settings = {}, { onSubmit } = {}) {
     }
 
     return next;
-  }, [config, language, lowLiteracy, readAloud, voiceInput]);
+  }, [config, language, lowLiteracy, readAloud, voiceInput, referralPartners]);
 
   /** Record where we are and redraw. */
   const sync = useCallback(() => {
@@ -72,6 +77,17 @@ export function useFormEngine(config, settings = {}, { onSubmit } = {}) {
     },
     [engine, sync],
   );
+
+  /* Clearing removes the answer altogether, so an optional question goes
+     back to unanswered rather than holding an empty value. */
+  const clear = useCallback(() => {
+    const key = engine.getCurrentQuestion()?.key;
+    if (!key) return;
+
+    engine.removeAnswer(key);
+    setError(null);
+    sync();
+  }, [engine, sync]);
 
   const answerField = useCallback(
     (key, value) => {
@@ -192,6 +208,7 @@ export function useFormEngine(config, settings = {}, { onSubmit } = {}) {
       sync();
     },
     answer,
+    clear,
     answerField,
     next,
     back,

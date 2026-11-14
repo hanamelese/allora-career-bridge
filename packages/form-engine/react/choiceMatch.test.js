@@ -1,6 +1,6 @@
 import { describe, it, expect } from 'vitest';
 
-import { matchSpokenChoice } from './choiceMatch.js';
+import { matchSpokenChoice, matchSpokenAlternatives } from './choiceMatch.js';
 
 const OPTIONS = [
   { value: 'kebele_id', label: 'Kebele ID' },
@@ -80,5 +80,46 @@ describe('matching Amharic answers', () => {
 
   it('still reports no match for unrelated Amharic', () => {
     expect(matchSpokenChoice('ሰላም እንደምን ነህ', AMHARIC_OPTIONS).confidence).toBe('none');
+  });
+});
+
+describe('never guessing between options', () => {
+  it('does not pick one of several options that all fit', () => {
+    const result = matchSpokenChoice('ID', OPTIONS);
+
+    expect(result.option).toBeNull();
+    expect(result.confidence).toBe('ambiguous');
+    expect(result.candidates.map((option) => option.value)).toEqual(['kebele_id', 'refugee_id']);
+  });
+
+  it('does not pick when two options are both named', () => {
+    expect(matchSpokenChoice('passport or kebele id', OPTIONS).confidence).toBe('ambiguous');
+  });
+});
+
+describe('trying every recognition guess', () => {
+  it('uses a later guess when it is the confident one', () => {
+    const result = matchSpokenAlternatives(
+      [{ transcript: 'pass sport' }, { transcript: 'passport' }],
+      OPTIONS,
+    );
+
+    expect(result.option.value).toBe('passport');
+    expect(result.confidence).toBe('high');
+    expect(result.transcript).toBe('passport');
+  });
+
+  it('selects nothing when no guess matches', () => {
+    expect(matchSpokenAlternatives(['hello there', 'yellow chair'], OPTIONS).option).toBeNull();
+  });
+
+  it('matches yes and no', () => {
+    const yesNo = [
+      { value: true, label: 'Yes' },
+      { value: false, label: 'No' },
+    ];
+
+    expect(matchSpokenAlternatives(['yes'], yesNo).option.value).toBe(true);
+    expect(matchSpokenAlternatives(['no'], yesNo).option.value).toBe(false);
   });
 });

@@ -20,7 +20,7 @@ export function PreviewPage() {
           description={`This is ${formType.name} exactly as a learner meets it: one question per screen, with a chance to check every answer before sending. It updates as you change the settings.`}
         />
 
-        <PreviewPane config={config} />
+        <PreviewPane config={config} formId={form.formId} />
       </Card>
 
       <Card as="section" aria-labelledby="embed-heading">

@@ -1,4 +1,5 @@
 import { NavLink } from 'react-router-dom';
+import { Building } from 'lucide-react';
 import { FORM_TYPES } from '../../formTypes.js';
 import './FormsSidebar.css';
 
@@ -16,8 +17,30 @@ export function FormsSidebar({ id, isOpen = false, onNavigate }) {
     <nav
       id={id}
       className={['forms-sidebar', isOpen ? 'forms-sidebar--open' : ''].filter(Boolean).join(' ')}
-      aria-label="Forms"
+      aria-label="Dashboard"
     >
+      <h2 className="forms-sidebar__heading">Organisation</h2>
+
+      <ul className="forms-sidebar__list forms-sidebar__list--section" role="list">
+        <li>
+          <NavLink
+            to="/organisation"
+            className={({ isActive }) =>
+              ['forms-sidebar__link', isActive ? 'forms-sidebar__link--active' : '']
+                .filter(Boolean)
+                .join(' ')
+            }
+            onClick={onNavigate}
+          >
+            <Building className="forms-sidebar__icon" aria-hidden="true" />
+            <span className="forms-sidebar__text">
+              <span className="forms-sidebar__name">Referral partners</span>
+              <span className="forms-sidebar__summary">Organisations learners can be referred to</span>
+            </span>
+          </NavLink>
+        </li>
+      </ul>
+
       <h2 className="forms-sidebar__heading">Forms</h2>
 
       <ul className="forms-sidebar__list" role="list">

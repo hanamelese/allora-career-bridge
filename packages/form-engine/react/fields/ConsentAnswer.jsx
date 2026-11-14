@@ -14,9 +14,17 @@ export function ConsentAnswer({ question, value, onChange, describedBy, hasError
         id={id}
         className="fe-consent__input"
         checked={value === true}
+        aria-required={question.required || undefined}
         aria-invalid={hasError || undefined}
         aria-describedby={describedBy}
         onChange={(event) => onChange(event.target.checked)}
+        /* Enter acts on the focused control, as Space does. */
+        onKeyDown={(event) => {
+          if (event.key === 'Enter') {
+            event.preventDefault();
+            onChange(value !== true);
+          }
+        }}
       />
       <label className="fe-consent__label" htmlFor={id}>
         {question.consentText ?? question.label}

@@ -1,8 +1,8 @@
-import { useEffect, useRef } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { useFormEngine } from './useFormEngine.js';
 import { getFieldComponent } from './fields/index.js';
 import { ReadAloudButton } from './ReadAloudButton.jsx';
-import { VoiceAnswer } from './VoiceAnswer.jsx';
+import { AnswerTools } from './AnswerTools.jsx';
 import { ReviewStep } from './ReviewStep.jsx';
 import './form-engine.css';
 
@@ -16,6 +16,10 @@ const COPY = {
     doneDetail: 'Thank you. There is nothing more you need to do.',
     empty: 'This form has no questions switched on yet.',
     noTimeLimit: 'There is no time limit. You can take as long as you need.',
+    simpleWords: 'Simple words and pictures',
+    requiredNote: 'Questions marked * must be answered. All other questions are optional.',
+    required: '(required)',
+    optional: '(optional)',
   },
   am: {
     next: 'ቀጣይ',
@@ -26,6 +30,10 @@ const COPY = {
     doneDetail: 'እናመሰግናለን። ከዚህ በላይ ማድረግ ያለብዎት ነገር የለም።',
     empty: 'በዚህ ቅጽ ላይ ገና የበራ ጥያቄ የለም።',
     noTimeLimit: 'የጊዜ ገደብ የለም። የሚፈልጉትን ያህል ጊዜ መውሰድ ይችላሉ።',
+    simpleWords: 'ቀላል ቃላትና ሥዕሎች',
+    requiredNote: '* ምልክት ያላቸው ጥያቄዎች መመለስ አለባቸው። ሌሎቹ ጥያቄዎች አማራጭ ናቸው።',
+    required: '(ግዴታ)',
+    optional: '(አማራጭ)',
   },
 };
 
@@ -39,10 +47,29 @@ const COPY = {
  *
  * There is deliberately no timer anywhere in here. Progress is never
  * discarded for taking too long.
+ *
+ * `referral` is supplied by the host for the referral step:
+ *   partners          [{ id, name }] - the organisation's referral partners
+ *   organisationName  shown in the SMS preview
+ *   onSend(request)   sends the link; resolves { results: [{ partnerId, status }] }
+ * The host decides how sending happens (the embed uses the public API, the
+ * dashboard preview its signed-in test endpoint); the form never holds a
+ * phone number or a credential.
  */
-export function FormRenderer({ config, settings = {}, onSubmit, renderIcon }) {
-  const engine = useFormEngine(config, settings, { onSubmit });
+export function FormRenderer({ config, settings = {}, onSubmit, renderIcon, referral }) {
+  /* Simple words are the learner's own choice, made on the form itself.
+     The host may only suggest where it starts. */
+  const [lowLiteracy, setLowLiteracy] = useState(Boolean(settings.lowLiteracy));
+  /* Which referral partners a link has already gone to. Held here so it
+     survives moving between questions. */
+  const [referralStatus, setReferralStatus] = useState({});
+  const engine = useFormEngine(
+    config,
+    { ...settings, lowLiteracy, referralPartners: referral?.partners },
+    { onSubmit },
+  );
   const headingRef = useRef(null);
+  const fieldRef = useRef(null);
   const hasNavigatedRef = useRef(false);
 
   const language = settings.language ?? config.defaultLanguage ?? 'en';
@@ -67,6 +94,21 @@ export function FormRenderer({ config, settings = {}, onSubmit, renderIcon }) {
     hasNavigatedRef.current = true;
   }, [stepKey]);
 
+  const simpleWordsSwitch = (
+    <div className="fe-toolbar">
+      <label className="fe-toolbar__option" htmlFor="fe-simple-words">
+        <input
+          type="checkbox"
+          id="fe-simple-words"
+          className="fe-toolbar__input"
+          checked={lowLiteracy}
+          onChange={(event) => setLowLiteracy(event.target.checked)}
+        />
+        <span>{copy.simpleWords}</span>
+      </label>
+    </div>
+  );
+
   if (isSubmitted) {
     return (
       <div className="fe-form" data-language={language}>
@@ -83,12 +125,12 @@ export function FormRenderer({ config, settings = {}, onSubmit, renderIcon }) {
 
   if (isReviewing) {
     return (
-      <div className="fe-form" data-language={language} data-low-literacy={settings.lowLiteracy || undefined}>
+      <div className="fe-form" data-language={language} data-low-literacy={lowLiteracy || undefined}>
+        {simpleWordsSwitch}
         <ReviewStep
           items={engine.reviewItems}
           summary={engine.reviewSummary}
           language={language}
-          readAloud={settings.readAloud}
           onEdit={engine.goTo}
           onSubmit={engine.submit}
           onBack={engine.back}
@@ -117,14 +159,16 @@ export function FormRenderer({ config, settings = {}, onSubmit, renderIcon }) {
   /* Simple-words mode reads each question out as it arrives, which is the
      point of that mode - but only once the learner has moved at least
      once, so nothing starts talking the instant the page opens. */
-  const autoPlayAudio = Boolean(settings.lowLiteracy && settings.readAloud && hasNavigatedRef.current);
+  const autoPlayAudio = Boolean(lowLiteracy && hasNavigatedRef.current);
 
   return (
     <div
       className="fe-form"
       data-language={language}
-      data-low-literacy={settings.lowLiteracy || undefined}
+      data-low-literacy={lowLiteracy || undefined}
     >
+      {simpleWordsSwitch}
+
       <div className="fe-progress">
         <p className="fe-progress__label">{copy.progress(progress.position, progress.total)}</p>
         <div
@@ -140,11 +184,12 @@ export function FormRenderer({ config, settings = {}, onSubmit, renderIcon }) {
             style={{ width: `${(progress.position / Math.max(progress.total, 1)) * 100}%` }}
           />
         </div>
+        <p className="fe-progress__note">{copy.requiredNote}</p>
       </div>
 
       <div className="fe-question">
         <div className="fe-question__title">
-          {settings.lowLiteracy && question.icon && renderIcon ? (
+          {lowLiteracy && question.icon && renderIcon ? (
             <span className="fe-question__icon" aria-hidden="true">
               {renderIcon(question.icon)}
             </span>
@@ -157,15 +202,23 @@ export function FormRenderer({ config, settings = {}, onSubmit, renderIcon }) {
             data-question-heading
           >
             {question.label}
+            {/* Required status is said in words as well as shown, so it
+                never depends on the asterisk or on colour. */}
+            {question.required ? (
+              <span className="fe-required">
+                <span aria-hidden="true"> *</span>
+                <span className="fe-visually-hidden"> {copy.required}</span>
+              </span>
+            ) : (
+              <span className="fe-optional"> {copy.optional}</span>
+            )}
           </h2>
 
-          {settings.readAloud ? (
-            <ReadAloudButton
-              text={question.readAloudText}
-              language={language}
-              autoPlay={autoPlayAudio}
-            />
-          ) : null}
+          <ReadAloudButton
+            text={question.readAloudText}
+            language={language}
+            autoPlay={autoPlayAudio}
+          />
         </div>
 
         {question.notice ? (
@@ -180,11 +233,19 @@ export function FormRenderer({ config, settings = {}, onSubmit, renderIcon }) {
           </p>
         ) : null}
 
-        <div className="fe-question__field">
+        <div className="fe-question__field" ref={fieldRef}>
           <FieldComponent
+            /* Keyed by question so per-question state (an open selection
+               bar, for one) never carries over to the next question. */
+            key={question.key}
             question={question}
             value={engine.currentAnswer}
             onChange={engine.answer}
+            onCommit={engine.next}
+            answers={engine.answers}
+            referral={referral}
+            referralStatus={referralStatus}
+            onReferralStatus={setReferralStatus}
             describedBy={describedBy}
             hasError={Boolean(error)}
             renderIcon={renderIcon}
@@ -197,16 +258,26 @@ export function FormRenderer({ config, settings = {}, onSubmit, renderIcon }) {
           </p>
         ) : null}
 
-        {question.voiceInput ? (
-          <VoiceAnswer
-            question={question}
-            language={language}
-            onAccept={(value) => {
-              engine.answer(value);
-              engine.confirmAnswer(question.key);
-            }}
-          />
-        ) : null}
+        <AnswerTools
+          key={question.key}
+          question={
+            /* A tick box is one press; speaking "yes" to give permission
+               is not offered, so consent is never given by mishearing. */
+            question.type === 'consent' ? { ...question, voiceInput: false } : question
+          }
+          value={engine.currentAnswer}
+          language={language}
+          onAnswer={engine.answer}
+          onClear={engine.clear}
+          onFocusField={() => {
+            /* After the value changes, so focus lands on the updated control. */
+            requestAnimationFrame(() => {
+              fieldRef.current
+                ?.querySelector('input:not([type=hidden]), textarea, .fe-select__bar')
+                ?.focus();
+            });
+          }}
+        />
       </div>
 
       <div className="fe-actions">

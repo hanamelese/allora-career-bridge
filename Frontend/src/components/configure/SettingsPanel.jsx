@@ -18,7 +18,6 @@ export function SettingsPanel({ config, fieldErrors, lockReasons, onUpdateField 
           field={describeField(fieldConfig)}
           lockReason={lockReasons?.[fieldConfig.key]}
           error={fieldErrors[fieldConfig.key]}
-          voiceAvailable={config.features.voiceInput}
           onUpdate={(patch) => onUpdateField(fieldConfig.key, patch)}
         />
       ))}

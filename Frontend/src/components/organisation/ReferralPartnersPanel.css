@@ -1,0 +1,105 @@
+.referral-partners {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-lg);
+  margin-block-start: var(--space-md);
+}
+
+.referral-partners__list {
+  display: flex;
+  flex-direction: column;
+  border-block-start: 1px solid var(--border-subtle);
+}
+
+.referral-partners__item {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: var(--space-md);
+  padding-block: var(--space-md);
+  border-block-end: 1px solid var(--border-subtle);
+}
+
+.referral-partners__item > .referral-form {
+  flex: 1 1 100%;
+}
+
+.referral-partners__details {
+  flex: 1 1 16rem;
+  min-width: 0;
+  overflow-wrap: anywhere;
+}
+
+.referral-partners__name {
+  font-weight: var(--font-weight-semibold);
+}
+
+.referral-partners__contact {
+  display: flex;
+  align-items: center;
+  gap: var(--space-sm);
+  color: var(--ink-secondary);
+  font-size: var(--font-size-sm);
+}
+
+.referral-partners__contact svg {
+  width: 1rem;
+  height: 1rem;
+  flex-shrink: 0;
+}
+
+.referral-partners__actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-sm);
+}
+
+.referral-partners__confirm {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-sm);
+  max-width: 24rem;
+}
+
+.referral-partners__add {
+  padding-block-start: var(--space-md);
+}
+
+.referral-partners__add-heading {
+  margin-block-end: var(--space-sm);
+  font-size: var(--font-size-md, 1rem);
+  font-weight: var(--font-weight-semibold);
+}
+
+.referral-form {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-md);
+}
+
+.referral-form__note {
+  font-size: var(--font-size-sm);
+  color: var(--ink-secondary);
+}
+
+.referral-form__fields {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(min(100%, 14rem), 1fr));
+  gap: var(--space-md);
+  align-items: start;
+}
+
+.referral-form__actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-sm);
+}
+
+.referral-form__error {
+  padding: var(--space-sm) var(--space-gutter);
+  border-radius: var(--radius-md);
+  background-color: var(--danger-surface);
+  color: var(--danger);
+  font-weight: var(--font-weight-semibold);
+}

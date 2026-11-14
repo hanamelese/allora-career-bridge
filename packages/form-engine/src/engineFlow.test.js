@@ -182,13 +182,20 @@ describe('answers written out for the review step', () => {
 });
 
 describe('plain-language validation', () => {
-  it('explains a missing answer in the learner‘s language', () => {
+  it('explains a missing answer in the learner‘s language, naming the question', () => {
     expect(engineFor('signup', {}, { language: 'en' }).validateAnswer('name')).toBe(
-      'Please answer this question before moving on.',
+      'Full name: Please answer this question before moving on.',
     );
     expect(engineFor('signup', {}, { language: 'am' }).validateAnswer('name')).toBe(
-      'ከመቀጠልዎ በፊት እባክዎ ይህን ጥያቄ ይመልሱ።',
+      'ሙሉ ስም: ከመቀጠልዎ በፊት እባክዎ ይህን ጥያቄ ይመልሱ።',
     );
+  });
+
+  it('names the question in every error from a full check', () => {
+    const { errors } = engineFor('signup').validateSubmission();
+
+    expect(errors.name).toMatch(/^Full name: /);
+    expect(errors.consent).toMatch(/^Your permission: /);
   });
 
   it('says how to fix an email address rather than that it is invalid', () => {
@@ -206,7 +213,7 @@ describe('plain-language validation', () => {
   it('asks for permission rather than reporting a type error', () => {
     const message = engineFor('signup', { consent: false }).validateAnswer('consent');
 
-    expect(message).toBe('Tick the box to give your permission before moving on.');
+    expect(message).toBe('Your permission: Tick the box to give your permission before moving on.');
   });
 
   it('accepts a good answer', () => {
@@ -215,5 +222,53 @@ describe('plain-language validation', () => {
 
   it('lets an optional question pass unanswered, with no timeout to beat', () => {
     expect(engineFor('signup', {}).validateAnswer('location')).toBeNull();
+  });
+});
+
+describe('built-in accessibility', () => {
+  it('offers voice and read-aloud without any settings', () => {
+    const question = createFormEngine(FORM_TEMPLATES.signup).getCurrentQuestion();
+
+    expect(question.voiceInput).toBe(true);
+    expect(question.readAloud).toBe(true);
+  });
+
+  it('ignores a retired per-question switch that turned voice off', () => {
+    const config = {
+      ...FORM_TEMPLATES.signup,
+      fields: FORM_TEMPLATES.signup.fields.map((field) =>
+        field.key === 'name' ? { ...field, voiceInput: false } : field,
+      ),
+    };
+
+    expect(createFormEngine(config).getCurrentQuestion().voiceInput).toBe(true);
+  });
+});
+
+describe('the referral step', () => {
+  const partners = [
+    { id: 'rp_1', name: 'Bole Kebele Office' },
+    { id: 'rp_2', name: 'Hope NGO' },
+  ];
+
+  it('lists the organisation’s referral partners by name', () => {
+    const engine = engineFor('signup', { identityRoute: 'no_document' }, { referralPartners: partners });
+    engine.goTo('referral');
+    const question = engine.getCurrentQuestion();
+
+    expect(question.key).toBe('referral');
+    expect(question.options).toEqual([
+      { value: 'rp_1', label: 'Bole Kebele Office', icon: null },
+      { value: 'rp_2', label: 'Hope NGO', icon: null },
+    ]);
+    expect(formatAnswerText(question, ['rp_2'], 'en')).toBe('Hope NGO');
+  });
+
+  it('is the last question for a learner with no document, and absent otherwise', () => {
+    const noDocument = engineFor('signup', { identityRoute: 'no_document' });
+    const withPassport = engineFor('signup', { identityRoute: 'passport' });
+
+    expect(noDocument.getVisibleQuestions().at(-1).key).toBe('referral');
+    expect(withPassport.getVisibleQuestions().map((question) => question.key)).not.toContain('referral');
   });
 });

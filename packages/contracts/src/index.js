@@ -40,6 +40,7 @@ export {
 
 export {
   FORM_TEMPLATES,
+  LEGACY_FORM_TYPES,
   LOCK_REASONS,
   getTemplate,
   getLockReason,
@@ -60,6 +61,17 @@ export {
   formConfigBaseSchema,
   formConfigSchema,
 } from './formConfig.js';
+
+export { upgradeLearnerDraft } from './formUpgrades.js';
+
+export {
+  REFERRAL_PHONE_PATTERN,
+  MAX_REFERRAL_RECIPIENTS,
+  REFERRAL_LINK_PLACEHOLDER,
+  referralPartnerSchema,
+  referralRequestSchema,
+  buildReferralMessage,
+} from './referrals.js';
 
 export {
   matchesShowIf,

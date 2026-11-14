@@ -34,7 +34,7 @@ function field(key, { required = false, locked = false, enabled = true, showIf }
   };
 }
 
-function template(type, formId, features, fields) {
+function template(type, formId, fields) {
   return {
     schemaVersion: 1,
     formId,
@@ -42,55 +42,56 @@ function template(type, formId, features, fields) {
     version: 'draft',
     languages: LANGUAGES,
     defaultLanguage: 'en',
-    features,
     fields,
     identityRoutes: ALL_IDENTITY_ROUTES,
     customFields: [],
   };
 }
 
+/**
+ * Form types that are no longer offered. `learner` (Learner Profile &
+ * Support) was merged into `signup`; existing rows are upgraded by the API
+ * and the type stays valid in the schema so stored versions still parse.
+ */
+export const LEGACY_FORM_TYPES = ['learner'];
+
 export const FORM_TEMPLATES = {
-  /* ---- Learner Registration ---- */
+  /* ---- Learner Registration & Profile ----
+     One learner form: who they are, how they can be identified, their
+     background, and a private way to ask for support. */
   signup: template(
     'signup',
     'frm_learner_registration',
-    { voiceInput: true, readAloud: true, lowLiteracy: false },
     [
       field('name', { required: true, locked: true }),
       field('phone', { required: true }),
       field('email'),
+      field('location'),
+      field('address', { enabled: false }),
       field('identityRoute', { required: true, locked: true }),
       /* Only asked when the chosen document actually carries a number, so a
          learner with no document never meets it. */
       field('documentId', {
         showIf: { field: 'identityRoute', in: ['kebele_id', 'passport', 'refugee_id'] },
       }),
-      field('location'),
-      field('address', { enabled: false }),
-      // Partner-assisted registration: an optional extra, off by default.
-      field('assistedBy', { enabled: false }),
-      field('assistedConsent', { enabled: false }),
-      field('consent', { required: true, locked: true }),
-    ],
-  ),
-
-  /* ---- Learner Profile & Support ---- */
-  learner: template(
-    'learner',
-    'frm_learner_profile',
-    { voiceInput: true, readAloud: true, lowLiteracy: true },
-    [
-      field('name', { required: true, locked: true }),
       field('education'),
       field('currentLevel', { required: true }),
       field('skills'),
       field('careerGoal'),
-      field('location'),
-      field('address', { enabled: false }),
       // Locked on, never required: always offered, never forced.
       field('supportNeeds', { locked: true }),
       field('supportNote'),
+      // Partner-assisted registration: an optional extra, off by default.
+      field('assistedBy', { enabled: false }),
+      field('assistedConsent', { enabled: false }),
       field('consent', { required: true, locked: true }),
+      /* Last, after every ordinary question and after consent: a learner
+         with no document can ask a partner organisation to help. Their
+         name and phone are already known, so nothing is asked twice. */
+      field('referral', {
+        locked: true,
+        showIf: { field: 'identityRoute', in: ['no_document', 'partner_referral'] },
+      }),
     ],
   ),
 
@@ -98,7 +99,6 @@ export const FORM_TEMPLATES = {
   jobApplication: template(
     'jobApplication',
     'frm_job_application',
-    { voiceInput: true, readAloud: true, lowLiteracy: false },
     [
       field('name', { required: true, locked: true }),
       field('phone', { required: true }),
@@ -117,7 +117,6 @@ export const FORM_TEMPLATES = {
   employer: template(
     'employer',
     'frm_employer_accessibility',
-    { voiceInput: false, readAloud: true, lowLiteracy: false },
     [
       field('organisationName', { required: true, locked: true }),
       field('contactName', { required: true }),
@@ -142,13 +141,11 @@ export const LOCK_REASONS = {
     name: 'A registration cannot be completed without a name.',
     identityRoute:
       'Every learner must be offered a way to identify themselves, including the option of having no document at all.',
-    consent: 'Learners must agree before any of their answers are submitted.',
-  },
-  learner: {
-    name: 'The profile is attached to a learner, so it needs a name.',
     supportNeeds:
       'Learners must always be able to ask for support. It stays optional to answer, and private when they do.',
     consent: 'Learners must agree before any of their answers are submitted.',
+    referral:
+      'A learner with no identity document must always have a way forward. It is only asked of learners who have no document or ask to be referred, and it never has to be answered.',
   },
   jobApplication: {
     name: 'An employer cannot act on an application with no name.',

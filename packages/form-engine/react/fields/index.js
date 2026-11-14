@@ -2,6 +2,7 @@ import { TextAnswer } from './TextAnswer.jsx';
 import { ChoiceAnswer } from './ChoiceAnswer.jsx';
 import { MultiChoiceAnswer } from './MultiChoiceAnswer.jsx';
 import { ConsentAnswer } from './ConsentAnswer.jsx';
+import { ReferralAnswer } from './ReferralAnswer.jsx';
 
 /**
  * Which component answers which kind of question.
@@ -20,6 +21,7 @@ const FIELD_COMPONENTS = {
   yesNo: ChoiceAnswer,
   multiChoice: MultiChoiceAnswer,
   consent: ConsentAnswer,
+  referral: ReferralAnswer,
 };
 
 export function getFieldComponent(type) {

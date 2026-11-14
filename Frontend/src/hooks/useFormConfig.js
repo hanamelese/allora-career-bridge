@@ -81,13 +81,6 @@ export function useFormConfig(initialConfig) {
     setConfig((current) => applyPatch(current, patch));
   }, []);
 
-  const updateFeature = useCallback((name, enabled) => {
-    setConfig((current) => ({
-      ...current,
-      features: { ...current.features, [name]: enabled },
-    }));
-  }, []);
-
   const updateField = useCallback((key, patch) => {
     setConfig((current) => ({
       ...current,
@@ -138,7 +131,6 @@ export function useFormConfig(initialConfig) {
     fieldErrors: validation.byField,
     generalErrors: validation.general,
     updateConfig,
-    updateFeature,
     updateField,
     addCustomField,
     updateCustomField,

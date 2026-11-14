@@ -48,6 +48,11 @@ export function startListening({ language = 'en', onResult, onError, onEnd }) {
   recognition.interimResults = false;
   recognition.maxAlternatives = 3;
 
+  /* Recognition can end without a result and without an error - the
+     learner said nothing, or it heard only noise. That is reported as
+     'no-speech', so the learner is told rather than left waiting. */
+  let settled = false;
+
   recognition.onresult = (event) => {
     const result = event.results?.[0];
     if (!result) return;
@@ -62,15 +67,19 @@ export function startListening({ language = 'en', onResult, onError, onEnd }) {
       .filter((alternative) => alternative.transcript);
 
     if (alternatives.length > 0) {
+      settled = true;
       onResult?.(alternatives[0].transcript, alternatives);
     }
   };
 
   recognition.onerror = (event) => {
-    onError?.(event.error ?? 'speech-error');
+    settled = true;
+    /* 'aborted' is our own stop(); it is not a failure to report. */
+    if (event.error !== 'aborted') onError?.(event.error ?? 'speech-error');
   };
 
   recognition.onend = () => {
+    if (!settled) onError?.('no-speech');
     onEnd?.();
   };
 
@@ -83,6 +92,7 @@ export function startListening({ language = 'en', onResult, onError, onEnd }) {
 
   return {
     stop() {
+      settled = true;
       try {
         recognition.stop();
       } catch {

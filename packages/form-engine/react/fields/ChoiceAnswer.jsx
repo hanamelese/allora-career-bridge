@@ -1,48 +1,106 @@
+import { useRef } from 'react';
+import { SelectionBar } from './SelectionBar.jsx';
+
 /**
  * One answer chosen from a list.
  *
- * Native radios, so arrow-key navigation and group semantics come from the
- * browser. Option values can be booleans (a yes/no question), so they are
- * compared as strings in the markup and mapped back on change.
+ * Each option is a button with `role="radio"`, inside a `radiogroup`, so a
+ * screen reader still hears "radio button, 2 of 4, checked". Unlike native
+ * radios, every option is its own Tab stop - learners asked to be able to
+ * Tab through the choices - and the arrow keys move between them too.
+ *
+ * Space or a click chooses. Enter chooses and moves on to the next
+ * question, which is how a keyboard user answers in one key press. It
+ * never submits the form: the engine only moves forward, and submitting
+ * happens on the review screen.
+ *
+ * Option values can be booleans (a yes/no question), so they are compared
+ * as strings.
  */
-export function ChoiceAnswer({ question, value, onChange, describedBy, hasError, renderIcon }) {
+export function ChoiceAnswer({ question, value, onChange, onCommit, describedBy, hasError, renderIcon }) {
+  const optionRefs = useRef([]);
   const showIcons = question.lowLiteracy;
+  const selected = question.options.find((option) => String(option.value) === String(value));
 
-  function handleChange(rawValue) {
-    const option = question.options.find((candidate) => String(candidate.value) === rawValue);
-    onChange(option ? option.value : rawValue);
+  function focusOption(index) {
+    const count = question.options.length;
+    optionRefs.current[(index + count) % count]?.focus();
+  }
+
+  function handleKeyDown(event, option, index) {
+    switch (event.key) {
+      case 'ArrowDown':
+      case 'ArrowRight':
+        event.preventDefault();
+        focusOption(index + 1);
+        break;
+      case 'ArrowUp':
+      case 'ArrowLeft':
+        event.preventDefault();
+        focusOption(index - 1);
+        break;
+      case 'Home':
+        event.preventDefault();
+        focusOption(0);
+        break;
+      case 'End':
+        event.preventDefault();
+        focusOption(question.options.length - 1);
+        break;
+      case 'Enter':
+        /* Handled here rather than left to the button's click, so Enter can
+           both choose and move on. */
+        event.preventDefault();
+        onChange(option.value);
+        onCommit?.();
+        break;
+      default:
+    }
   }
 
   return (
-    <fieldset
-      className={`fe-options${hasError ? ' fe-options--invalid' : ''}`}
-      aria-describedby={describedBy}
+    <SelectionBar
+      question={question}
+      summary={selected?.label}
+      hasError={hasError}
+      describedBy={describedBy}
     >
-      <legend className="fe-visually-hidden">{question.label}</legend>
+      <div
+        className={`fe-options${hasError ? ' fe-options--invalid' : ''}`}
+        role="radiogroup"
+        aria-label={question.label}
+        aria-required={question.required || undefined}
+        aria-invalid={hasError || undefined}
+        aria-describedby={describedBy}
+      >
+        {question.options.map((option, index) => {
+          const isChecked = selected !== undefined && String(selected.value) === String(option.value);
 
-      {question.options.map((option) => {
-        const id = `fe-${question.key}-${String(option.value)}`;
-
-        return (
-          <label className="fe-option" htmlFor={id} key={String(option.value)}>
-            <input
-              type="radio"
-              id={id}
-              name={`fe-${question.key}`}
-              className="fe-option__input"
-              value={String(option.value)}
-              checked={String(value) === String(option.value)}
-              onChange={(event) => handleChange(event.target.value)}
-            />
-            {showIcons && option.icon && renderIcon ? (
-              <span className="fe-option__icon" aria-hidden="true">
-                {renderIcon(option.icon)}
-              </span>
-            ) : null}
-            <span className="fe-option__label">{option.label}</span>
-          </label>
-        );
-      })}
-    </fieldset>
+          return (
+            <button
+              type="button"
+              role="radio"
+              aria-checked={isChecked}
+              className={`fe-option${isChecked ? ' fe-option--checked' : ''}`}
+              key={String(option.value)}
+              ref={(element) => {
+                optionRefs.current[index] = element;
+              }}
+              data-option
+              onClick={() => onChange(option.value)}
+              onKeyDown={(event) => handleKeyDown(event, option, index)}
+            >
+              <span className="fe-option__radio" aria-hidden="true" />
+              {showIcons && option.icon && renderIcon ? (
+                <span className="fe-option__icon" aria-hidden="true">
+                  {renderIcon(option.icon)}
+                </span>
+              ) : null}
+              <span className="fe-option__label">{option.label}</span>
+            </button>
+          );
+        })}
+      </div>
+    </SelectionBar>
   );
 }

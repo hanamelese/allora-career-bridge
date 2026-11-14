@@ -1,7 +1,7 @@
-import { ClipboardList, UserRound, Briefcase, Building2 } from 'lucide-react';
+import { ClipboardList, Briefcase, Building2 } from 'lucide-react';
 
 /**
- * The four form types, as partner staff see them.
+ * The form types, as partner staff see them.
  *
  * `id` is the value stored in the form config and validated by
  * `formTypeSchema` in @onboarding/contracts. Those identifiers predate the
@@ -16,24 +16,17 @@ import { ClipboardList, UserRound, Briefcase, Building2 } from 'lucide-react';
  */
 export const FORM_TYPES = [
   {
+    /* One learner form. It replaced the separate Learner Registration and
+       Learner Profile & Support forms; the old profile link still works. */
     id: 'signup',
     slug: 'learner-registration',
-    name: 'Learner Registration',
-    summary: 'Basic details and account registration',
+    aliases: ['learner-profile'],
+    name: 'Learner Registration & Profile',
+    summary: 'Registration, profile and private support requests',
     purpose:
-      'Register a learner without assuming they hold a national ID or passport, and take clear consent before anything is submitted.',
+      '',
     audience: 'Completed by the learner',
     icon: ClipboardList,
-  },
-  {
-    id: 'learner',
-    slug: 'learner-profile',
-    name: 'Learner Profile & Support',
-    summary: 'Onboarding profile and private support requests',
-    purpose:
-      'Collect profile and onboarding details, and give learners a private way to ask for the support they need - with no medical proof and no requirement to disclose a disability.',
-    audience: 'Completed by the learner',
-    icon: UserRound,
   },
   {
     id: 'jobApplication',
@@ -41,7 +34,7 @@ export const FORM_TYPES = [
     name: 'Job Application',
     summary: 'Accessible applications with voice answers',
     purpose:
-      'An accessible job application that accepts spoken answers, and lets an applicant request interview accommodations privately.',
+      '',
     audience: 'Completed by the job seeker',
     icon: Briefcase,
   },
@@ -51,7 +44,7 @@ export const FORM_TYPES = [
     name: 'Employer & Workplace Accessibility',
     summary: 'Organisation details and accommodations offered',
     purpose:
-      'Let employers describe their organisation and the workplace accommodations they offer, so the career gateway can match roles without asking anyone for sensitive information.',
+      '',
     audience: 'Completed by the employer',
     icon: Building2,
   },
@@ -59,6 +52,11 @@ export const FORM_TYPES = [
 
 export function getFormTypeBySlug(slug) {
   return FORM_TYPES.find((formType) => formType.slug === slug) ?? null;
+}
+
+/** A form type whose old slug this is, so a bookmarked link can redirect. */
+export function getFormTypeByAlias(slug) {
+  return FORM_TYPES.find((formType) => formType.aliases?.includes(slug)) ?? null;
 }
 
 export function getFormTypeById(id) {

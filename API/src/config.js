@@ -22,6 +22,10 @@ export const config = {
   databaseUrl: process.env.DATABASE_URL ?? './data/onboarding.db',
   jwtSecret: process.env.NODE_ENV === 'test' ? 'test-secret' : required('JWT_SECRET'),
   tokenLifetime: process.env.TOKEN_LIFETIME ?? '2h',
+  /* Where the dashboard is served. Referral links in SMS point here. */
+  publicAppUrl: (process.env.PUBLIC_APP_URL ?? 'http://localhost:5173').replace(/\/+$/, ''),
+  /* Days a referral link keeps working. */
+  referralLifetimeDays: Number(process.env.REFERRAL_LIFETIME_DAYS ?? 14),
   /* Only these origins may call the API from a browser. */
   corsOrigins: (process.env.CORS_ORIGINS ?? 'http://localhost:5173')
     .split(',')

@@ -6,6 +6,7 @@ import { errorHandler, notFound } from './middleware/errors.js';
 import { authRoutes } from './routes/auth.js';
 import { formRoutes } from './routes/forms.js';
 import { publicFormRoutes } from './routes/publicForms.js';
+import { organisationRoutes } from './routes/organisation.js';
 
 /**
  * Builds the API.
@@ -14,7 +15,7 @@ import { publicFormRoutes } from './routes/publicForms.js';
  * in-memory one, and routes are versioned under /api/v1 so a later release
  * can add /v2 without breaking a partner pinned to this one.
  */
-export function createApp(db) {
+export function createApp(db, { sms = null, rateLimiter } = {}) {
   const app = express();
 
   app.disable('x-powered-by');
@@ -42,8 +43,9 @@ export function createApp(db) {
   });
 
   app.use('/api/v1/auth', authRoutes(db));
-  app.use('/api/v1/forms', requireAuth, formRoutes(db));
-  app.use('/api/v1/public', publicFormRoutes(db));
+  app.use('/api/v1/forms', requireAuth, formRoutes(db, { sms }));
+  app.use('/api/v1/organisation', requireAuth, organisationRoutes(db));
+  app.use('/api/v1/public', publicFormRoutes(db, { sms, rateLimiter }));
 
   app.use(notFound);
   app.use(errorHandler);

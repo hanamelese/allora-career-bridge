@@ -37,3 +37,19 @@ so no API address is baked into the bundle.
 - Published form versions are immutable — enforced in the publish route and by
   triggers on `form_versions`.
 - `API/.env` and `API/data/` are git-ignored.
+- On start, the API upgrades stored Learner Registration drafts to the merged
+  Learner Registration & Profile form (published versions are never touched).
+
+## Referral SMS
+
+A learner who has no identity document can ask, at the end of the learner
+form, for a link to be sent by SMS to the organisation's referral partners
+(managed under **Organisation → Referral partners**). The link opens
+`/referrals/:token`, where the partner sees the learner's name and phone and
+can accept the referral.
+
+**No SMS provider is wired up yet.** With `SMS_PROVIDER` unset, every send
+fails with `sms_not_configured` and nothing is reported as sent. To enable
+it, add a provider in `API/src/sms/index.js` and put its credentials in
+`API/.env` (never in the frontend). Set `PUBLIC_APP_URL` to where the
+dashboard is served so links in messages point to it.

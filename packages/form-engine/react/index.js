@@ -9,7 +9,8 @@ export { FormRenderer } from './FormRenderer.jsx';
 export { useFormEngine } from './useFormEngine.js';
 export { ReadAloudButton } from './ReadAloudButton.jsx';
 export { VoiceAnswer } from './VoiceAnswer.jsx';
-export { matchSpokenChoice } from './choiceMatch.js';
+export { AnswerTools } from './AnswerTools.jsx';
+export { matchSpokenChoice, matchSpokenAlternatives } from './choiceMatch.js';
 export {
   toSpeechLanguage,
   isRecognitionSupported,

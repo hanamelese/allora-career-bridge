@@ -12,7 +12,7 @@ import {
 import { newId, createKeyPair, hashSecretKey, hashPassword } from './keys.js';
 
 /**
- * Puts one partner in place with their four forms.
+ * Puts one partner in place with one form of each type.
  *
  * The form defaults come from `FORM_TEMPLATES` in the shared contracts
  * package - the same object the dashboard seeds a new form from - so the
@@ -67,7 +67,7 @@ export function seedDatabase(db, { partnerName, email, password }) {
       .run();
 
     /* Form ids are generated, not derived from the type: every partner
-       gets their own four forms, and one partner's id must never collide
+       gets their own forms, and one partner's id must never collide
        with another's. The dashboard finds a form by its type. */
     const formId = newId('frm');
     formIds[type] = formId;
@@ -104,7 +104,7 @@ if (import.meta.url === `file://${process.argv[1]}`) {
   if (result.alreadySeeded) {
     console.log('Already seeded. Nothing to do.');
   } else {
-    console.log('Seeded one partner with four forms.\n');
+    console.log(`Seeded one partner with ${Object.keys(result.formIds).length} forms.\n`);
     console.log(`  Sign in with : ${process.env.SEED_EMAIL ?? 'partner@alx.example'}`);
     console.log(`  Password     : ${process.env.SEED_PASSWORD ?? 'onboarding-demo'}`);
     console.log(`  Public key   : ${result.publicKey}`);

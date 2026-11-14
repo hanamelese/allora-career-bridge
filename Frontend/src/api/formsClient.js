@@ -9,6 +9,7 @@ import { apiFetch } from './http.js';
  *   saveDraft(id, config)    PUT    /api/v1/forms/:id/draft
  *   publish(id)              POST   /api/v1/forms/:id/publish
  *   listVersions(id)         GET    /api/v1/forms/:id/versions
+ *   sendTestReferral(id, r)  POST   /api/v1/forms/:id/referrals/test
  */
 
 export function listForms() {
@@ -32,6 +33,26 @@ export function publish(formId) {
 
 export function listVersions(formId) {
   return apiFetch(`/forms/${encodeURIComponent(formId)}/versions`);
+}
+
+/** The preview's Send link: a real SMS, marked as a test. */
+export function sendTestReferral(formId, referralRequest) {
+  return apiFetch(`/forms/${encodeURIComponent(formId)}/referrals/test`, {
+    method: 'POST',
+    body: referralRequest,
+  });
+}
+
+/** A referral link opened by a referral partner. No sign-in: the token is the credential. */
+export function getReferral(token) {
+  return apiFetch(`/public/referrals/${encodeURIComponent(token)}`, { auth: false });
+}
+
+export function acceptReferral(token) {
+  return apiFetch(`/public/referrals/${encodeURIComponent(token)}/accept`, {
+    method: 'POST',
+    auth: false,
+  });
 }
 
 /**

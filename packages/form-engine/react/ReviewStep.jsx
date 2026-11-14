@@ -31,7 +31,7 @@ const COPY = {
  * a screen-reader user hears "Change your answer to: Full name" rather
  * than a list of buttons all called "Change".
  */
-export function ReviewStep({ items, summary, language, readAloud, onEdit, onSubmit, onBack }) {
+export function ReviewStep({ items, summary, language, onEdit, onSubmit, onBack }) {
   const copy = COPY[language] ?? COPY.en;
   const hasPrivateAnswers = items.some((item) => item.isPrivate);
 
@@ -41,9 +41,7 @@ export function ReviewStep({ items, summary, language, readAloud, onEdit, onSubm
         <h2 className="fe-question__heading" data-question-heading tabIndex={-1}>
           {copy.heading}
         </h2>
-        {readAloud ? (
-          <ReadAloudButton text={`${copy.heading}. ${summary}`} language={language} />
-        ) : null}
+        <ReadAloudButton text={`${copy.heading}. ${summary}`} language={language} />
       </div>
 
       <p className="fe-question__help">{copy.intro}</p>

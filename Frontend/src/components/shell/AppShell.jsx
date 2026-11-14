@@ -31,7 +31,11 @@ export function AppShell() {
   const [section, formSlug, view] = location.pathname.split('/').filter(Boolean);
   const activeFormType = section === 'forms' ? getFormTypeBySlug(formSlug) : null;
   const announcement =
-    activeFormType && view ? `${activeFormType.name}, ${view} view.` : '';
+    activeFormType && view
+      ? `${activeFormType.name}, ${view} view.`
+      : section === 'organisation'
+        ? 'Your organisation: referral partners.'
+        : '';
 
   return (
     <div className="app-shell">
@@ -44,7 +48,7 @@ export function AppShell() {
             className="app-shell__nav-toggle"
             variant="quiet-inverse"
             icon={Menu}
-            label={isNavOpen ? 'Hide forms navigation' : 'Show forms navigation'}
+            label={isNavOpen ? 'Hide navigation' : 'Show navigation'}
             aria-expanded={isNavOpen}
             aria-controls="forms-navigation"
             onClick={() => setIsNavOpen((open) => !open)}

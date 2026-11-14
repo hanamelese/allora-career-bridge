@@ -48,7 +48,10 @@ export function createFormEngine(config, initialAnswers = {}, settings = {}) {
 
   const fields = (config.fields ?? [])
     .filter((field) => field.enabled !== false)
-    .map((field) => ({
+    /* A stored per-question `voiceInput: false` is a retired partner switch
+       and is ignored: speaking an answer is built in wherever the catalogue
+       says the question can be answered by voice. */
+    .map(({ voiceInput: _retired, ...field }) => ({
       ...(fieldCatalog[field.key] ?? {}),
       ...field,
     }))
@@ -184,6 +187,29 @@ export function createFormEngine(config, initialAnswers = {}, settings = {}) {
     return getCurrentQuestion();
   }
 
+  /* A message names the question it is about ("Full name: Please answer
+     this question…"), so it still makes sense when read on its own - by a
+     screen reader announcing the alert, or in a list of problems. */
+  function nameQuestion(fieldKey, message) {
+    if (!message) return message;
+
+    const field = fields.find((item) => item.key === fieldKey);
+    if (!field) return message;
+
+    const { label } = getQuestionContent(field, accessibility, config);
+    return label ? `${label}: ${message}` : message;
+  }
+
+  function withQuestionNames(result) {
+    if (result.valid) return result;
+
+    const errors = Object.fromEntries(
+      Object.entries(result.errors).map(([key, message]) => [key, nameQuestion(key, message)]),
+    );
+
+    return { ...result, errors };
+  }
+
   function updateSettings(updates) {
     accessibility = updateAccessibilitySettings(
       accessibility,
@@ -253,10 +279,12 @@ export function createFormEngine(config, initialAnswers = {}, settings = {}) {
         getQuestionContent(question, accessibility, config)
       ),
 
-    validateSubmission: () => validateSubmission(config, answers, accessibility.language),
-    validateProgress: () => validateProgress(config, answers, accessibility.language),
+    validateSubmission: () =>
+      withQuestionNames(validateSubmission(config, answers, accessibility.language)),
+    validateProgress: () =>
+      withQuestionNames(validateProgress(config, answers, accessibility.language)),
     validateAnswer: (fieldKey) =>
-      validateAnswer(config, fieldKey, answers, accessibility.language),
+      nameQuestion(fieldKey, validateAnswer(config, fieldKey, answers, accessibility.language)),
 
     updateSettings,
   };

@@ -90,6 +90,17 @@ function getBuiltInFieldSchema(fieldConfig, config) {
     case 'consent':
       return z.boolean();
 
+    /* The partner ids the learner chose. Which ids exist is only known to
+       the server, which checks them when a referral is actually sent. */
+    case 'referral':
+      return z
+        .array(z.string().min(1).max(64))
+        .max(10)
+        .refine(
+          (values) => new Set(values).size === values.length,
+          'Do not select the same organisation more than once.'
+        );
+
     default:
       throw new Error(
         `No validation rule exists for field type: ${definition.type}`

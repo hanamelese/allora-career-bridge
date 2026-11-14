@@ -7,14 +7,14 @@ import { ApiError } from './errors.js';
  * is sent, so this is a second line rather than the first - which is the
  * point: the server never trusts that the check already happened.
  */
-export function validateBody(schema) {
+export function validateBody(schema, message = 'This form configuration was rejected.') {
   return (request, response, next) => {
     const result = schema.safeParse(request.body);
 
     if (!result.success) {
       return response.status(422).json({
         error: 'invalid_request',
-        message: 'This form configuration was rejected.',
+        message,
         issues: result.error.issues.map((issue) => ({
           path: issue.path.join('.'),
           message: issue.message,

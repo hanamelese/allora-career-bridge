@@ -8,6 +8,8 @@ import { ConfigurePage } from './pages/ConfigurePage.jsx';
 import { PreviewPage } from './pages/PreviewPage.jsx';
 import { PublishPage } from './pages/PublishPage.jsx';
 import { NotFoundPage } from './pages/NotFoundPage.jsx';
+import { OrganisationPage } from './pages/OrganisationPage.jsx';
+import { ReferralPage } from './pages/ReferralPage.jsx';
 import { FORM_TYPES } from './formTypes.js';
 
 const firstFormPath = `/forms/${FORM_TYPES[0].slug}/configure`;
@@ -31,6 +33,8 @@ function DashboardRoutes() {
       <Route element={<AppShell />}>
         <Route index element={<Navigate to={firstFormPath} replace />} />
 
+        <Route path="organisation" element={<OrganisationPage />} />
+
         <Route path="forms/:formSlug" element={<FormWorkspace />}>
           <Route index element={<Navigate to="configure" replace />} />
           <Route path="configure" element={<ConfigurePage />} />
@@ -48,7 +52,12 @@ export default function App() {
   return (
     <AuthProvider>
       <BrowserRouter>
-        <DashboardRoutes />
+        <Routes>
+          {/* Opened from a referral SMS by someone with no dashboard
+              account, so it sits outside the sign-in. */}
+          <Route path="referrals/:token" element={<ReferralPage />} />
+          <Route path="*" element={<DashboardRoutes />} />
+        </Routes>
       </BrowserRouter>
     </AuthProvider>
   );

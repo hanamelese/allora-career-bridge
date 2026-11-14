@@ -362,6 +362,35 @@ export const fieldCatalog = {
     needsReview: true,
   },
 
+  // ----- Referral (learners with no identity document) -----
+  /* Asked last, and only of a learner who has no document or asked to be
+     referred. Its options are the partner's registered referral partners,
+     which the host supplies at run time - they are not part of the form
+     configuration. The answer is the list of partner ids chosen. */
+  referral: {
+    key: 'referral',
+    type: 'referral',
+    label: {
+      en: 'Ask a partner organisation to help you register',
+      am: 'እንዲመዘገቡ እንዲረዳዎ አጋር ድርጅት ይጠይቁ',
+    },
+    simpleLabel: { en: 'Who can help you?', am: 'ማን ሊረዳዎት ይችላል?' },
+    helpText: {
+      en: 'You told us you have no identity document. Choose one or more organisations, and we will send them a text message with your name and a link, so they can help you finish registering.',
+      am: 'የመታወቂያ ሰነድ እንደሌለዎት ነግረውናል። አንድ ወይም ከዚያ በላይ ድርጅት ይምረጡ፤ ምዝገባዎን እንዲጨርሱ እንዲረዱዎት ስምዎንና ማስፈንጠሪያ የያዘ የጽሑፍ መልዕክት እንልክላቸዋለን።',
+    },
+    notice: {
+      en: 'Nothing is sent until you check the message and agree. Only your name and phone number are shared.',
+      am: 'መልዕክቱን አይተው እስኪስማሙ ድረስ ምንም አይላክም። የሚጋሩት ስምዎና ስልክ ቁጥርዎ ብቻ ናቸው።',
+    },
+    icon: 'handshake',
+    skippable: true,
+    sensitive: true,
+    private: true,
+    voiceInput: false,
+    needsReview: true,
+  },
+
   // ----- Learner Profile -----
   education: {
     key: 'education',

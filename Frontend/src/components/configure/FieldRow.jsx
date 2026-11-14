@@ -41,7 +41,7 @@ function patchOverride(current, language, value, catalogText) {
   return Object.keys(next).length > 0 ? next : undefined;
 }
 
-export function FieldRow({ fieldConfig, field, lockReason, error, voiceAvailable, onUpdate }) {
+export function FieldRow({ fieldConfig, field, lockReason, error, onUpdate }) {
   const idPrefix = `field-${fieldConfig.key}`;
   const catalogLabel = field.definition?.label;
   const catalogHelp = field.definition?.helpText;
@@ -201,21 +201,15 @@ export function FieldRow({ fieldConfig, field, lockReason, error, voiceAvailable
                 />
               )}
 
-              {field.supportsVoice && voiceAvailable ? (
-                <Checkbox
-                  id={`${idPrefix}-voice`}
-                  label="Allow a spoken answer to this question"
-                  description="Learners can still type. Voice never submits an answer on its own."
-                  checked={fieldConfig.voiceInput !== false}
-                  onChange={(checked) => onUpdate({ voiceInput: checked ? undefined : false })}
-                />
-              ) : null}
-
-              {!field.supportsVoice ? (
+              {field.supportsVoice ? (
+                <p className="field-row__fixed">
+                  Learners can always answer this question by speaking, as well as by typing.
+                </p>
+              ) : (
                 <p className="field-row__fixed">
                   This question cannot be answered by voice, so voice input is not offered for it.
                 </p>
-              ) : null}
+              )}
             </fieldset>
           </div>
         </details>

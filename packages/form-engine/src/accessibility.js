@@ -15,7 +15,8 @@ import { getCatalogItems } from '@onboarding/contracts/optionCatalogs.js';
 export const DEFAULT_ACCESSIBILITY_SETTINGS = {
   language: 'en',
   lowLiteracy: false,
-  readAloud: false,
+  /* Built into every form; not something a partner switches on. */
+  readAloud: true,
   readBack: true,
   largeText: false,
   voiceInput: true,
@@ -106,6 +107,15 @@ export function resolveOptions(question, settings = {}, config = null) {
       return (question.options ?? []).map((option) =>
         normalizeOption(option, language, lowLiteracy),
       );
+
+    /* The partner's registered referral partners - names only - supplied
+       by the host at run time rather than stored in the form. */
+    case 'referral':
+      return (settings.referralPartners ?? []).map((partner) => ({
+        value: partner.id,
+        label: partner.name,
+        icon: null,
+      }));
 
     default:
       return [];

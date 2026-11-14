@@ -1,7 +1,7 @@
-import { useParams } from 'react-router-dom';
+import { Navigate, useLocation, useParams } from 'react-router-dom';
 import { CircleAlert } from 'lucide-react';
 import { getFormByType } from '../api/formsClient.js';
-import { getFormTypeBySlug } from '../formTypes.js';
+import { getFormTypeByAlias, getFormTypeBySlug } from '../formTypes.js';
 import { useAsync } from '../hooks/useAsync.js';
 import { Card } from '../components/ui/Card.jsx';
 import { ErrorState } from '../components/ui/ErrorState.jsx';
@@ -17,7 +17,9 @@ import './FormWorkspace.css';
  */
 export function FormWorkspace() {
   const { formSlug } = useParams();
+  const location = useLocation();
   const formType = getFormTypeBySlug(formSlug);
+  const renamedTo = formType ? null : getFormTypeByAlias(formSlug);
 
   /* Form ids are issued by the server and differ between partners, so the
      form is found by the type this route names. */
@@ -29,11 +31,18 @@ export function FormWorkspace() {
     [formType?.id],
   );
 
+  /* A link to a form that was merged into another goes to its new home,
+     on the same step. */
+  if (renamedTo) {
+    const rest = location.pathname.split(`/forms/${formSlug}`)[1] ?? '';
+    return <Navigate to={`/forms/${renamedTo.slug}${rest}`} replace />;
+  }
+
   if (!formType) {
     return (
       <ErrorState
         title="That form does not exist"
-        description="Choose one of the four forms from the Forms list to continue."
+        description="Choose a form from the Forms list to continue."
       />
     );
   }

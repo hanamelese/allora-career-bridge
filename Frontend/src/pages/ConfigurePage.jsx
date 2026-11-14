@@ -6,7 +6,7 @@ import { EmptyState } from '../components/ui/EmptyState.jsx';
 import { SettingsPanel } from '../components/configure/SettingsPanel.jsx';
 import { CustomFieldRow } from '../components/configure/CustomFieldRow.jsx';
 import { CustomFieldEditor } from '../components/configure/CustomFieldEditor.jsx';
-import { FeatureToggles } from '../components/configure/FeatureToggles.jsx';
+import { LanguageSettings } from '../components/configure/LanguageSettings.jsx';
 import { IdentityRoutesEditor } from '../components/configure/IdentityRoutesEditor.jsx';
 import './ConfigurePage.css';
 
@@ -24,7 +24,6 @@ export function ConfigurePage() {
     errors,
     generalErrors,
     updateConfig,
-    updateFeature,
     updateField,
     addCustomField,
     updateCustomField,
@@ -99,17 +98,14 @@ export function ConfigurePage() {
         />
       </Card>
 
-      <Card as="section" aria-labelledby="accessibility-heading">
+      <Card as="section" aria-labelledby="language-heading">
         <SectionHeading
-          id="accessibility-heading"
-          title="Accessibility and language"
-          description="This form is always available in English and Amharic. These settings decide how learners can read and answer it."
+          id="language-heading"
+          title="Language"
         />
 
-        <FeatureToggles
-          features={config.features}
+        <LanguageSettings
           defaultLanguage={config.defaultLanguage}
-          onFeatureChange={updateFeature}
           onDefaultLanguageChange={(language) => updateConfig({ defaultLanguage: language })}
         />
       </Card>

@@ -15,15 +15,8 @@
 }
 
 .preview-pane__controls .select {
-  min-width: 12rem;
-}
-
-.preview-pane__variant {
-  padding: var(--space-sm) var(--space-gutter);
-  border-radius: var(--radius-md);
-  background-color: var(--warning-surface);
-  color: var(--warning);
-  font-size: var(--font-size-sm);
+  flex: 1 1 12rem;
+  min-width: 0;
 }
 
 /* A plain surface with room to breathe: the preview should read as the
@@ -34,6 +27,7 @@
   border-radius: var(--radius-lg);
   background-color: var(--surface);
   max-width: 34rem;
+  min-width: 0;
   margin-inline: auto;
   width: 100%;
 }
@@ -42,4 +36,9 @@
   .preview-pane__frame {
     padding: var(--space-md);
   }
+}
+
+.preview-pane__note {
+  font-size: var(--font-size-sm);
+  color: var(--ink-secondary);
 }

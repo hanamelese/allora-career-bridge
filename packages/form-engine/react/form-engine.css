@@ -31,6 +31,54 @@
   display: flex;
   flex-direction: column;
   gap: 1.5rem;
+  /* Reflow at 200% zoom and on narrow screens: long words and addresses
+     wrap instead of pushing the page sideways. */
+  min-width: 0;
+  max-width: 100%;
+  overflow-wrap: anywhere;
+  /* Lets the review rows and actions respond to the space the form
+     actually has, which differs between the preview and an embed. */
+  container-type: inline-size;
+}
+
+.fe-form *,
+.fe-form *::before,
+.fe-form *::after {
+  box-sizing: border-box;
+}
+
+/* One focus ring for every control in the form, clearly visible on any
+   background - a light inner ring and a dark outer one. */
+.fe-form :is(button, input, textarea, select, a):focus-visible {
+  outline: 2px solid #ffffff;
+  outline-offset: 1px;
+  box-shadow: 0 0 0 4px var(--fe-ink);
+}
+
+.fe-toolbar {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: flex-end;
+  gap: 0.5rem;
+}
+
+.fe-toolbar__option {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  min-height: var(--fe-target);
+  padding: 0.25rem 0.75rem;
+  border: 1px solid var(--fe-border);
+  border-radius: var(--fe-radius);
+  background: var(--fe-surface);
+  cursor: pointer;
+  font-weight: 600;
+}
+
+.fe-toolbar__input {
+  width: 1.25rem;
+  height: 1.25rem;
+  accent-color: var(--fe-accent);
 }
 
 .fe-visually-hidden {
@@ -58,6 +106,12 @@
   border-radius: 999px;
   background-color: var(--fe-border-subtle);
   overflow: hidden;
+}
+
+.fe-progress__note {
+  margin: 0.5rem 0 0;
+  font-size: 0.875rem;
+  color: var(--fe-ink-secondary);
 }
 
 .fe-progress__bar {
@@ -90,8 +144,20 @@
   font-size: 1.375rem;
   line-height: 1.3;
   margin: 0;
-  flex: 1;
-  min-width: 12rem;
+  flex: 1 1 12rem;
+  min-width: 0;
+}
+
+/* Required and optional are both said in words; the asterisk is extra. */
+.fe-required {
+  color: var(--fe-danger);
+  font-weight: 700;
+}
+
+.fe-optional {
+  font-size: 0.875em;
+  font-weight: 500;
+  color: var(--fe-ink-secondary);
 }
 
 .fe-question__heading:focus {
@@ -185,12 +251,44 @@ textarea.fe-input {
   display: flex;
   align-items: center;
   gap: 0.75rem;
+  width: 100%;
   min-height: var(--fe-target);
   padding: 0.625rem 0.875rem;
   border: 1px solid var(--fe-border);
   border-radius: var(--fe-radius);
   background-color: var(--fe-surface);
   cursor: pointer;
+  /* Options are buttons as well as labels; both need the form's text. */
+  font: inherit;
+  color: inherit;
+  text-align: start;
+}
+
+/* The drawn radio circle for a single choice. Checked shows a filled dot,
+   so the state never depends on colour alone. */
+.fe-option__radio {
+  display: inline-grid;
+  place-items: center;
+  width: 1.25rem;
+  height: 1.25rem;
+  flex-shrink: 0;
+  border: 2px solid var(--fe-ink-secondary);
+  border-radius: 50%;
+  background-color: var(--fe-surface);
+}
+
+.fe-option--checked .fe-option__radio::after {
+  content: '';
+  width: 0.625rem;
+  height: 0.625rem;
+  border-radius: 50%;
+  background-color: var(--fe-ink);
+}
+
+.fe-option--checked {
+  background-color: var(--fe-selected);
+  border-color: var(--fe-ink);
+  box-shadow: inset 0 0 0 1px var(--fe-ink);
 }
 
 .fe-option:hover {
@@ -203,6 +301,7 @@ textarea.fe-input {
   box-shadow: inset 0 0 0 1px var(--fe-ink);
 }
 
+.fe-option:focus-visible,
 .fe-option:has(.fe-option__input:focus-visible) {
   outline: 2px solid #ffffff;
   outline-offset: 1px;
@@ -230,6 +329,79 @@ textarea.fe-input {
 
 .fe-option__label {
   font-size: 1rem;
+}
+
+/* ---- Selection bar ---- */
+.fe-select {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+  width: 100%;
+}
+
+.fe-select__bar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.75rem;
+  width: 100%;
+  min-height: var(--fe-target);
+  padding: 0.75rem 1rem;
+  font: inherit;
+  color: inherit;
+  text-align: start;
+  background-color: var(--fe-surface);
+  border: 1px solid var(--fe-border);
+  border-radius: var(--fe-radius);
+  cursor: pointer;
+}
+
+.fe-select__bar:hover {
+  background-color: var(--fe-surface-sunken);
+}
+
+.fe-select--invalid .fe-select__bar {
+  border-color: var(--fe-danger);
+  border-width: 2px;
+}
+
+.fe-select__text {
+  display: flex;
+  flex-direction: column;
+  gap: 0.125rem;
+  min-width: 0;
+}
+
+.fe-select__question {
+  font-weight: 600;
+}
+
+.fe-select__value {
+  color: var(--fe-ink-secondary);
+}
+
+.fe-select__hint {
+  flex-shrink: 0;
+}
+
+.fe-select__chevron {
+  display: inline-block;
+  font-size: 1.25rem;
+  transition: transform 150ms ease;
+}
+
+.fe-select--open .fe-select__chevron {
+  transform: rotate(180deg);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .fe-select__chevron {
+    transition: none;
+  }
+}
+
+.fe-select__panel[hidden] {
+  display: none;
 }
 
 /* ---- Consent ---- */
@@ -412,7 +584,7 @@ textarea.fe-input {
 
 .fe-review__item {
   display: grid;
-  grid-template-columns: 1fr auto;
+  grid-template-columns: minmax(0, 1fr) auto;
   align-items: center;
   gap: 0.25rem 1rem;
   padding-block: 0.875rem;
@@ -492,9 +664,156 @@ textarea.fe-input {
   font-size: 1.125rem;
 }
 
+/* Narrow space - a phone, or 200% zoom - stacks each review row so the
+   Change button never squeezes the answer, and gives buttons full rows. */
+@container (max-width: 28rem) {
+  .fe-review__item {
+    grid-template-columns: minmax(0, 1fr);
+  }
+
+  .fe-review__item > .fe-button {
+    grid-column: 1;
+    grid-row: auto;
+    justify-self: start;
+  }
+
+  .fe-actions > .fe-button {
+    flex: 1 1 100%;
+  }
+
+  .fe-voice__mic {
+    align-self: stretch;
+  }
+}
+
 @media (forced-colors: active) {
+  .fe-option--checked,
   .fe-option:has(.fe-option__input:checked) {
     border-color: Highlight;
     box-shadow: inset 0 0 0 2px Highlight;
   }
+}
+
+/* ---- Answer tools: speak, read back, clear ---- */
+.fe-tools {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+
+.fe-tools__row {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+}
+
+.fe-audio-button:disabled {
+  color: var(--fe-ink-muted);
+  cursor: not-allowed;
+  border-style: dashed;
+}
+
+.fe-tools__status {
+  margin: 0;
+  font-size: 0.875rem;
+  color: var(--fe-ink-secondary);
+}
+
+.fe-tools__status:empty {
+  display: none;
+}
+
+/* ---- Referral step ---- */
+.fe-referral {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+}
+
+.fe-referral__legend {
+  margin-block-end: 0.5rem;
+  padding: 0;
+  font-weight: 600;
+}
+
+.fe-referral__send {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 0.5rem;
+}
+
+.fe-referral__sent {
+  font-weight: 700;
+  color: var(--success, #0f5132);
+}
+
+.fe-referral__status {
+  margin: 0;
+  font-weight: 600;
+}
+
+.fe-referral__status:empty {
+  display: none;
+}
+
+.fe-button:disabled {
+  cursor: not-allowed;
+  background-color: var(--fe-surface-sunken);
+  border-color: var(--fe-border);
+  border-style: dashed;
+  color: var(--fe-ink-muted);
+}
+
+.fe-option:has(.fe-option__input:disabled) {
+  cursor: default;
+}
+
+/* ---- Confirmation dialog ---- */
+.fe-dialog {
+  width: min(32rem, calc(100vw - 2rem));
+  max-height: calc(100vh - 2rem);
+  overflow-y: auto;
+  padding: 1.5rem;
+  border: 1px solid var(--fe-border);
+  border-radius: var(--fe-radius);
+  background-color: var(--fe-surface);
+  color: var(--fe-ink);
+  font-family: var(--font-sans, system-ui, sans-serif);
+  line-height: 1.5;
+  overflow-wrap: anywhere;
+}
+
+.fe-dialog::backdrop {
+  background-color: rgb(0 0 0 / 0.5);
+}
+
+.fe-dialog > * + * {
+  margin-block-start: 0.75rem;
+}
+
+.fe-dialog__title {
+  margin: 0;
+  font-size: 1.25rem;
+  line-height: 1.3;
+}
+
+.fe-dialog__list {
+  margin: 0;
+  padding-inline-start: 1.25rem;
+  font-weight: 600;
+}
+
+.fe-dialog__message {
+  padding: 0.75rem 1rem;
+  border-inline-start: 3px solid var(--fe-accent);
+  border-radius: 4px;
+  background-color: var(--fe-surface-sunken);
+  white-space: pre-wrap;
+}
+
+.fe-dialog :is(button):focus-visible {
+  outline: 2px solid #ffffff;
+  outline-offset: 1px;
+  box-shadow: 0 0 0 4px var(--fe-ink);
 }

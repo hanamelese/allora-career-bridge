@@ -93,3 +93,7 @@
     display: none;
   }
 }
+
+.forms-sidebar__list--section {
+  margin-block-end: var(--space-lg);
+}

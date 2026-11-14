@@ -94,3 +94,56 @@ export const formVersions = sqliteTable(
   },
   (table) => [uniqueIndex('form_versions_form_version_idx').on(table.partnerFormId, table.version)],
 );
+
+/**
+ * Organisations a partner refers learners to - for example, a learner with
+ * no identity document. Removing one archives it, so a referral already
+ * sent still says who it went to.
+ */
+export const referralPartners = sqliteTable('referral_partners', {
+  id: text('id').primaryKey(),
+  partnerId: text('partner_id')
+    .notNull()
+    .references(() => partners.id),
+  name: text('name').notNull(),
+  email: text('email').notNull(),
+  phone: text('phone').notNull(),
+  status: text('status').notNull().default('active'),
+  createdAt: text('created_at').notNull(),
+  updatedAt: text('updated_at'),
+});
+
+/**
+ * A referral link sent to one referral partner for one learner.
+ *
+ * The token in the link is stored only as a hash, like an API secret key.
+ * A row is written before the SMS is attempted and records what really
+ * happened: `sent` only once the provider accepted it, `failed` otherwise.
+ */
+export const referrals = sqliteTable(
+  'referrals',
+  {
+    id: text('id').primaryKey(),
+    partnerId: text('partner_id')
+      .notNull()
+      .references(() => partners.id),
+    referralPartnerId: text('referral_partner_id')
+      .notNull()
+      .references(() => referralPartners.id),
+    partnerFormId: text('partner_form_id')
+      .notNull()
+      .references(() => partnerForms.id),
+    learnerName: text('learner_name').notNull(),
+    learnerPhone: text('learner_phone'),
+    language: text('language').notNull().default('en'),
+    tokenHash: text('token_hash').notNull(),
+    status: text('status').notNull().default('pending'),
+    isTest: integer('is_test', { mode: 'boolean' }).notNull().default(false),
+    providerMessageId: text('provider_message_id'),
+    errorCode: text('error_code'),
+    createdAt: text('created_at').notNull(),
+    expiresAt: text('expires_at').notNull(),
+    acceptedAt: text('accepted_at'),
+  },
+  (table) => [uniqueIndex('referrals_token_hash_idx').on(table.tokenHash)],
+);

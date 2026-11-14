@@ -7,6 +7,8 @@ import { IDENTITY_ROUTES, fieldCatalog } from './fieldCatalog.js';
 // ==========================================
 
 export const FORM_TYPES = [
+  /* Retired: merged into 'signup' (Learner Registration & Profile). Kept
+     valid so stored drafts and published versions still parse. */
   'learner',
   'signup',
   'jobSeeker',
@@ -285,11 +287,15 @@ export const formConfigBaseSchema = z.object({
 
   defaultLanguage: z.enum(['en', 'am']),
 
+  /* Deprecated. Voice input, read-aloud and simple words used to be
+     partner switches; they are now built into every form. Still accepted
+     so older drafts and published versions keep validating, but nothing
+     reads it. */
   features: z.object({
     voiceInput: z.boolean(),
     readAloud: z.boolean(),
     lowLiteracy: z.boolean(),
-  }).strict(),
+  }).strict().optional(),
 
   fields: z.array(
     formFieldConfigSchema

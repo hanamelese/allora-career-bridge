@@ -1,10 +1,13 @@
-import { useState } from 'react';
+import { useMemo, useState } from 'react';
 import { RotateCcw } from 'lucide-react';
 import { FormRenderer } from '@onboarding/form-engine/react';
 import { Button } from '../ui/Button.jsx';
-import { Switch } from '../ui/Switch.jsx';
 import { Select } from '../ui/Select.jsx';
 import { getIcon } from '../../icons.js';
+import { sendTestReferral } from '../../api/formsClient.js';
+import { listReferralPartners } from '../../api/organisationClient.js';
+import { useAsync } from '../../hooks/useAsync.js';
+import { useAuth } from '../../auth/authContext.js';
 import './PreviewPane.css';
 
 /**
@@ -23,12 +26,27 @@ function renderIcon(name) {
   return <Icon />;
 }
 
-export function PreviewPane({ config }) {
+export function PreviewPane({ config, formId }) {
   const [language, setLanguage] = useState(config.defaultLanguage);
-  const [lowLiteracy, setLowLiteracy] = useState(config.features.lowLiteracy);
   const [runId, setRunId] = useState(0);
+  const { partner } = useAuth();
 
-  const isVariant = lowLiteracy !== config.features.lowLiteracy;
+  /* The organisation's real referral partners, so the referral step shows
+     exactly what a learner would see. Names only reach the form. */
+  const asksForReferral = config.fields.some((field) => field.key === 'referral' && field.enabled);
+  const partners = useAsync(
+    () => (asksForReferral ? listReferralPartners() : Promise.resolve([])),
+    [asksForReferral],
+  );
+
+  const referral = useMemo(
+    () => ({
+      partners: (partners.data ?? []).map(({ id, name }) => ({ id, name })),
+      organisationName: partner?.name ?? '',
+      onSend: (request) => sendTestReferral(formId, request),
+    }),
+    [partners.data, partner?.name, formId],
+  );
 
   return (
     <div className="preview-pane">
@@ -44,13 +62,6 @@ export function PreviewPane({ config }) {
           }))}
         />
 
-        <Switch
-          id="preview-low-literacy"
-          label="Simple words and icons"
-          checked={lowLiteracy}
-          onChange={setLowLiteracy}
-        />
-
         <Button
           variant="secondary"
           size="sm"
@@ -61,10 +72,11 @@ export function PreviewPane({ config }) {
         </Button>
       </div>
 
-      {isVariant ? (
-        <p className="preview-pane__variant" role="status">
-          You are previewing simple words and icons, which is currently switched{' '}
-          {config.features.lowLiteracy ? 'on' : 'off'} for learners in the Configure view.
+      {asksForReferral ? (
+        <p className="preview-pane__note">
+          {partners.status === 'error'
+            ? 'Your referral partners could not be loaded, so the referral step shows none.'
+            : 'Send link in this preview really sends a text message to the referral partners you choose, marked as a test.'}
         </p>
       ) : null}
 
@@ -72,14 +84,10 @@ export function PreviewPane({ config }) {
         <FormRenderer
           /* A new run remounts the renderer, which is how "start again"
              clears the answers without the engine needing a reset API. */
-          key={`${runId}-${language}-${lowLiteracy}`}
+          key={`${runId}-${language}`}
           config={config}
-          settings={{
-            language,
-            lowLiteracy,
-            readAloud: config.features.readAloud,
-            voiceInput: config.features.voiceInput,
-          }}
+          settings={{ language }}
+          referral={referral}
           renderIcon={renderIcon}
         />
       </div>
