@@ -1,0 +1,94 @@
+/* The Register and Job application pages: room for the embedded onboarding form.
+
+   Everything else on those pages is the portal's own markup and stylesheets. This only sizes the
+   slot the form sits in and gives the new links a visible keyboard focus. The form draws itself
+   inside its own shadow root, so nothing here reaches into it. */
+
+.onboarding-page {
+  max-width: 52rem;
+}
+
+/* Below 768px the portal clears its fixed header with the course bar's padding, which these pages
+   do not have. The header is 72px tall, or 56px at 320px and below. */
+@media (max-width: 767.98px) {
+  .onboarding-page {
+    padding-top: 72px;
+  }
+}
+
+@media (max-width: 320px) {
+  .onboarding-page {
+    padding-top: 56px;
+  }
+}
+
+.onboarding-intro {
+  max-width: 40rem;
+}
+
+.onboarding-back {
+  display: inline-flex;
+  align-items: center;
+  min-height: 44px;
+  font-weight: 500;
+  text-decoration: none;
+}
+
+.onboarding-back:hover {
+  text-decoration: underline;
+}
+
+.onboarding-card {
+  /* Long words (an email address, a file name) wrap rather than widen the page. */
+  min-width: 0;
+  overflow-wrap: anywhere;
+}
+
+.onboarding-slot {
+  padding: 1.5rem;
+}
+
+@media (max-width: 575.98px) {
+  .onboarding-slot {
+    padding: 1rem 0.75rem;
+  }
+}
+
+.onboarding-placeholder {
+  color: var(--bs-secondary-color);
+}
+
+/* A focus ring in the portal's red that shows clearly on white (3:1 or more). */
+.onboarding-page a:focus-visible {
+  outline: 3px solid #db3e3e;
+  outline-offset: 2px;
+  border-radius: 6px;
+}
+
+.onboarding-unavailable {
+  padding: 1rem;
+  border: 2px solid #db3e3e;
+  border-radius: 0.5rem;
+  background: #fdf7f7;
+  color: #212529;
+}
+
+.onboarding-next {
+  margin-top: 1.5rem;
+  padding: 1.5rem;
+  border: 1px solid var(--bs-border-color);
+  border-radius: 0.5rem;
+  background: #ffffff;
+}
+
+.onboarding-next[hidden],
+.onboarding-unavailable[hidden] {
+  display: none;
+}
+
+.onboarding-credit {
+  max-width: 40rem;
+  margin: 0.75rem 0 0;
+  font-size: 0.875rem;
+  color: var(--bs-secondary-color);
+}
