@@ -1,5 +1,6 @@
 import { useEffect, useState } from 'react';
 import { isSynthesisSupported, speak, stopSpeaking } from './speech.js';
+import { useVoiceContext } from './voiceContext.js';
 
 const LABELS = {
   en: { play: 'Read aloud', stop: 'Stop reading' },
@@ -9,12 +10,16 @@ const LABELS = {
 /**
  * Plays a question as speech.
  *
- * It renders nothing at all when the browser has no speech synthesis,
- * rather than offering a button that would do nothing.
+ * It renders nothing at all when there is no voice to read with (no
+ * read-aloud service and no speech synthesis in the browser), rather than
+ * offering a button that would do nothing.
  */
 export function ReadAloudButton({ text, language = 'en', autoPlay = false }) {
   const [isPlaying, setIsPlaying] = useState(false);
-  const supported = isSynthesisSupported();
+  const { voice } = useVoiceContext();
+  /* With the host's read-aloud service, there is a voice even where the
+     browser has none (Amharic, often). */
+  const supported = isSynthesisSupported() || Boolean(voice);
 
   /* Stop whatever is being read when the question changes, so one question
      is never read over the top of the next. */
@@ -24,13 +29,13 @@ export function ReadAloudButton({ text, language = 'en', autoPlay = false }) {
     if (!autoPlay || !supported || !text) return undefined;
 
     setIsPlaying(true);
-    const stop = speak(text, { language, onEnd: () => setIsPlaying(false) });
+    const stop = speak(text, { language, voice, onEnd: () => setIsPlaying(false) });
 
     return () => {
       stop();
       setIsPlaying(false);
     };
-  }, [autoPlay, supported, text, language]);
+  }, [autoPlay, supported, text, language, voice]);
 
   if (!supported) return null;
 
@@ -44,7 +49,7 @@ export function ReadAloudButton({ text, language = 'en', autoPlay = false }) {
     }
 
     setIsPlaying(true);
-    speak(text, { language, onEnd: () => setIsPlaying(false) });
+    speak(text, { language, voice, onEnd: () => setIsPlaying(false) });
   }
 
   return (

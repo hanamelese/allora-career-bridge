@@ -98,6 +98,49 @@ together; a real deployment would set up proxy headers and trust them.
     option, **"I have no document, refer me"**, which leads to the referral
     step. Versions published before the change still show the old options.
 
+## Voice: read aloud, answering by speaking, and Voice control
+
+Every form (the dashboard preview, the embedded widget, the Savanna pages) has three voice features,
+in English and Amharic:
+
+- **Read aloud.** Questions, help, options, errors and the form's messages are read in a natural
+  voice made by the API (`API/src/speech.js`): Microsoft Edge's neural voices through
+  [`msedge-tts`](https://www.npmjs.com/package/msedge-tts) (`en-US-AriaNeural`, Amharic
+  `am-ET-MekdesNeural`), then Google Translate's voice through
+  [`google-tts-api`](https://www.npmjs.com/package/google-tts-api) if Edge fails. If both fail,
+  the browser's own voice reads. Most browsers have no Amharic voice of their own, which is why
+  the server voice matters.
+  - Routes (POST, so the text is never in a URL or a log): `POST /api/v1/public/forms/:formId/speech`
+    (public key and allowed websites, as for the form itself; 120 a minute per key and address) and
+    `POST /api/v1/speech` (signed-in partners, for the preview). Results are cached in memory.
+  - **Answers read back use the same voices.** "Read my answer", "We wrote what you said …"
+    (Answer by speaking), and Voice control's "You said …" and review read-out send the learner's
+    answer to the speech route marked `private`: the API passes it to the voice provider (Microsoft
+    or Google) to be spoken, and **never caches or logs it** (`Cache-Control: no-store`). The
+    form's own text is cached. A password is never read or taken by voice.
+  - **Caveat:** both libraries use free, unofficial endpoints with no key. They can stop working or
+    change without notice, and their terms may not allow this use in production. For production,
+    swap in an official service (for example Azure Speech, which has the same voices) in
+    `createSpeech({ providers })`.
+- **Answer by speaking** (per question): speech is typed into the answer or matched to an option,
+  asking "Did you mean…?" when unsure. It uses the browser's speech recognition (Chrome and Edge;
+  not Firefox), which in Chrome is done by Google's servers.
+- **Voice control** (hands-free): the **Voice control** button beside **Settings**, or
+  <kbd>Alt</kbd>+<kbd>Shift</kbd>+<kbd>V</kbd>. The form reads each question with its numbered
+  options, then listens, acts, says what it did and listens again. Say:
+  - *next*, *back* / *previous*, *repeat*, *read the question*, *read the options*;
+  - *option 2* / *the second one*, *choose Addis Ababa*; anything else is the answer
+    (*my answer is …* gives a command word as an answer); e-mail addresses can be said as
+    "name at example dot org";
+  - *clear*, *help*, *stop*; and *send*, which always asks for a spoken *yes* first;
+  - in Amharic: ቀጣይ, ተመለስ, ድገም, ጥያቄውን አንብብ, አማራጮቹን አንብብ, አማራጭ ሁለት / ሁለተኛው,
+    … ምረጥ, አጥፋ, እገዛ, አቁም, ላክ, አዎ / አይ.
+
+  It stops after two silences in a row, and never listens while it is speaking. File uploads and
+  referral choices still need the keyboard or mouse; it says so. The commands are in
+  `packages/form-engine/react/voiceCommands.js` (tested); **the Amharic phrases are a first draft
+  and need checking by a native speaker**, as do the Amharic voice prompts.
+
 ## Referral SMS
 
 A learner who chooses "I have no document, refer me" can ask, at the end of the learner

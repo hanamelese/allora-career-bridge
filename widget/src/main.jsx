@@ -165,10 +165,12 @@ class OnboardingFormElement extends HTMLElement {
         : published.config;
     this.root.render(
       <FormRenderer
-        /* A new mode starts the form afresh. */
-        key={config.account?.mode ?? 'form'}
+        /* A new mode, or a new lang attribute, starts the form afresh in it
+           (answers so far come back from this tab's saved progress). */
+        key={`${config.account?.mode ?? 'form'}|${lang}`}
         config={config}
         settings={{ language: lang }}
+        voice={(text, language, options) => api.speech(formId, text, language, options)}
         referral={{
           partners: referralPartners ?? [],
           organisationName: organisationName ?? '',

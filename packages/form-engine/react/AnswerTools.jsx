@@ -1,5 +1,6 @@
 import { useState } from 'react';
 import { isSynthesisSupported, speak } from './speech.js';
+import { useVoiceContext } from './voiceContext.js';
 import { formatAnswerText } from '../src/accessibility.js';
 import { VoiceAnswer } from './VoiceAnswer.jsx';
 
@@ -45,7 +46,10 @@ function isEmpty(value) {
 export function AnswerTools({ question, value, language = 'en', onAnswer, onClear, onFocusField }) {
   const [status, setStatus] = useState('');
   const copy = COPY[language] ?? COPY.en;
-  const canSpeak = isSynthesisSupported();
+  const { voice } = useVoiceContext();
+  /* With the host's read-aloud service there is a voice even where the
+     browser has none (Amharic, often). A password is never read out. */
+  const canSpeak = (isSynthesisSupported() || Boolean(voice)) && question.type !== 'password';
   const empty = isEmpty(value);
 
   function readAnswer() {
@@ -54,7 +58,9 @@ export function AnswerTools({ question, value, language = 'en', onAnswer, onClea
       : copy.yourAnswer(formatAnswerText(question, value, language));
 
     setStatus(text);
-    speak(text, { language });
+    /* The learner's own answer, in the same natural voice as the questions;
+       marked private, so the read-aloud service never keeps it. */
+    speak(text, { language, voice, private: true });
   }
 
   function clear() {

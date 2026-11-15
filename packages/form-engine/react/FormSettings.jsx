@@ -102,6 +102,8 @@ export function FormSettings({
   language,
   languages = ['en'],
   onLanguageChange,
+  /* Another control for the top bar, before the gear (Voice control). */
+  barStart = null,
 }) {
   const copy = COPY[language] ?? COPY.en;
   const id = useId();
@@ -146,6 +148,7 @@ export function FormSettings({
   return (
     <div className="fe-settings">
       <div className="fe-settings__bar">
+        {barStart}
         <button
           type="button"
           ref={buttonRef}

@@ -99,6 +99,25 @@ export function createPublicApi({ scriptSrc, apiOrigin, publicKey }) {
       return { receiptId: typeof receipt?.receiptId === 'string' ? receipt.receiptId.slice(0, 200) : null };
     },
 
+    /**
+     * Read-aloud audio - natural voices, including Amharic - for the form's
+     * own text, and for a learner's answer read back to them (`private`:
+     * spoken by the service without being cached or logged; never a
+     * password). Rejects on any failure, and the form then uses the
+     * browser's own voice.
+     */
+    async speech(formId, text, language, { private: isPrivate = false } = {}) {
+      const url = `${base}/forms/${encodeURIComponent(formId)}/speech?key=${encodeURIComponent(publicKey)}`;
+      const response = await fetch(url, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        credentials: 'omit',
+        body: JSON.stringify({ text, lang: language === 'am' ? 'am' : 'en', private: isPrivate }),
+      });
+      if (!response.ok) throw Object.assign(new Error('Read aloud is not available.'), { code: 'speech_unavailable' });
+      return response.blob();
+    },
+
     sendReferral(formId, request) {
       return call(`/forms/${encodeURIComponent(formId)}/referrals`, {
         method: 'POST',

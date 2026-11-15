@@ -63,48 +63,103 @@ html.full-view-open body {
   backdrop-filter: blur(6px);
 }
 
-.is-full-view {
-  position: fixed !important;
+/* The pop-up window, as in the Bridge's own preview: a header, then a light area the form sits in. */
+.full-view-window {
+  position: fixed;
   inset: 0;
   z-index: 2001;
-  width: min(64rem, 100vw - 2rem);
-  max-height: 90vh;
-  max-height: 90dvh;
-  margin: auto !important;
+  display: flex;
+  flex-direction: column;
+  width: min(64rem, 100vw - 1.5rem);
+  height: min(56rem, 100vh - 1.5rem);
+  height: min(56rem, 100dvh - 1.5rem);
+  margin: auto;
+  overflow: hidden;
+  border-radius: 0.875rem;
+  background: #ffffff;
+  box-shadow: 0 24px 64px -12px rgb(16 24 40 / 0.45);
+  color: #101828;
+  font-family: 'Poppins', system-ui, -apple-system, 'Segoe UI', Roboto, sans-serif;
+}
+
+.full-view-window__top {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1rem;
+  padding: 0.75rem 0.75rem 0.75rem 1.5rem;
+  border-bottom: 1px solid #e4e7ec;
+}
+
+.full-view-window__title {
+  margin: 0;
+  font-size: 1.125rem;
+  font-weight: 500;
+  line-height: 1.3;
+  overflow-wrap: anywhere;
+}
+
+.full-view-window__title strong {
+  font-weight: 700;
+  color: #1a2b52;
+}
+
+.full-view-window__name {
+  color: #475467;
+}
+
+/* The area the form is pinned over (see place() in full-view.js). */
+.full-view-window__body {
+  flex: 1 1 auto;
+  min-height: 0;
+  background: #f6f7fb;
+}
+
+.full-view-window .full-view-close {
+  flex-shrink: 0;
+  justify-content: center;
+  width: 44px;
+  padding: 0;
+  border-color: transparent;
+}
+
+.full-view-window .full-view-close:hover {
+  border-color: #d0d5dd;
+}
+
+/* The form's own card, at its page width, framed like the Bridge's preview and scrolling inside. */
+.is-full-view {
+  position: fixed !important;
+  z-index: 2002;
+  margin: 0 !important;
   overflow-y: auto;
   overscroll-behavior: contain;
   background: #ffffff;
   border-radius: 0.75rem;
-  box-shadow: 0 24px 64px -12px rgb(16 24 40 / 0.45);
+  box-shadow: 0 1px 3px rgb(16 24 40 / 0.1), 0 8px 24px -8px rgb(16 24 40 / 0.18);
 }
 
-/* The login column's form has no padding of its own. */
+/* The sign-in page's form has no card of its own, so it gets the card's padding here. */
 .login__form.is-full-view {
   padding: 1.5rem;
 }
 
-.is-full-view .full-view-close {
-  position: sticky;
-  inset-block-start: 0.75rem;
-  z-index: 1;
-  display: flex;
-  width: fit-content;
-  margin: 0.75rem 0.75rem 0 auto;
-  box-shadow: 0 2px 8px rgb(16 24 40 / 0.12);
-}
-
-/* Phones: the whole screen. */
+/* Phones: the window fills the screen. */
 @media (max-width: 30rem) {
-  .is-full-view {
+  .full-view-window {
     width: 100vw;
-    max-height: none;
-    height: 100%;
+    height: 100vh;
+    height: 100dvh;
     border-radius: 0;
+  }
+
+  .full-view-window__top {
+    padding-inline-start: 1rem;
   }
 }
 
 @media (prefers-reduced-motion: no-preference) {
-  .is-full-view,
+  .full-view-window,
   .guide-dialog[open] {
     animation: full-view-in 160ms ease-out;
   }
@@ -118,6 +173,7 @@ html.full-view-open body {
 }
 
 @media (forced-colors: active) {
+  .full-view-window,
   .is-full-view,
   .guide-dialog {
     border: 2px solid CanvasText;

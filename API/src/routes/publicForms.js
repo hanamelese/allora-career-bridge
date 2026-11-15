@@ -10,6 +10,7 @@ import {
   referrals,
 } from '../db/schema.js';
 import { signDeliveryToken } from '../delivery.js';
+import { speechHandlers } from './speech.js';
 import { ApiError } from '../middleware/errors.js';
 import { validateBody } from '../middleware/validate.js';
 import {
@@ -27,7 +28,8 @@ import {
  * public key, which allows nothing beyond reading a published config for
  * that partner's own forms and sending a learner's referral to that
  * partner's own registered referral partners, and issuing the token that
- * goes with a delivery to the organisation's own server (see delivery.js).
+ * goes with a delivery to the organisation's own server (see delivery.js),
+ * and reading that form's own text aloud (see speech.js).
  * A learner's answers never come here: their browser sends them straight
  * to the organisation.
  *
@@ -42,6 +44,10 @@ export function publicFormRoutes(
     /* Generous enough for a family sharing one connection, tight enough
        that a script cannot mint tokens in bulk. */
     deliveryLimiter = createRateLimiter({ limit: 20 }),
+    /* Read-aloud audio: a few questions a minute for every learner on a
+       shared connection, not a free speech service for anyone else. */
+    speech = null,
+    speechLimiter = createRateLimiter({ limit: 120, windowMs: 60_000 }),
   } = {},
 ) {
   const router = Router();
@@ -236,6 +242,24 @@ export function publicFormRoutes(
       response.json({ deliveryUrl: organisation.deliveryUrl, token, expiresAt });
     },
   );
+
+  /* ---- Read aloud: the form's own text as audio (see ../speech.js) ---- */
+
+  if (speech) {
+    router.post(
+      '/forms/:formId/speech',
+      ...speechHandlers({
+        speech,
+        limiter: speechLimiter,
+        keyOf: (request) => `${request.speechKey}|${request.ip}`,
+        authorise(request) {
+          const key = requireKey(request);
+          findPublishedForm(key, request.params.formId);
+          request.speechKey = key.publicKey;
+        },
+      }),
+    );
+  }
 
   /* ---- Referral links, opened by the referral partner ---- */
 

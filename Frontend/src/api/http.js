@@ -74,3 +74,22 @@ export async function apiFetch(path, { method = 'GET', body, auth = true } = {})
 
   return payload;
 }
+
+/**
+ * Read-aloud audio, so the preview speaks with the voices learners hear
+ * (including Amharic): the form's text, and answers read back (`private`:
+ * never cached). Rejects on any failure; the form then uses the browser's
+ * own voice.
+ */
+export async function fetchSpeech(text, language, { private: isPrivate = false } = {}) {
+  const response = await fetch(`${BASE_URL}/speech`, {
+    method: 'POST',
+    headers: {
+      'content-type': 'application/json',
+      ...(authToken ? { authorization: `Bearer ${authToken}` } : {}),
+    },
+    body: JSON.stringify({ text, lang: language === 'am' ? 'am' : 'en', private: isPrivate }),
+  });
+  if (!response.ok) throw new ApiError(response.status, 'speech_unavailable', 'Read aloud is not available.');
+  return response.blob();
+}

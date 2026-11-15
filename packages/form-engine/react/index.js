@@ -16,8 +16,13 @@ export {
   isRecognitionSupported,
   isSynthesisSupported,
   speak,
+  speakAsync,
   stopSpeaking,
+  splitForSpeech,
 } from './speech.js';
+export { useVoiceControl } from './VoiceControl.jsx';
+export { parseCommand, tidyDictation } from './voiceCommands.js';
+export { VoiceContext } from './voiceContext.js';
 export { AccountForm } from './AccountForm.jsx';
 export { clearProgress, progressKeyFor } from './progressStore.js';
 export { FormSettings } from './FormSettings.jsx';

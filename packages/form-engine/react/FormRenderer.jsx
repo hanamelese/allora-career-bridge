@@ -8,6 +8,8 @@ import { FormSettings } from './FormSettings.jsx';
 import { AccountForm } from './AccountForm.jsx';
 import { useLearnerPreferences } from './learnerPreferences.js';
 import { progressKeyFor } from './progressStore.js';
+import { useVoiceControl } from './VoiceControl.jsx';
+import { VoiceContext } from './voiceContext.js';
 import './form-engine.css';
 
 const COPY = {
@@ -91,6 +93,10 @@ export function FormRenderer({
   /* Where this tab keeps the learner's place; by default one per form
      version. `null` turns saving off. */
   progressKey,
+  /* The host's read-aloud service, (text, language) => Promise<Blob>:
+     natural voices, including Amharic. Without it, or if it fails, the
+     browser's own voice reads. Only the form's own text is sent to it. */
+  voice = null,
 }) {
   /* The learner's own display choices: contrast, text size and simple
      words. The host may only suggest where simple words start. */
@@ -126,6 +132,39 @@ export function FormRenderer({
   const { question, isReviewing, isSubmitted, error, progress } = engine;
   const stepKey = isReviewing ? 'review' : question?.key;
 
+  /* Hands-free Voice control acts through the same actions as the buttons.
+     A Sign up / Sign in form reports its own screens (accountVoiceRef). */
+  const accountVoiceRef = useRef(null);
+  const formVoice = {
+    key: isSubmitted ? 'done' : (stepKey ?? 'empty'),
+    screen: isSubmitted ? 'done' : isReviewing ? 'review' : question ? 'question' : 'empty',
+    question,
+    value: engine.currentAnswer,
+    error,
+    progressText: copy.progress(progress.position, progress.total),
+    isLast: engine.isLast,
+    canGoBack: isReviewing || !engine.isFirst,
+    isSending: engine.isSending,
+    sendFailed: engine.sendFailed,
+    isAccount: false,
+    reviewText: engine.reviewSummary,
+    doneText: `${copy.done}. ${copy.doneDetail}`,
+    emptyText: copy.empty,
+    next: engine.next,
+    back: engine.back,
+    answer: engine.answer,
+    clear: engine.clear,
+    submit: engine.submit,
+  };
+  const formVoiceRef = useRef(formVoice);
+  formVoiceRef.current = formVoice;
+  const voiceControl = useVoiceControl({
+    getController: () =>
+      config.type === 'account' ? (accountVoiceRef.current ?? formVoiceRef.current) : formVoiceRef.current,
+    language,
+    voice,
+  });
+
   /* Moving to another question is this form's equivalent of a page load,
      so focus goes to the new question's heading. Without it, focus would
      stay on the Next button and a screen-reader user would never hear the
@@ -152,8 +191,10 @@ export function FormRenderer({
    */
   function frame(content) {
     return (
+      <VoiceContext.Provider value={{ voice, controlActive: voiceControl.active }}>
       <div
         className="fe-form"
+        onKeyDown={voiceControl.onKeyDown}
         lang={language}
         data-language={language}
         data-low-literacy={lowLiteracy || undefined}
@@ -168,7 +209,10 @@ export function FormRenderer({
           language={language}
           languages={languages}
           onLanguageChange={setLanguage}
+          barStart={voiceControl.button}
         />
+
+        {voiceControl.statusLine}
 
         <div
           className={`fe-form__body${isSettingsOpen ? ' fe-form__body--blurred' : ''}`}
@@ -177,6 +221,7 @@ export function FormRenderer({
           {content}
         </div>
       </div>
+      </VoiceContext.Provider>
     );
   }
 
@@ -190,6 +235,7 @@ export function FormRenderer({
         onSocialSignIn={onSocialSignIn}
         onSwitchMode={onSwitchMode}
         renderIcon={renderIcon}
+        voiceRef={accountVoiceRef}
       />,
     );
   }

@@ -45,6 +45,9 @@ export function AccountForm({
   onSocialSignIn,
   onSwitchMode,
   renderIcon,
+  /* Filled in on every render with this form's screens and actions, for
+     Voice control (see VoiceControl.jsx). */
+  voiceRef,
 }) {
   const copy = ACCOUNT_COPY[language] ?? ACCOUNT_COPY.en;
   const mode = config.account?.mode ?? 'signUp';
@@ -200,6 +203,29 @@ export function AccountForm({
     } else {
       goTo(index + 1);
     }
+  }
+
+  if (voiceRef) {
+    voiceRef.current = {
+      key: isDone ? 'done' : (step ?? 'empty'),
+      screen: isDone ? 'done' : step === SOCIAL_STEP ? 'social' : question ? 'question' : 'empty',
+      question,
+      value: question ? answers[question.key] : undefined,
+      error: (question && errors[question.key]) || formMessage || '',
+      progressText: steps.length > 1 ? copy.progress(index + 1, steps.length) : '',
+      isLast,
+      canGoBack: index > 0,
+      isSending,
+      sendFailed: false,
+      isAccount: true,
+      doneText: copy.done(mode),
+      emptyText: copy.noOptions,
+      next: () => handleNext(),
+      back: () => goTo(index - 1),
+      answer: (value) => question && update(question.key, value),
+      clear: () => question && update(question.key, undefined),
+      submit: () => handleNext(),
+    };
   }
 
   if (isDone) {

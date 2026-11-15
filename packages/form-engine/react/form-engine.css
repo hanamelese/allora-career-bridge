@@ -907,7 +907,64 @@ textarea.fe-input {
 
 .fe-settings__bar {
   display: flex;
+  flex-wrap: wrap;
   justify-content: flex-end;
+  gap: 0.5rem;
+}
+
+/* ---- Voice control (VoiceControl.jsx) ----
+   On: filled, with a mic badge, so the state never depends on colour alone. */
+.fe-voice-control[aria-pressed='true'] {
+  color: var(--fe-on-ink);
+  background-color: var(--fe-ink);
+  border-color: var(--fe-ink);
+}
+
+.fe-voice-control[aria-pressed='true']::after {
+  content: 'ON';
+  padding: 0 0.375rem;
+  border-radius: 999px;
+  background-color: var(--fe-on-ink);
+  color: var(--fe-ink);
+  font-size: calc(0.75rem * var(--fe-scale, 1));
+  font-weight: 700;
+  letter-spacing: 0.04em;
+}
+
+.fe-form[lang='am'] .fe-voice-control[aria-pressed='true']::after {
+  content: 'በርቷል';
+  letter-spacing: 0;
+}
+
+.fe-voice-control__panel {
+  display: flex;
+  flex-direction: column;
+  gap: 0.25rem;
+  padding: 0.75rem 1rem;
+  border: 1px solid var(--fe-border-subtle);
+  border-inline-start: 4px solid var(--fe-accent);
+  border-radius: var(--fe-radius);
+  background-color: var(--fe-surface-sunken);
+}
+
+.fe-voice-control__panel--empty {
+  display: none;
+}
+
+.fe-voice-control__status {
+  margin: 0;
+  font-size: calc(1rem * var(--fe-scale, 1));
+  font-weight: 600;
+}
+
+.fe-voice-control__status:empty {
+  display: none;
+}
+
+.fe-voice-control__caption {
+  margin: 0;
+  font-size: calc(0.9375rem * var(--fe-scale, 1));
+  color: var(--fe-ink-secondary);
 }
 
 .fe-settings__toggle {

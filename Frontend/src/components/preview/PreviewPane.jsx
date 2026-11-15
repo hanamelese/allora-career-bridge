@@ -10,6 +10,7 @@ import { useAsync } from '../../hooks/useAsync.js';
 import { useAuth } from '../../auth/authContext.js';
 import { useT } from '../../i18n/index.js';
 import './PreviewPane.css';
+import { fetchSpeech } from '../../api/http.js';
 
 /**
  * The live preview.
@@ -114,6 +115,7 @@ export function PreviewPane({ config, formId, variant = 'inline' }) {
           config={config}
           progressKey={progressKey}
           settings={{ language: config.defaultLanguage }}
+          voice={fetchSpeech}
           referral={referral}
           onSocialSignIn={(provider) =>
             setAccountNote(t('workspace.preview.socialSignIn', provider.name, provider.url))

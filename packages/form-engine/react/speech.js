@@ -102,35 +102,149 @@ export function startListening({ language = 'en', onResult, onError, onEnd }) {
   };
 }
 
+/* What is speaking now, so anything new stops it first and questions
+   never stack up on top of one another. */
+let current = null;
+
 /**
- * Read text aloud. Returns a function that stops it again.
- *
- * Anything already speaking is cancelled first, so questions never stack
- * up on top of one another.
+ * Splits text into pieces of at most `max` characters, at sentence ends
+ * where it can (including the Amharic full stop ።), so a long question is
+ * spoken whole rather than cut off by the speech service's limit.
  */
-export function speak(text, { language = 'en', onEnd } = {}) {
-  if (!isSynthesisSupported() || !text) {
-    onEnd?.();
-    return () => {};
+export function splitForSpeech(text, max = 400) {
+  const clean = String(text ?? '').replace(/\s+/g, ' ').trim();
+  if (!clean) return [];
+  const sentences = clean.match(/[^.!?።]+[.!?።]*\s*/g) ?? [clean];
+  const pieces = [];
+  let piece = '';
+
+  for (const sentence of sentences) {
+    if (piece && (piece + sentence).length > max) {
+      pieces.push(piece.trim());
+      piece = '';
+    }
+    let rest = sentence;
+    while (rest.length > max) {
+      pieces.push(rest.slice(0, max).trim());
+      rest = rest.slice(max);
+    }
+    piece += rest;
   }
+  if (piece.trim()) pieces.push(piece.trim());
+  return pieces;
+}
 
-  window.speechSynthesis.cancel();
-
+function speakWithBrowser(text, language, token, finish) {
+  if (!isSynthesisSupported()) {
+    finish();
+    return;
+  }
   const utterance = new window.SpeechSynthesisUtterance(text);
   utterance.lang = toSpeechLanguage(language);
   utterance.rate = 0.95;
-  utterance.onend = () => onEnd?.();
-  utterance.onerror = () => onEnd?.();
-
+  utterance.onend = finish;
+  utterance.onerror = finish;
+  token.browser = true;
   window.speechSynthesis.speak(utterance);
+}
+
+function playBlob(blob, token) {
+  return new Promise((resolve, reject) => {
+    const url = URL.createObjectURL(blob);
+    const audio = new Audio(url);
+    token.audio = audio;
+    const done = (error) => {
+      URL.revokeObjectURL(url);
+      if (token.audio === audio) token.audio = null;
+      if (error) reject(error);
+      else resolve();
+    };
+    audio.onended = () => done();
+    audio.onerror = () => done(new Error('audio-error'));
+    audio.play().catch(done);
+  });
+}
+
+/**
+ * Read text aloud. Returns a function that stops it again.
+ *
+ * - `voice(text, language, { private }) -> Promise<Blob>` is the form's
+ *   read-aloud service (the Bridge's speech route): natural voices,
+ *   including Amharic, which most browsers lack. If it is missing or
+ *   fails, the browser's own voice reads the rest.
+ * - `private: true` marks a learner's own answer ("Read my answer", what
+ *   was heard): it is read by the same voices, and the service speaks it
+ *   without caching or logging it. A password is never passed here.
+ *
+ * `onEnd` is called once, when it finishes, fails or is stopped.
+ */
+export function speak(text, { language = 'en', onEnd, voice = null, private: isPrivate = false } = {}) {
+  stopSpeaking();
+
+  const token = { stopped: false, audio: null, browser: false, done: false };
+  const finish = () => {
+    if (token.done) return;
+    token.done = true;
+    if (current === token) current = null;
+    onEnd?.();
+  };
+  token.finish = finish;
+
+  if (!text || (!voice && !isSynthesisSupported())) {
+    finish();
+    return () => {};
+  }
+  current = token;
+
+  if (!voice) {
+    speakWithBrowser(text, language, token, finish);
+  } else {
+    (async () => {
+      const pieces = splitForSpeech(text);
+      for (let index = 0; index < pieces.length; index += 1) {
+        if (token.stopped) return;
+        try {
+          const blob = await voice(pieces[index], language, { private: isPrivate });
+          if (token.stopped) return;
+          await playBlob(blob, token);
+        } catch {
+          if (token.stopped) return;
+          /* The service is down or the audio would not play: the browser
+             reads what is left. */
+          speakWithBrowser(pieces.slice(index).join(' '), language, token, finish);
+          return;
+        }
+      }
+      finish();
+    })();
+  }
 
   return () => {
-    window.speechSynthesis.cancel();
+    if (current === token) stopSpeaking();
   };
 }
 
+/** Like speak(), as a promise that settles when the speaking ends. */
+export function speakAsync(text, options = {}) {
+  return new Promise((resolve) => {
+    speak(text, { ...options, onEnd: resolve });
+  });
+}
+
 export function stopSpeaking() {
+  const token = current;
+  current = null;
+  if (token) {
+    token.stopped = true;
+    token.audio?.pause();
+  }
   if (isSynthesisSupported()) {
     window.speechSynthesis.cancel();
   }
+  token?.finish?.();
+}
+
+/** Whether anything is being read aloud right now. */
+export function isSpeaking() {
+  return current !== null;
 }

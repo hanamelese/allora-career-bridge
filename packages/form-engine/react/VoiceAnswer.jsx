@@ -1,6 +1,7 @@
 import { useEffect, useRef, useState } from 'react';
 import { isRecognitionSupported, speak, startListening, stopSpeaking } from './speech.js';
 import { matchSpokenAlternatives } from './choiceMatch.js';
+import { useVoiceContext } from './voiceContext.js';
 
 const COPY = {
   en: {
@@ -75,6 +76,7 @@ export function VoiceAnswer({ question, value, language = 'en', onAnswer, onFocu
 
   const copy = COPY[language] ?? COPY.en;
   const supported = isRecognitionSupported();
+  const { voice, controlActive } = useVoiceContext();
   const hasOptions = question.options?.length > 0;
   const isMulti = question.type === 'multiChoice';
 
@@ -90,11 +92,17 @@ export function VoiceAnswer({ question, value, language = 'en', onAnswer, onFocu
     return <p className="fe-voice__note">{copy.unavailable}</p>;
   }
 
+  /* Voice control is listening already; a second microphone button would
+     compete with it. */
+  if (controlActive) return null;
+
   /* Say it and show it: the status line is a polite live region, and it is
      also read aloud for learners who rely on audio. */
-  function report(text) {
+  function report(text, { private: isPrivate = false } = {}) {
     setMessage(text);
-    speak(text, { language });
+    /* What the learner said is read back in the same natural voice; marked
+       private, so the read-aloud service never keeps it. */
+    speak(text, { language, voice, private: isPrivate });
   }
 
   function choose(option) {
@@ -122,7 +130,7 @@ export function VoiceAnswer({ question, value, language = 'en', onAnswer, onFocu
 
       onAnswer(next);
       setState('answered');
-      report(copy.wroteIt(transcript));
+      report(copy.wroteIt(transcript), { private: true });
       onFocusField?.();
       return;
     }
@@ -147,7 +155,7 @@ export function VoiceAnswer({ question, value, language = 'en', onAnswer, onFocu
     if (result.confidence === 'ambiguous') {
       report(copy.several(result.candidates.map((option) => option.label).join(', ')));
     } else {
-      report(copy.noMatch(transcript));
+      report(copy.noMatch(transcript), { private: true });
     }
   }
 

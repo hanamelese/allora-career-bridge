@@ -12,6 +12,9 @@ import { authRoutes } from './routes/auth.js';
 import { formRoutes } from './routes/forms.js';
 import { publicFormRoutes } from './routes/publicForms.js';
 import { organisationRoutes } from './routes/organisation.js';
+import { partnerSpeechRoutes } from './routes/speech.js';
+import { createRateLimiter } from './referrals.js';
+import { createSpeech } from './speech.js';
 
 /**
  * Builds the API.
@@ -20,7 +23,10 @@ import { organisationRoutes } from './routes/organisation.js';
  * in-memory one, and routes are versioned under /api/v1 so a later release
  * can add /v2 without breaking a partner pinned to this one.
  */
-export function createApp(db, { sms = null, rateLimiter, deliveryLimiter, signupLimiter } = {}) {
+export function createApp(
+  db,
+  { sms = null, rateLimiter, deliveryLimiter, signupLimiter, speech = createSpeech(), speechLimiter } = {},
+) {
   const app = express();
 
   app.disable('x-powered-by');
@@ -133,7 +139,15 @@ export function createApp(db, { sms = null, rateLimiter, deliveryLimiter, signup
   app.use('/api/v1/auth', authRoutes(db, signupLimiter ? { signupLimiter } : {}));
   app.use('/api/v1/forms', requireAuth, formRoutes(db, { sms }));
   app.use('/api/v1/organisation', requireAuth, organisationRoutes(db));
-  app.use('/api/v1/public', publicFormRoutes(db, { sms, rateLimiter, deliveryLimiter }));
+  app.use(
+    '/api/v1/speech',
+    requireAuth,
+    partnerSpeechRoutes({ speech, limiter: speechLimiter ?? createRateLimiter({ limit: 240, windowMs: 60_000 }) }),
+  );
+  app.use(
+    '/api/v1/public',
+    publicFormRoutes(db, { sms, rateLimiter, deliveryLimiter, speech, ...(speechLimiter ? { speechLimiter } : {}) }),
+  );
 
   app.use(notFound);
   app.use(errorHandler);
