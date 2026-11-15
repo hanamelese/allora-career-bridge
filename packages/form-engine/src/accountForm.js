@@ -6,11 +6,16 @@
  * its own screen with Back and Next. The questions, wording and checks
  * come from the same catalogue and schema as every other form, so a
  * partner's reworded label shows here exactly as it would anywhere else.
+ *
+ * Questions the partner added ("Questions you added") are part of creating
+ * an account: they follow the standard questions when signing up, and are
+ * never asked when signing in, which needs only what signing in needs.
  */
 
 import { fieldCatalog } from '@onboarding/contracts/fieldCatalog.js';
 import { buildSubmissionSchema } from '@onboarding/contracts/submissionSchema.js';
 import { getSocialProvider } from '@onboarding/contracts/socialProviders.js';
+import { matchesShowIf } from '@onboarding/contracts/fieldVisibility.js';
 import { getQuestionContent } from './accessibility.js';
 
 export const ACCOUNT_COPY = {
@@ -89,25 +94,52 @@ export const ACCOUNT_COPY = {
   },
 };
 
-/** The form's config with the name question dropped when signing in. */
+/**
+ * The form's config as this mode asks it: the name question dropped when
+ * signing in, and the partner's added questions asked only when signing up.
+ */
 export function effectiveAccountConfig(config) {
   const mode = config.account?.mode ?? 'signUp';
   const allowEmail = config.account?.allowEmailPassword !== false;
+  const off = (field) => ({ ...field, enabled: false, required: false });
 
   return {
     ...config,
-    fields: config.fields.map((field) => {
-      const off = !allowEmail || (mode === 'signIn' && field.key === 'name');
-      return off ? { ...field, enabled: false, required: false } : field;
-    }),
+    fields: config.fields.map((field) =>
+      !allowEmail || (mode === 'signIn' && field.key === 'name') ? off(field) : field,
+    ),
+    customFields: (config.customFields ?? []).map((field) => (mode === 'signIn' ? off(field) : field)),
   };
 }
 
-/** The questions on screen, worded for the language chosen. */
-export function getAccountQuestions(config, settings = {}) {
-  const mode = config.account?.mode ?? 'signUp';
+/** The partner's added questions to ask, given the answers so far. */
+function visibleCustomFields(effective, answers) {
+  return effective.customFields.filter((field) => field.enabled && matchesShowIf(field.showIf, answers));
+}
 
-  return effectiveAccountConfig(config)
+/** The keys on screen, in order: the standard questions, then the added ones. */
+function enabledAccountKeys(effective, answers) {
+  return [
+    ...effective.fields.filter((field) => field.enabled).map((field) => field.key),
+    ...visibleCustomFields(effective, answers).map((field) => field.key),
+  ];
+}
+
+/**
+ * The questions on screen, worded for the language chosen. `answers`
+ * decides which added questions show, for one that depends on another.
+ * An added question is marked `isCustom`.
+ */
+export function getAccountQuestions(config, settings = {}, answers = {}) {
+  const mode = config.account?.mode ?? 'signUp';
+  const effective = effectiveAccountConfig(config);
+
+  const custom = visibleCustomFields(effective, answers).map((field) => ({
+    ...getQuestionContent(field, settings, config),
+    isCustom: true,
+  }));
+
+  return effective
     .fields.filter((field) => field.enabled)
     .map(({ voiceInput: _retired, ...field }) => {
       const question = getQuestionContent({ ...(fieldCatalog[field.key] ?? {}), ...field }, settings, config);
@@ -125,7 +157,8 @@ export function getAccountQuestions(config, settings = {}) {
       if (field.key === 'email') question.autocomplete = mode === 'signIn' ? 'username' : 'email';
 
       return question;
-    });
+    })
+    .concat(custom);
 }
 
 /** The switched-on social providers, in the order the partner listed them. */
@@ -143,7 +176,9 @@ export function getEnabledProviders(config) {
 export function validateAccount(config, answers, { language = 'en', labels = {} } = {}) {
   const copy = (ACCOUNT_COPY[language] ?? ACCOUNT_COPY.en).errors;
   const effective = effectiveAccountConfig(config);
-  const enabledKeys = effective.fields.filter((field) => field.enabled).map((field) => field.key);
+  /* Only what is on screen is checked: an added question that is hidden,
+     or not asked in this mode, can never block the form. */
+  const enabledKeys = enabledAccountKeys(effective, answers);
 
   const cleaned = {};
   for (const key of enabledKeys) {
@@ -184,7 +219,9 @@ export function validateAccount(config, answers, { language = 'en', labels = {} 
             ? empty
               ? copy.passwordEmpty
               : copy.passwordShort
-            : copy.invalid;
+            : empty
+              ? copy.answerEmpty
+              : copy.invalid;
 
     errors[key] = labels[key] ? `${labels[key]}: ${message}` : message;
   }

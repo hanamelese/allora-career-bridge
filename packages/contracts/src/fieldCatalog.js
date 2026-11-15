@@ -723,6 +723,9 @@ export const fieldCatalog = {
     },
     icon: 'accessibility',
     optionsFrom: 'workplaceAccommodations',
+    /* Asked in a section of its own, like the support questions on the
+       learner forms - but not private: candidates are meant to see it. */
+    section: 'accommodations',
     skippable: true,
     sensitive: false,
     private: false,

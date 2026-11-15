@@ -13,6 +13,14 @@ export const partners = sqliteTable('partners', {
   name: text('name').notNull(),
   status: text('status').notNull().default('active'),
   createdAt: text('created_at').notNull(),
+  /* Where the organisation's own server receives submitted forms. Answers
+     go there straight from the learner's browser; this service never
+     receives or keeps them. */
+  deliveryUrl: text('delivery_url'),
+  /* Signs the short-lived token sent with each delivery, so the
+     organisation can check a submission came through its published form.
+     Kept in full because signing needs it; shown only to the partner. */
+  deliverySecret: text('delivery_secret'),
 });
 
 export const partnerUsers = sqliteTable(
@@ -133,7 +141,10 @@ export const referrals = sqliteTable(
     partnerFormId: text('partner_form_id')
       .notNull()
       .references(() => partnerForms.id),
-    learnerName: text('learner_name').notNull(),
+    /* No longer written: the learner's name and phone go to the referral
+       partner in the text message only, and are not kept here. The columns
+       stay for referrals made before that change. */
+    learnerName: text('learner_name'),
     learnerPhone: text('learner_phone'),
     language: text('language').notNull().default('en'),
     tokenHash: text('token_hash').notNull(),
@@ -167,13 +178,13 @@ export const allowedOrigins = sqliteTable(
 );
 
 /**
- * A learner's answers to an embedded form, against the published version
- * they answered.
+ * RETIRED - no longer written or read.
  *
- * Only what an organisation can act on is kept (see `toStorableSubmission`
- * in the contracts package): never private support answers, the referral
- * choice, ID numbers, or the contents of a file - an uploaded CV is kept as
- * its name, size and type.
+ * Learners' answers used to be stored here. Since the move to delivering
+ * submissions straight to each organisation's own server, this service
+ * keeps no answers. The table is left in place only until its existing
+ * rows have been exported and their deletion approved; then a migration
+ * drops it.
  */
 export const submissions = sqliteTable(
   'submissions',

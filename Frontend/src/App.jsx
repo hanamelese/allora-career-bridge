@@ -1,15 +1,14 @@
 import { BrowserRouter, Navigate, Route, Routes } from 'react-router-dom';
 import { AuthProvider } from './auth/AuthProvider.jsx';
+import { DisplayProvider } from './display/DisplayProvider.jsx';
 import { useAuth } from './auth/authContext.js';
 import { AppShell } from './components/shell/AppShell.jsx';
-import { SignInPage, SignUpPage } from './pages/AuthPage.jsx';
 import { LandingPage } from './pages/LandingPage.jsx';
 import { FormWorkspace } from './pages/FormWorkspace.jsx';
 import { ConfigurePage } from './pages/ConfigurePage.jsx';
 import { PreviewPage } from './pages/PreviewPage.jsx';
 import { PublishPage } from './pages/PublishPage.jsx';
 import { EmbedPage } from './pages/EmbedPage.jsx';
-import { SubmissionsPage } from './pages/SubmissionsPage.jsx';
 import { NotFoundPage } from './pages/NotFoundPage.jsx';
 import { OrganisationPage } from './pages/OrganisationPage.jsx';
 import { ReferralPage } from './pages/ReferralPage.jsx';
@@ -23,14 +22,14 @@ const firstFormPath = `/forms/${FORM_TYPES[0].slug}/configure`;
  *
  * Everything sits behind a sign-in, because these are a partner's own form
  * configurations and the API scopes every query to them. A deep link
- * opened while signed out shows the sign-in in place, and the same link
- * once signed in.
+ * opened while signed out shows the front page with the sign-in popup
+ * open, and the same link once signed in.
  */
 function DashboardRoutes() {
   const { isSignedIn } = useAuth();
 
   if (!isSignedIn) {
-    return <SignInPage />;
+    return <LandingPage initialAuthMode="signIn" />;
   }
 
   return (
@@ -46,7 +45,10 @@ function DashboardRoutes() {
           <Route path="preview" element={<PreviewPage />} />
           <Route path="publish" element={<PublishPage />} />
           <Route path="embed" element={<EmbedPage />} />
-          <Route path="submissions" element={<SubmissionsPage />} />
+          {/* The Submissions view is no longer offered here (its data and
+              API are unchanged pending the privacy review); an old link
+              lands on Configure. */}
+          <Route path="submissions" element={<Navigate to="../configure" replace />} />
         </Route>
 
         <Route path="*" element={<NotFoundPage />} />
@@ -55,7 +57,7 @@ function DashboardRoutes() {
   );
 }
 
-/** Pages for someone not signed in; a signed-in partner goes to their forms. */
+/** The ways in, for someone not signed in; a signed-in partner goes to their forms. */
 function PublicOnly({ children }) {
   const { isSignedIn } = useAuth();
   return isSignedIn ? <Navigate to={firstFormPath} replace /> : children;
@@ -63,6 +65,7 @@ function PublicOnly({ children }) {
 
 export default function App() {
   return (
+    <DisplayProvider>
     <AuthProvider>
       <BrowserRouter>
         <Routes>
@@ -70,20 +73,14 @@ export default function App() {
               account, so it sits outside the sign-in. */}
           <Route path="referrals/:token" element={<ReferralPage />} />
 
-          {/* The public front page, and the ways in. */}
-          <Route
-            index
-            element={
-              <PublicOnly>
-                <LandingPage />
-              </PublicOnly>
-            }
-          />
+          {/* The front page - also home for a signed-in partner - and the
+              ways in, which open it with the sign-in popup showing. */}
+          <Route index element={<LandingPage />} />
           <Route
             path="signin"
             element={
               <PublicOnly>
-                <SignInPage />
+                <LandingPage key="signIn" initialAuthMode="signIn" />
               </PublicOnly>
             }
           />
@@ -91,7 +88,7 @@ export default function App() {
             path="signup"
             element={
               <PublicOnly>
-                <SignUpPage />
+                <LandingPage key="signUp" initialAuthMode="signUp" />
               </PublicOnly>
             }
           />
@@ -100,5 +97,6 @@ export default function App() {
         </Routes>
       </BrowserRouter>
     </AuthProvider>
+    </DisplayProvider>
   );
 }

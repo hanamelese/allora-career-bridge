@@ -1,6 +1,7 @@
 import { Plus, Trash2 } from 'lucide-react';
 import { Button } from '../ui/Button.jsx';
 import { TextInput } from '../ui/TextInput.jsx';
+import { useLanguage, useT } from '../../i18n/index.js';
 import './FieldOptionsEditor.css';
 
 /**
@@ -14,6 +15,9 @@ import './FieldOptionsEditor.css';
  * custom field's, which is how the shared schema names them.
  */
 export function FieldOptionsEditor({ idPrefix, options, onChange, keyName = 'key' }) {
+  const t = useT();
+  const language = useLanguage();
+
   function updateOption(index, patch) {
     onChange(options.map((option, position) => (position === index ? { ...option, ...patch } : option)));
   }
@@ -39,6 +43,7 @@ export function FieldOptionsEditor({ idPrefix, options, onChange, keyName = 'key
     let suffix = options.length + 1;
     while (taken.has(`option_${suffix}`)) suffix += 1;
 
+    /* The English wording of the new option, so stays English. */
     onChange([...options, { [keyName]: `option_${suffix}`, label: { en: 'New option' } }]);
   }
 
@@ -56,16 +61,16 @@ export function FieldOptionsEditor({ idPrefix, options, onChange, keyName = 'key
             <div className="options-editor__labels">
               <TextInput
                 id={`${idPrefix}-option-${option[keyName]}-en`}
-                label="English"
+                label={t('configure.field.english')}
                 value={option.label.en ?? ''}
                 onChange={(value) => updateLabel(index, 'en', value)}
               />
               <TextInput
                 id={`${idPrefix}-option-${option[keyName]}-am`}
-                label="Amharic"
+                label={t('configure.field.amharic')}
                 lang="am"
                 value={option.label.am ?? ''}
-                placeholder="Falls back to English"
+                placeholder={t('configure.field.fallsBackToEnglish')}
                 onChange={(value) => updateLabel(index, 'am', value)}
               />
             </div>
@@ -74,7 +79,7 @@ export function FieldOptionsEditor({ idPrefix, options, onChange, keyName = 'key
               variant="ghost"
               size="sm"
               icon={Trash2}
-              label={`Remove the option "${option.label.en ?? option[keyName]}"`}
+              label={t('configure.options.remove', option.label[language] ?? option.label.en ?? option[keyName])}
               disabled={options.length <= 1}
               onClick={() => removeOption(index)}
             />
@@ -83,7 +88,7 @@ export function FieldOptionsEditor({ idPrefix, options, onChange, keyName = 'key
       </ul>
 
       <Button variant="secondary" size="sm" icon={Plus} onClick={addOption}>
-        Add an option
+        {t('configure.options.add')}
       </Button>
     </div>
   );

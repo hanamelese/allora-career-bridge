@@ -2,20 +2,11 @@ import { SOCIAL_PROVIDERS } from '@onboarding/contracts';
 import { BrandIcon } from '@onboarding/form-engine/react';
 import { Switch } from '../ui/Switch.jsx';
 import { TextInput } from '../ui/TextInput.jsx';
+import { useT } from '../../i18n/index.js';
 import './AccountSettings.css';
 
-const MODES = [
-  {
-    value: 'signUp',
-    label: 'Sign up',
-    description: 'For new people. Asks for their name as well as an email and password.',
-  },
-  {
-    value: 'signIn',
-    label: 'Sign in',
-    description: 'For people who already have an account. Asks for email and password only.',
-  },
-];
+/* Their wording is under `configure.account.modes.<value>`. */
+const MODES = ['signUp', 'signIn'];
 
 /**
  * The Sign up / Sign in form's own options: its title, and which ways of
@@ -26,6 +17,7 @@ const MODES = [
  * OAuth flow - so all this stores is that address.
  */
 export function AccountSettings({ account, errors, onChange }) {
+  const t = useT();
   const providers = SOCIAL_PROVIDERS.map((provider) => ({
     ...provider,
     ...(account.socialProviders.find((item) => item.key === provider.key) ?? {
@@ -42,18 +34,24 @@ export function AccountSettings({ account, errors, onChange }) {
     });
   }
 
+  const modes = MODES.map((value) => ({
+    value,
+    label: t(`configure.account.modes.${value}.label`),
+    description: t(`configure.account.modes.${value}.description`),
+  }));
+
   const providerIndex = (key) => providers.findIndex((provider) => provider.key === key);
 
   return (
     <div className="account-settings">
       <fieldset className="account-settings__modes">
-        <legend className="account-settings__legend">Form title</legend>
+        <legend className="account-settings__legend">{t('configure.account.formTitle')}</legend>
         <p className="account-settings__hint">
-          Sign up and sign in work the same way, so one form covers both. Choose which this one is.
+          {t('configure.account.formTitleHint')}
         </p>
 
         <div className="account-settings__mode-list">
-          {MODES.map((mode) => (
+          {modes.map((mode) => (
             <label className="account-settings__mode" key={mode.value}>
               <input
                 type="radio"
@@ -76,8 +74,8 @@ export function AccountSettings({ account, errors, onChange }) {
 
       <Switch
         id="account-email-password"
-        label="Email and password"
-        description="People type an email address and password. They are passed to your sign-in system and never stored here."
+        label={t('configure.account.emailPassword')}
+        description={t('configure.account.emailPasswordDescription')}
         checked={account.allowEmailPassword}
         onChange={(checked) => onChange({ allowEmailPassword: checked })}
       />
@@ -88,10 +86,9 @@ export function AccountSettings({ account, errors, onChange }) {
       ) : null}
 
       <fieldset className="account-settings__providers">
-        <legend className="account-settings__legend">Sign in with another account</legend>
+        <legend className="account-settings__legend">{t('configure.account.providers')}</legend>
         <p className="account-settings__hint">
-          Each button opens the address you give, usually where your own site starts signing in with
-          that service. Screen readers announce each one as, for example, “Sign up with Google, link”.
+          {t('configure.account.providersHint')}
         </p>
 
         <ul className="account-settings__provider-list" role="list">
@@ -113,13 +110,13 @@ export function AccountSettings({ account, errors, onChange }) {
                 {provider.enabled ? (
                   <TextInput
                     id={`account-provider-${provider.key}-url`}
-                    label={`${provider.name} sign-in address`}
+                    label={t('configure.account.providerAddress', provider.name)}
                     type="url"
                     inputMode="url"
                     placeholder={`https://your-site.example/auth/${provider.key}`}
                     value={provider.url}
                     error={urlError}
-                    help="Must start with https://"
+                    help={t('configure.account.httpsHelp')}
                     onChange={(url) => updateProvider(provider.key, { url: url.trim() })}
                   />
                 ) : null}

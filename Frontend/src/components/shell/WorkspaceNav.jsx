@@ -1,31 +1,29 @@
 import { NavLink } from 'react-router-dom';
+import { useT } from '../../i18n/index.js';
 import './WorkspaceNav.css';
 
 /**
  * The partner's workflow, in the order it happens: configure the form,
- * check how it will look, publish it, take the tag that puts the published
- * version on their site, then read what learners sent from there.
+ * check how it will look, publish it, then take the tag that puts the
+ * published version on their site. Each step is a card; the current one
+ * is marked, and pressing one gives a small press-down.
  *
  * Like the sidebar these are routes, so they are links with
  * `aria-current`, not ARIA tabs - announcing "tab" for something that
  * navigates would misdescribe what pressing it does.
  */
-const VIEWS = [
-  { slug: 'configure', label: 'Configure', description: 'Choose fields and settings' },
-  { slug: 'preview', label: 'Preview', description: 'See the learner experience' },
-  { slug: 'publish', label: 'Publish', description: 'Save and publish a version' },
-  { slug: 'embed', label: 'Embed tag', description: 'Put it on your website' },
-  { slug: 'submissions', label: 'Submissions', description: 'What learners sent' },
-];
+const VIEWS = ['configure', 'preview', 'publish', 'embed'];
 
 export function WorkspaceNav({ formSlug }) {
+  const t = useT();
+
   return (
-    <nav className="workspace-nav" aria-label="Form workflow">
+    <nav className="workspace-nav" aria-label={t('shell.workflow.label')}>
       <ul className="workspace-nav__list" role="list">
         {VIEWS.map((view, index) => (
-          <li key={view.slug}>
+          <li key={view}>
             <NavLink
-              to={`/forms/${formSlug}/${view.slug}`}
+              to={`/forms/${formSlug}/${view}`}
               className={({ isActive }) =>
                 ['workspace-nav__link', isActive ? 'workspace-nav__link--active' : '']
                   .filter(Boolean)
@@ -36,8 +34,8 @@ export function WorkspaceNav({ formSlug }) {
                 {index + 1}
               </span>
               <span className="workspace-nav__text">
-                <span className="workspace-nav__label">{view.label}</span>
-                <span className="workspace-nav__description">{view.description}</span>
+                <span className="workspace-nav__label">{t(`shell.workflow.${view}.label`)}</span>
+                <span className="workspace-nav__description">{t(`shell.workflow.${view}.description`)}</span>
               </span>
             </NavLink>
           </li>

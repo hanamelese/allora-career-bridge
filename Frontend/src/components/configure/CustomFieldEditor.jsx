@@ -6,6 +6,7 @@ import { Checkbox } from '../ui/Checkbox.jsx';
 import { Select } from '../ui/Select.jsx';
 import { TextInput } from '../ui/TextInput.jsx';
 import { slugify, uniqueKey } from '../../keys.js';
+import { useT } from '../../i18n/index.js';
 import './CustomFieldEditor.css';
 
 /**
@@ -18,13 +19,8 @@ import './CustomFieldEditor.css';
  * This is a real <form>, so Enter submits and the browser's own validation
  * applies before ours does.
  */
-const TYPE_LABELS = {
-  text: 'Short written answer',
-  choice: 'Choose one from a list',
-  yesNo: 'Yes or no',
-};
-
 export function CustomFieldEditor({ existingKeys, onAdd }) {
+  const t = useT();
   const [labelEn, setLabelEn] = useState('');
   const [labelAm, setLabelAm] = useState('');
   const [type, setType] = useState('text');
@@ -49,12 +45,12 @@ export function CustomFieldEditor({ existingKeys, onAdd }) {
     const trimmed = labelEn.trim();
 
     if (!trimmed) {
-      setError('Write the question in English first. Amharic is optional.');
+      setError(t('configure.custom.errorNoEnglish'));
       return;
     }
 
     if (!slugify(trimmed)) {
-      setError('Use at least one letter or number in the English question.');
+      setError(t('configure.custom.errorNoLetters'));
       return;
     }
 
@@ -64,7 +60,7 @@ export function CustomFieldEditor({ existingKeys, onAdd }) {
       .filter(Boolean);
 
     if (type === 'choice' && optionLabels.length === 0) {
-      setError('A question with a list of answers needs at least one option.');
+      setError(t('configure.custom.errorNoOptions'));
       return;
     }
 
@@ -97,40 +93,40 @@ export function CustomFieldEditor({ existingKeys, onAdd }) {
       <div className="custom-field-editor__row">
         <TextInput
           id="custom-label-en"
-          label="Question in English"
+          label={t('configure.custom.labelEn')}
           value={labelEn}
           onChange={setLabelEn}
-          placeholder="For example: Preferred contact time"
+          placeholder={t('configure.custom.labelEnPlaceholder')}
           required
         />
         <TextInput
           id="custom-label-am"
-          label="Question in Amharic (optional)"
+          label={t('configure.custom.labelAm')}
           lang="am"
           value={labelAm}
           onChange={setLabelAm}
-          help="Left blank, learners reading in Amharic see the English wording."
+          help={t('configure.custom.labelAmHelp')}
         />
       </div>
 
       <div className="custom-field-editor__row">
         <Select
           id="custom-type"
-          label="Kind of answer"
+          label={t('configure.custom.type')}
           value={type}
           onChange={setType}
-          options={CUSTOM_FIELD_TYPES.map((value) => ({ value, label: TYPE_LABELS[value] }))}
+          options={CUSTOM_FIELD_TYPES.map((value) => ({ value, label: t(`configure.custom.types.${value}`) }))}
         />
 
         {type === 'choice' ? (
           <TextInput
             id="custom-options"
-            label="Answer options"
+            label={t('configure.custom.options')}
             multiline
             rows={3}
             value={optionsText}
             onChange={setOptionsText}
-            help="One option per line."
+            help={t('configure.custom.optionsHelp')}
           />
         ) : null}
       </div>
@@ -138,13 +134,13 @@ export function CustomFieldEditor({ existingKeys, onAdd }) {
       <div className="custom-field-editor__checks">
         <Checkbox
           id="custom-required"
-          label="An answer is required"
+          label={t('configure.custom.required')}
           checked={isRequired}
           onChange={setIsRequired}
         />
         <Checkbox
           id="custom-private"
-          label="Keep answers private"
+          label={t('configure.custom.private')}
           checked={isPrivate}
           onChange={setIsPrivate}
         />
@@ -158,7 +154,7 @@ export function CustomFieldEditor({ existingKeys, onAdd }) {
 
       <div>
         <Button type="submit" variant="primary" icon={Plus}>
-          Add this question
+          {t('configure.custom.add')}
         </Button>
       </div>
     </form>

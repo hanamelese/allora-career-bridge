@@ -3,7 +3,26 @@ import { Link } from 'react-router-dom';
 import { Check, Copy } from 'lucide-react';
 import { Button } from '../ui/Button.jsx';
 import { WIDGET_VERSION, buildEmbedTag, draftDiffersFromPublished, latestPublished, widgetUrl } from './embedTag.js';
+import { useLanguage, useT } from '../../i18n/index.js';
 import './EmbedTagBox.css';
+
+
+/* How a page collects the answers. Code, so it is not translated. */
+const ANSWERS_SNIPPET = `<script>
+  document.addEventListener('onboarding-submit', (event) => {
+    const { answers, files } = event.detail; // answers: plain JSON; files: File objects
+    // Optional: make the form wait for your save, so it says "sent" only once it worked.
+    event.detail.waitUntil(
+      fetch('/your-endpoint', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(answers),
+      }).then((response) => {
+        if (!response.ok) throw new Error('Not saved');
+      }),
+    );
+  });
+</script>`;
 
 /**
  * The tag a partner pastes into their own website - always for the
@@ -18,6 +37,8 @@ import './EmbedTagBox.css';
  * is stored only as a hash and never leaves the server.
  */
 export function EmbedTagBox({ form, hasUnsavedChanges = false }) {
+  const t = useT();
+  const language = useLanguage();
   const [status, setStatus] = useState('');
   const codeRef = useRef(null);
   const published = latestPublished(form);
@@ -26,9 +47,10 @@ export function EmbedTagBox({ form, hasUnsavedChanges = false }) {
     return (
       <div className="embed-tag">
         <p className="embed-tag__empty">
-          <strong>There is no tag yet.</strong> A tag always points at a published version, and this
-          form has not been published. Use <strong>Publish</strong> above to publish version 1; its
-          tag then appears here.
+          <strong>{t('workspace.embed.noTagTitle')}</strong>
+          {t('workspace.embed.noTagBefore')}
+          <strong>{t('workspace.embed.noTagPublish')}</strong>
+          {t('workspace.embed.noTagAfter')}
         </p>
       </div>
     );
@@ -64,30 +86,30 @@ export function EmbedTagBox({ form, hasUnsavedChanges = false }) {
     <div className="embed-tag">
       <dl className="embed-tag__facts">
         <div>
-          <dt>Version in this tag</dt>
+          <dt>{t('workspace.embed.versionInTag')}</dt>
           <dd>
-            Version {published.version}
-            <span className="embed-tag__badge">Latest published</span>
+            {t('workspace.embed.version', published.version)}
+            <span className="embed-tag__badge">{t('workspace.embed.latestPublished')}</span>
           </dd>
         </div>
         <div>
-          <dt>Published</dt>
-          <dd>{new Date(published.publishedAt).toLocaleString()}</dd>
+          <dt>{t('workspace.embed.published')}</dt>
+          <dd>{new Date(published.publishedAt).toLocaleString(language === 'am' ? 'am-ET' : undefined)}</dd>
         </div>
         <div>
-          <dt>Form ID</dt>
+          <dt>{t('workspace.embed.formId')}</dt>
           <dd>
             <code>{form.formId}</code>
           </dd>
         </div>
         <div>
-          <dt>Public key</dt>
+          <dt>{t('workspace.embed.publicKey')}</dt>
           <dd>
             <code>{form.publicKey}</code>
           </dd>
         </div>
         <div>
-          <dt>Widget version</dt>
+          <dt>{t('workspace.embed.widgetVersion')}</dt>
           <dd>
             <code>{WIDGET_VERSION}</code>
           </dd>
@@ -96,55 +118,64 @@ export function EmbedTagBox({ form, hasUnsavedChanges = false }) {
 
       {draftDiffers ? (
         <p className="embed-tag__warning">
-          Your draft has changes that are not live yet. This tag shows version {published.version},
-          as published. Publish a new version to put your changes on your site.
+          {t('workspace.embed.draftDiffers', published.version)}
         </p>
       ) : null}
 
-      <pre className="embed-tag__code" tabIndex={0} aria-label={`Embed tag for version ${published.version}`} ref={codeRef}>
+      <pre className="embed-tag__code" tabIndex={0} aria-label={t('workspace.embed.codeLabel', published.version)} ref={codeRef}>
         <code>{snippet}</code>
       </pre>
 
       <div className="embed-tag__actions">
         <Button variant="secondary" icon={status === 'copied' ? Check : Copy} onClick={copy}>
-          {status === 'copied' ? 'Copied' : 'Copy the tag'}
+          {status === 'copied' ? t('workspace.embed.copied') : t('workspace.embed.copyTag')}
         </Button>
         <p className="embed-tag__status" role="status">
           {status === 'copied'
-            ? `Embed tag for version ${published.version} copied to your clipboard.`
+            ? t('workspace.embed.copiedStatus', published.version)
             : status === 'selected'
-              ? 'Your browser did not allow copying. The tag is selected: press Ctrl+C (or Cmd+C) to copy it.'
+              ? t('workspace.embed.selectedStatus')
               : ''}
         </p>
       </div>
 
       <dl className="embed-tag__notes">
         <div>
-          <dt>Where it goes</dt>
+          <dt>{t('workspace.embed.whereTitle')}</dt>
           <dd>
-            Paste it into your page’s HTML where the form should appear. The script loads from{' '}
-            <code>{widgetUrl()}</code>.
+            {t('workspace.embed.whereText')}{' '}
+            <code>{widgetUrl()}</code>
+            {t('workspace.embed.whereEnd')}
           </dd>
         </div>
         <div>
-          <dt>Allowed websites</dt>
+          <dt>{t('workspace.embed.allowedTitle')}</dt>
           <dd>
-            Add your site’s address under{' '}
-            <Link to="/organisation">Your organisation → Websites</Link>, or the form will not load
-            there.
+            {t('workspace.embed.allowedBefore')}{' '}
+            <Link to="/organisation">{t('workspace.embed.allowedLink')}</Link>
+            {t('workspace.embed.allowedAfter')}
           </dd>
         </div>
         <div>
-          <dt>Public key</dt>
+          <dt>{t('workspace.embed.publicKey')}</dt>
           <dd>
-            Safe to put in a web page. Your secret key stays on the server and is never included here.
+            {t('workspace.embed.publicKeyText')}
           </dd>
         </div>
         <div>
-          <dt>Pinned versions</dt>
+          <dt>{t('workspace.embed.answersTitle')}</dt>
           <dd>
-            Your site keeps showing version {published.version} until you paste a newer tag, even after
-            you publish again.
+            <p>{t('workspace.embed.answersText')}</p>
+            <pre className="embed-tag__code embed-tag__code--small" tabIndex={0} aria-label={t('workspace.embed.answersCodeLabel')}>
+              <code>{ANSWERS_SNIPPET}</code>
+            </pre>
+            <p>{t('workspace.embed.answersNote')}</p>
+          </dd>
+        </div>
+        <div>
+          <dt>{t('workspace.embed.pinnedTitle')}</dt>
+          <dd>
+            {t('workspace.embed.pinnedText', published.version)}
           </dd>
         </div>
       </dl>

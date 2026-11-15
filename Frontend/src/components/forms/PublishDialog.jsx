@@ -1,5 +1,6 @@
 import { useEffect, useRef } from 'react';
 import { Button } from '../ui/Button.jsx';
+import { useT } from '../../i18n/index.js';
 import './PublishDialog.css';
 
 /**
@@ -10,6 +11,7 @@ import './PublishDialog.css';
  * from hand-written key handling.
  */
 export function PublishDialog({ isOpen, form, isDirty, isPublishing, onConfirm, onClose }) {
+  const t = useT();
   const dialogRef = useRef(null);
   const nextVersion = (form.currentVersion ?? 0) + 1;
 
@@ -38,36 +40,33 @@ export function PublishDialog({ isOpen, form, isDirty, isPublishing, onConfirm, 
   return (
     <dialog className="publish-dialog" ref={dialogRef} aria-labelledby="publish-dialog-title">
       <h2 className="publish-dialog__title" id="publish-dialog-title">
-        Publish version {nextVersion}?
+        {t('workspace.publishDialog.title', nextVersion)}
       </h2>
 
       <div className="publish-dialog__body">
         <p>
-          Version {nextVersion} will be fixed as it is now and can never be changed. Learners will
-          see it as soon as it is published.
+          {t('workspace.publishDialog.fixed', nextVersion)}
         </p>
 
         {isDirty ? (
           <p className="publish-dialog__note">
-            Your unsaved changes will be saved first, so version {nextVersion} matches what you are
-            looking at.
+            {t('workspace.publishDialog.savesFirst', nextVersion)}
           </p>
         ) : null}
 
         {form.currentVersion ? (
           <p>
-            Version {form.currentVersion} stays available, so any website pinned to it keeps
-            working.
+            {t('workspace.publishDialog.previousStays', form.currentVersion)}
           </p>
         ) : null}
       </div>
 
       <div className="publish-dialog__actions">
         <Button variant="secondary" onClick={onClose} disabled={isPublishing}>
-          Cancel
+          {t('workspace.publishDialog.cancel')}
         </Button>
         <Button variant="primary" onClick={onConfirm} disabled={isPublishing}>
-          {isPublishing ? 'Publishing…' : `Publish version ${nextVersion}`}
+          {isPublishing ? t('workspace.publishDialog.publishing') : t('workspace.publishDialog.confirm', nextVersion)}
         </Button>
       </div>
     </dialog>

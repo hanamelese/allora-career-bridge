@@ -1,0 +1,14 @@
+# Kept out of the build context: dependencies are installed fresh, build
+# output is rebuilt, and no secret or database may end up in an image.
+**/node_modules
+**/dist
+**/.env
+**/.env.*
+!**/.env.example
+API/data
+.git
+savanna-site
+tools/delivery-receiver/received
+**/*.log
+**/.DS_Store
+docker-compose.yml

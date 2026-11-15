@@ -7,6 +7,7 @@ import {
   validateAccountField,
 } from '../src/accountForm.js';
 import { AnswerTools } from './AnswerTools.jsx';
+import { getFieldComponent } from './fields/index.js';
 import { BrandIcon } from './brandIcons.jsx';
 
 const SOCIAL_STEP = 'social';
@@ -19,6 +20,8 @@ const SOCIAL_STEP = 'social';
  * 2. Then each input - name (signing up only), email, password - has a
  *    screen of its own, with Back and Next. Nothing typed is lost going
  *    back, and Next checks only the answer on screen.
+ * 3. When signing up, any questions the partner added follow, one per
+ *    screen, answered with the same controls as in every other form.
  *
  * It authenticates no one itself. It is a component a partner puts in
  * place of their own sign-in screen:
@@ -47,9 +50,14 @@ export function AccountForm({
   const mode = config.account?.mode ?? 'signUp';
   const title = mode === 'signIn' ? copy.signIn : copy.signUp;
 
+  const [answers, setAnswers] = useState({});
+  /* The latest answers, for a choice that is chosen and moved on from in
+     one key press - before React has re-rendered with it. */
+  const answersRef = useRef(answers);
+
   const questions = useMemo(
-    () => getAccountQuestions(config, { language, lowLiteracy }),
-    [config, language, lowLiteracy],
+    () => getAccountQuestions(config, { language, lowLiteracy }, answers),
+    [config, language, lowLiteracy, answers],
   );
   const providers = useMemo(() => getEnabledProviders(config), [config]);
   const hasEmailPassword = questions.length > 0;
@@ -60,7 +68,6 @@ export function AccountForm({
   );
 
   const [stepIndex, setStepIndex] = useState(0);
-  const [answers, setAnswers] = useState({});
   const [errors, setErrors] = useState({});
   const [formMessage, setFormMessage] = useState('');
   const [showPassword, setShowPassword] = useState(false);
@@ -69,6 +76,17 @@ export function AccountForm({
 
   const headingRef = useRef(null);
   const inputRef = useRef(null);
+  /* Holds an added question's control, which draws its own input. */
+  const fieldRef = useRef(null);
+
+  function focusField() {
+    requestAnimationFrame(() => {
+      (
+        inputRef.current ??
+        fieldRef.current?.querySelector('input:not([type=hidden]), textarea, [aria-checked="true"], [data-option], .fe-select__bar')
+      )?.focus();
+    });
+  }
   const hasMovedRef = useRef(false);
 
   /* A partner switching Sign up to Sign in in the preview removes the
@@ -91,12 +109,11 @@ export function AccountForm({
   }
 
   function update(key, value) {
-    setAnswers((current) => {
-      const next = { ...current };
-      if (value === undefined || value === '') delete next[key];
-      else next[key] = value;
-      return next;
-    });
+    const next = { ...answersRef.current };
+    if (value === undefined || value === '') delete next[key];
+    else next[key] = value;
+    answersRef.current = next;
+    setAnswers(next);
 
     if (errors[key]) {
       setErrors((current) => {
@@ -118,14 +135,14 @@ export function AccountForm({
     if (first === -1 || first === index) {
       /* Same screen: the heading does not change, so move focus to the
          field itself, where the message is read with it. */
-      requestAnimationFrame(() => inputRef.current?.focus());
+      focusField();
     } else {
       setStepIndex(first);
     }
   }
 
   async function finish() {
-    const result = validateAccount(config, answers, { language, labels });
+    const result = validateAccount(config, answersRef.current, { language, labels });
 
     if (!result.valid) {
       showProblems(result.errors);
@@ -169,11 +186,11 @@ export function AccountForm({
     if (isSending) return;
 
     if (question) {
-      const problem = validateAccountField(config, question.key, answers, { language, labels });
+      const problem = validateAccountField(config, question.key, answersRef.current, { language, labels });
 
       if (problem) {
         setErrors((current) => ({ ...current, [question.key]: problem }));
-        requestAnimationFrame(() => inputRef.current?.focus());
+        focusField();
         return;
       }
     }
@@ -273,6 +290,72 @@ export function AccountForm({
         ) : null}
       </div>
     );
+  } else if (question?.isCustom) {
+    /* A question the partner added: the same control it has in every
+       other form (a written answer, a choice, yes or no). */
+    const FieldComponent = getFieldComponent(question.type);
+    const id = `fe-account-${question.key}`;
+    const helpId = question.helpText ? `${id}-help` : null;
+    const errorId = errors[question.key] ? `${id}-error` : null;
+    const describedBy = [errorId, helpId].filter(Boolean).join(' ') || undefined;
+
+    screen = (
+      <form className="fe-account__screen" noValidate onSubmit={handleNext} key={question.key}>
+        <div className="fe-question__title">
+          <h3 className="fe-account__step-heading" ref={headingRef} tabIndex={-1} data-question-heading>
+            {question.label}
+            {question.required ? (
+              <span className="fe-required">
+                <span aria-hidden="true"> *</span>
+                <span className="fe-visually-hidden"> {language === 'am' ? '(ግዴታ)' : '(required)'}</span>
+              </span>
+            ) : null}
+          </h3>
+        </div>
+
+        {question.helpText ? (
+          <p className="fe-question__help" id={helpId}>
+            {question.helpText}
+          </p>
+        ) : null}
+
+        <div className="fe-question__field" ref={fieldRef}>
+          <FieldComponent
+            key={question.key}
+            question={question}
+            value={answers[question.key]}
+            onChange={(value) => update(question.key, value)}
+            onCommit={handleNext}
+            answers={answers}
+            describedBy={describedBy}
+            hasError={Boolean(errors[question.key])}
+            renderIcon={renderIcon}
+          />
+        </div>
+
+        {errors[question.key] ? (
+          <p className="fe-error" id={errorId} role="alert">
+            {errors[question.key]}
+          </p>
+        ) : null}
+
+        <AnswerTools
+          question={question}
+          value={answers[question.key]}
+          language={language}
+          onAnswer={(value) => update(question.key, value)}
+          onClear={() => update(question.key, undefined)}
+          onFocusField={focusField}
+        />
+
+        <div className="fe-actions">
+          {backButton}
+          <button type="submit" className="fe-button fe-button--primary" disabled={isSending} aria-disabled={isSending || undefined}>
+            {isSending ? copy.sending : isLast ? copy.submitSignUp : copy.next}
+          </button>
+        </div>
+      </form>
+    );
   } else if (question) {
     const id = `fe-account-${question.key}`;
     const helpId = question.helpText ? `${id}-help` : null;
@@ -354,7 +437,7 @@ export function AccountForm({
             language={language}
             onAnswer={(value) => update(question.key, value)}
             onClear={() => update(question.key, undefined)}
-            onFocusField={() => requestAnimationFrame(() => inputRef.current?.focus())}
+            onFocusField={focusField}
           />
         )}
 

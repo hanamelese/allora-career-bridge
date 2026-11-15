@@ -8,3 +8,6 @@ build
 npm-debug.log*
 .vite
 .DS_Store
+
+# What the example delivery receiver saves (learners' answers, on the organisation's side)
+tools/delivery-receiver/received/

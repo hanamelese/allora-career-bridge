@@ -10,11 +10,6 @@ import { useLearnerPreferences } from './learnerPreferences.js';
 import { progressKeyFor } from './progressStore.js';
 import './form-engine.css';
 
-/* A full stop, unless the text already ends a sentence ("…need?"). */
-function endSentence(text, stop = '.') {
-  return /[.?!።?]$/.test(text) ? text : `${text}${stop}`;
-}
-
 const COPY = {
   en: {
     next: 'Next',
@@ -24,15 +19,19 @@ const COPY = {
     done: 'Your answers have been sent',
     doneDetail: 'Thank you. There is nothing more you need to do.',
     saved: 'Saved in this browser tab until you send the form or close the tab. Private answers and files are not saved.',
-    welcomeBack: 'Welcome back. We kept your answers from before, so you can carry on where you stopped.',
-    notKept: (labels) => `To protect your privacy these were not kept, so please add them again: ${endSentence(labels)}`,
-    startOver: 'Start over',
-    startOverDetail: 'Start over and clear the answers kept in this tab',
     empty: 'This form has no questions switched on yet.',
     noTimeLimit: 'There is no time limit. You can take as long as you need.',
     requiredNote: 'Questions marked * must be answered. All other questions are optional.',
-    supportSection: 'Support and accommodations',
-    supportSectionNote: 'Private. Only the organisation sees these answers, and you never have to explain why.',
+    sections: {
+      support: {
+        name: 'Support and accommodations',
+        note: 'Private. Only the organisation sees these answers, and you never have to explain why.',
+      },
+      accommodations: {
+        name: 'Workplace accessibility and accommodations',
+        note: 'Candidates see these answers, so they know what support a job offers.',
+      },
+    },
     required: '(required)',
     optional: '(optional)',
   },
@@ -44,15 +43,19 @@ const COPY = {
     done: 'መልሶችዎ ተልከዋል',
     doneDetail: 'እናመሰግናለን። ከዚህ በላይ ማድረግ ያለብዎት ነገር የለም።',
     saved: 'ቅጹን እስኪልኩ ወይም ይህን ትር እስኪዘጉ ድረስ በዚህ ትር ተቀምጧል። የግል መልሶችና ፋይሎች አይቀመጡም።',
-    welcomeBack: 'እንኳን ደህና መጡ። ካቆሙበት እንዲቀጥሉ የቀድሞ መልሶችዎን አስቀምጠናል።',
-    notKept: (labels) => `ግላዊነትዎን ለመጠበቅ እነዚህ አልተቀመጡም፤ እባክዎ እንደገና ያስገቡ፦ ${endSentence(labels, '።')}`,
-    startOver: 'እንደገና ጀምር',
-    startOverDetail: 'እንደገና ይጀምሩ እና በዚህ ትር የተቀመጡትን መልሶች ያጥፉ',
     empty: 'በዚህ ቅጽ ላይ ገና የበራ ጥያቄ የለም።',
     noTimeLimit: 'የጊዜ ገደብ የለም። የሚፈልጉትን ያህል ጊዜ መውሰድ ይችላሉ።',
     requiredNote: '* ምልክት ያላቸው ጥያቄዎች መመለስ አለባቸው። ሌሎቹ ጥያቄዎች አማራጭ ናቸው።',
-    supportSection: 'ድጋፍ እና ማመቻቻዎች',
-    supportSectionNote: 'የግል። እነዚህን መልሶች የሚያየው ድርጅቱ ብቻ ነው፤ ምክንያቱን ማስረዳት አያስፈልግዎትም።',
+    sections: {
+      support: {
+        name: 'ድጋፍ እና ማመቻቻዎች',
+        note: 'የግል። እነዚህን መልሶች የሚያየው ድርጅቱ ብቻ ነው፤ ምክንያቱን ማስረዳት አያስፈልግዎትም።',
+      },
+      accommodations: {
+        name: 'የሥራ ቦታ ተደራሽነት እና ማመቻቻዎች',
+        note: 'ዕጩዎች እነዚህን መልሶች ያያሉ፤ ስለዚህ ሥራው ምን ድጋፍ እንደሚሰጥ ያውቃሉ።',
+      },
+    },
     required: '(ግዴታ)',
     optional: '(አማራጭ)',
   },
@@ -114,23 +117,6 @@ export function FormRenderer({
     },
   );
 
-  /* "Welcome back" shows on the screen the learner returns to, and goes
-     once they move on. */
-  const restoredStepRef = useRef(engine.isReviewing ? 'review' : engine.question?.key);
-  const currentStep = engine.isReviewing ? 'review' : engine.question?.key;
-  const restoreNotice =
-    engine.wasRestored && currentStep === restoredStepRef.current ? (
-      <div className="fe-restored" role="status">
-        <p>{(COPY[language] ?? COPY.en).welcomeBack}</p>
-        {engine.notKept.length > 0 ? (
-          <p>{(COPY[language] ?? COPY.en).notKept(engine.notKept.join(', '))}</p>
-        ) : null}
-        <button type="button" className="fe-button fe-button--quiet" onClick={engine.startOver}>
-          {(COPY[language] ?? COPY.en).startOver}
-          <span className="fe-visually-hidden">: {(COPY[language] ?? COPY.en).startOverDetail}</span>
-        </button>
-      </div>
-    ) : null;
   const headingRef = useRef(null);
   const fieldRef = useRef(null);
   const hasNavigatedRef = useRef(false);
@@ -223,7 +209,6 @@ export function FormRenderer({
   if (isReviewing) {
     return frame(
       <>
-        {restoreNotice}
         <ReviewStep
           items={engine.reviewItems}
           summary={engine.reviewSummary}
@@ -243,6 +228,7 @@ export function FormRenderer({
   }
 
   const FieldComponent = getFieldComponent(question.type);
+  const section = question.section ? (copy.sections[question.section] ?? null) : null;
   const helpId = question.helpText ? `fe-${question.key}-help` : null;
   const noticeId = question.notice ? `fe-${question.key}-notice` : null;
   const errorId = `fe-${question.key}-error`;
@@ -282,16 +268,16 @@ export function FormRenderer({
         ) : null}
       </div>
 
-      {restoreNotice}
-
       <div className="fe-question">
-        {/* The support and accommodation questions sit in a section of
-            their own. The band is for the eye; the heading carries the
-            section's name for a screen reader, which lands on it. */}
-        {question.section === 'support' ? (
-          <div className="fe-section-band" aria-hidden="true">
-            <span className="fe-section-band__name">{copy.supportSection}</span>
-            <span className="fe-section-band__note">{copy.supportSectionNote}</span>
+        {/* Support and accommodation questions sit in a section of their
+            own: a learner's private support needs, or the accommodations
+            an employer offers. The band is for the eye; the heading
+            carries the section's name for a screen reader, which lands
+            on it. */}
+        {section ? (
+          <div className={`fe-section-band fe-section-band--${question.section}`} aria-hidden="true">
+            <span className="fe-section-band__name">{section.name}</span>
+            <span className="fe-section-band__note">{section.note}</span>
           </div>
         ) : null}
 
@@ -308,8 +294,8 @@ export function FormRenderer({
             tabIndex={-1}
             data-question-heading
           >
-            {question.section === 'support' ? (
-              <span className="fe-visually-hidden">{copy.supportSection}, {copy.supportSectionNote} </span>
+            {section ? (
+              <span className="fe-visually-hidden">{section.name}, {section.note} </span>
             ) : null}
             {question.label}
             {/* Required status is said in words as well as shown, so it

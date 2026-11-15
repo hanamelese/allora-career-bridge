@@ -1,5 +1,6 @@
 import { fieldCatalog, getCatalogItems, listFileTypes, resolveUploadRules } from '@onboarding/contracts';
 import { getIcon } from './icons.js';
+import { translate } from './i18n/index.js';
 
 /**
  * Resolving what a question actually says.
@@ -47,8 +48,9 @@ export function describeField(fieldConfig, { language = 'en', isCustom = false }
   };
 }
 
-/** What applicants will be told about an upload question, in one sentence. */
-export function describeUploadRules(settings) {
+/** What applicants will be told about an upload question, in one sentence, in `language`. */
+export function describeUploadRules(settings, language = 'en') {
   const rules = resolveUploadRules(settings);
-  return `Applicants can upload a ${listFileTypes(rules)} file, up to ${rules.maxSizeMb} MB.`;
+  const types = listFileTypes(rules, translate(language, 'configure.upload.or'));
+  return translate(language, 'configure.upload.summary', types, rules.maxSizeMb);
 }

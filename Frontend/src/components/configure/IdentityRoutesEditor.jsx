@@ -1,6 +1,7 @@
 import { OFFERED_IDENTITY_ROUTES } from '@onboarding/contracts';
 import { Checkbox } from '../ui/Checkbox.jsx';
 import { getIcon } from '../../icons.js';
+import { useLanguage, useT } from '../../i18n/index.js';
 import './IdentityRoutesEditor.css';
 
 /* Resolved once, not per render: the icon for a route never changes. */
@@ -14,6 +15,12 @@ const ROUTES = OFFERED_IDENTITY_ROUTES.map((route) => ({ ...route, Icon: getIcon
  * configuration that removes it and the control here is fixed on.
  */
 export function IdentityRoutesEditor({ selectedRoutes, error, onChange }) {
+  const t = useT();
+  const language = useLanguage();
+  /* The route's name in the dashboard's language, with the other
+     language's name under it. */
+  const otherLanguage = language === 'am' ? 'en' : 'am';
+
   function toggleRoute(key, checked) {
     const next = checked
       ? OFFERED_IDENTITY_ROUTES.filter(
@@ -44,11 +51,11 @@ export function IdentityRoutesEditor({ selectedRoutes, error, onChange }) {
 
               <Checkbox
                 id={`identity-route-${route.key}`}
-                label={route.label.en}
+                label={route.label[language] ?? route.label.en}
                 description={
                   isFixed
-                    ? 'Always offered, and it leads to the referral step. A learner must never reach a dead end because they have no paperwork.'
-                    : route.label.am
+                    ? t('configure.identity.alwaysOffered')
+                    : route.label[otherLanguage]
                 }
                 checked={isFixed || selectedRoutes.includes(route.key)}
                 disabled={isFixed}

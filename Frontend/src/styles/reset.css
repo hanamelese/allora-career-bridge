@@ -81,13 +81,33 @@ a {
   scroll-margin-top: var(--space-xl);
 }
 
+/* Motion is stopped when the system asks for less of it - unless the
+   person turned it back on with the dashboard's own control - and
+   whenever "Stop motion" is pressed (data-motion on <html>, set by
+   display/displaySettings.js). */
 @media (prefers-reduced-motion: reduce) {
-  *,
-  *::before,
-  *::after {
+  :root:not([data-motion='full']) *,
+  :root:not([data-motion='full']) *::before,
+  :root:not([data-motion='full']) *::after {
     animation-duration: 0.01ms !important;
     animation-iteration-count: 1 !important;
     transition-duration: 0.01ms !important;
     scroll-behavior: auto !important;
   }
+}
+
+:root[data-motion='reduce'] *,
+:root[data-motion='reduce'] *::before,
+:root[data-motion='reduce'] *::after,
+:root[data-motion='reduce'] ::backdrop {
+  animation-duration: 0.01ms !important;
+  animation-iteration-count: 1 !important;
+  transition-duration: 0.01ms !important;
+  scroll-behavior: auto !important;
+}
+
+/* Cards that lift on hover or sink when pressed stay still. */
+:root[data-motion='reduce'] .workspace-nav__link,
+:root[data-motion='reduce'] .landing__feature {
+  transform: none !important;
 }

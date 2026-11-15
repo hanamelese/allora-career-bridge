@@ -3,19 +3,21 @@ import { FORM_TYPES } from '../formTypes.js';
 import { Card } from '../components/ui/Card.jsx';
 import { EmptyState } from '../components/ui/EmptyState.jsx';
 import { Button } from '../components/ui/Button.jsx';
+import { useT } from '../i18n/index.js';
 
 export function NotFoundPage() {
   const firstForm = FORM_TYPES[0];
+  const t = useT();
 
   return (
     <Card as="section">
-      <h1 className="visually-hidden">Page not found</h1>
+      <h1 className="visually-hidden">{t('notFound.heading')}</h1>
       <EmptyState
-        title="This page does not exist"
-        description="The address may have been mistyped. Go back to the first form to carry on."
+        title={t('notFound.title')}
+        description={t('notFound.description')}
         action={
           <Button as={Link} variant="primary" to={`/forms/${firstForm.slug}/configure`}>
-            Go to {firstForm.name}
+            {t('notFound.goTo', t(`formTypes.${firstForm.id}.name`))}
           </Button>
         }
       />

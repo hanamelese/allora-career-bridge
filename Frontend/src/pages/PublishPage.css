@@ -19,6 +19,23 @@
   font-weight: var(--font-weight-medium);
 }
 
+.publish-page__next {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--space-md);
+  margin-block-start: var(--space-lg);
+  padding-block-start: var(--space-md);
+  border-block-start: 1px solid var(--border-subtle);
+}
+
+.publish-page__next-text {
+  flex: 1 1 16rem;
+  font-size: var(--font-size-sm);
+  color: var(--ink-secondary);
+}
+
 .publish-page__versions {
   margin-block-start: var(--space-md);
 }

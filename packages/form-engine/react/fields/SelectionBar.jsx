@@ -6,19 +6,21 @@ const COPY = {
 };
 
 /**
- * A selection question as one bar that opens to show its options.
+ * A selection question as one bar above its options.
  *
- * The bar is a real button with `aria-expanded`, so its state is announced
- * and it works the same with a mouse, a finger, Enter or Space. Closed, it
- * shows the question and the current answer; open, the options sit
- * directly beneath it at the same width.
+ * The options show from the start, so every choice is visible without a
+ * click. The bar is a real button with `aria-expanded`, so a learner can
+ * still fold the list away (and open it again) with a mouse, a finger,
+ * Enter or Space; folded, it shows the question and the current answer.
  *
- * Opening moves focus to the chosen option (or the first one), so a
- * keyboard user lands where they can act. A validation error opens it, so
- * the learner is never asked to fix something they cannot see.
+ * Starting open does not move focus - the page stays where the learner
+ * is. Opening it later moves focus to the chosen option (or the first
+ * one), so a keyboard user lands where they can act. A validation error
+ * opens it, so the learner is never asked to fix something they cannot
+ * see.
  */
 export function SelectionBar({ question, summary, hasError, describedBy, children }) {
-  const [isOpen, setIsOpen] = useState(false);
+  const [isOpen, setIsOpen] = useState(true);
   const panelRef = useRef(null);
   const focusOnOpenRef = useRef(false);
   const barId = useId();

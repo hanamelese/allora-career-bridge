@@ -41,22 +41,26 @@ const HOST_CSS = `
  * events it can listen for:
  *
  *   onboarding-ready   { formId, version, type }
- *   onboarding-submit  { formId, version, type, submissionId, answers, files }
+ *   onboarding-submit  { formId, version, type, mode?, answers, files, delivered, receiptId, waitUntil }
+ *   onboarding-sent    { formId, version, type, receiptId }   the form now says "sent"
+ *   onboarding-mode    { formId, mode }      a Sign up / Sign in form switched mode
  *   onboarding-error   { code, message, issues? }
  *
- * When the learner sends the form, the answers an organisation can act on
- * are stored by this API first (`toStorableSubmission`: never private
- * support answers, the referral choice, ID numbers or file contents - a
- * file is stored as its name, size and type). Only once that has worked
- * does the form say "sent" and fire `onboarding-submit`, which carries
- * everything the learner gave, files included, for the page's own use.
- * A referral the learner confirms goes to this API to send the SMS.
+ * When the learner sends the form, the page receives every answer as JSON
+ * in `onboarding-submit` (files as File objects), and can make the form
+ * wait for its own save with `waitUntil` - see `submit()` below. If the
+ * organisation also set a delivery address, the answers it can act on go
+ * from this browser straight there first. This service never receives or
+ * keeps a learner's answers. A referral the learner confirms goes to this
+ * API to send the SMS.
  *
- * The Sign up / Sign in form (`type: 'account'`) is never stored here: it
- * holds a password, and signing in is the page's job.
+ * <onboarding-form mode="signUp|signIn"> opens a Sign up / Sign in form in
+ * that mode; its own "Create an account" / "Sign in" link switches it. That
+ * form is never delivered: it holds a password, and signing in is the
+ * page's job.
  */
 class OnboardingFormElement extends HTMLElement {
-  static observedAttributes = ['form-id', 'public-key', 'form-version', 'lang'];
+  static observedAttributes = ['form-id', 'public-key', 'form-version', 'lang', 'mode'];
 
   connectedCallback() {
     if (!this.shadowRoot) {
@@ -109,9 +113,13 @@ class OnboardingFormElement extends HTMLElement {
     this.message(copy.loading);
     const api = createPublicApi({ scriptSrc, apiOrigin: this.getAttribute('api-origin'), publicKey });
 
-    let published;
+    /* A mode switch (Sign in <-> Sign up) re-renders the same form without
+       fetching it again. */
+    const cacheKey = `${api.origin}|${publicKey}|${formId}|${version ?? ''}`;
+    let published = this.cache?.key === cacheKey ? this.cache.published : null;
     try {
-      published = await api.getForm(formId, version);
+      published ??= await api.getForm(formId, version);
+      this.cache = { key: cacheKey, published };
     } catch (error) {
       if (loadId !== this.loadId) return;
       this.message(error.message, true);
@@ -122,14 +130,18 @@ class OnboardingFormElement extends HTMLElement {
     /* A newer load (an attribute changed) has replaced this one. */
     if (loadId !== this.loadId || !this.root) return;
 
-    const { config, referralPartners, organisationName } = published;
-    const files = (data) =>
-      Object.fromEntries(Object.entries(data).filter(([, value]) => value instanceof File));
-    const answers = (data) =>
-      Object.fromEntries(Object.entries(data).filter(([, value]) => !(value instanceof File)));
-
+    const { referralPartners, organisationName, delivery = false } = published;
+    /* A Sign up / Sign in form opens in the mode its `mode` attribute asks
+       for, or else the one it was published with. */
+    const mode = this.getAttribute('mode');
+    const config =
+      published.type === 'account' && (mode === 'signIn' || mode === 'signUp')
+        ? { ...published.config, account: { ...published.config.account, mode } }
+        : published.config;
     this.root.render(
       <FormRenderer
+        /* A new mode starts the form afresh. */
+        key={config.account?.mode ?? 'form'}
         config={config}
         settings={{ language: lang }}
         referral={{
@@ -137,46 +149,105 @@ class OnboardingFormElement extends HTMLElement {
           organisationName: organisationName ?? '',
           onSend: (request) => api.sendReferral(formId, request),
         }}
-        onSubmit={(data, extra) => {
-          const detail = {
-            formId,
-            version: published.version,
-            type: published.type,
-            ...(extra?.mode ? { mode: extra.mode } : {}),
-            answers: answers(data),
-            files: files(data),
-          };
-
-          if (published.type === 'account') {
-            this.emit('onboarding-submit', detail);
-            return undefined;
-          }
-
-          /* Returned to the form, which waits for it: "sent" is only shown
-             once the answers are stored, and a failure lets the learner
-             press Send again with nothing lost. */
-          return api
-            .sendSubmission(formId, {
-              version: published.version,
-              ...(lang === 'en' || lang === 'am' ? { language: lang } : {}),
-              answers: toStorableSubmission(config, data),
-            })
-            .then(
-              ({ submissionId }) => this.emit('onboarding-submit', { ...detail, submissionId }),
-              (error) => {
-                this.emit('onboarding-error', {
-                  code: error.code ?? 'submission_failed',
-                  message: error.message,
-                  ...(error.issues ? { issues: error.issues } : {}),
-                });
-                throw error;
-              },
-            );
-        }}
+        onSwitchMode={
+          published.type === 'account'
+            ? (next) => {
+                this.emit('onboarding-mode', { formId, mode: next });
+                this.setAttribute('mode', next);
+              }
+            : undefined
+        }
+        onSubmit={(data, extra) => this.submit({ api, formId, published, config, lang, delivery, data, extra })}
       />,
     );
 
     this.emit('onboarding-ready', { formId, version: published.version, type: published.type });
+  }
+
+  /**
+   * What happens when the learner sends the form. Returned to the form,
+   * which waits for it: "sent" is shown only once everything here has
+   * worked, and a failure lets the learner press Send again with nothing
+   * lost.
+   *
+   * 1. Only if the organisation set a delivery address: the answers an
+   *    organisation can act on go from this browser straight to it.
+   * 2. Always: `onboarding-submit` hands the page every answer as plain
+   *    JSON (`answers`) and the files as File objects (`files`). The page
+   *    may call `event.detail.waitUntil(promise)` - for its own save - and
+   *    the form waits for that too. A Sign up / Sign in page can resolve it
+   *    with `{ errors: { email: '…' } }` or `{ message }` to show a problem.
+   *
+   * This service never receives the answers.
+   */
+  async submit({ api, formId, published, config, lang, delivery, data, extra }) {
+    const files = Object.fromEntries(Object.entries(data).filter(([, value]) => value instanceof File));
+    const answers = Object.fromEntries(Object.entries(data).filter(([, value]) => !(value instanceof File)));
+    const isAccount = published.type === 'account';
+
+    const fail = (error, code) => {
+      this.emit('onboarding-error', {
+        code: error?.code ?? code,
+        message: error?.message ?? 'The answers could not be sent.',
+        ...(error?.issues ? { issues: error.issues } : {}),
+      });
+      throw error instanceof Error ? error : new Error(String(error?.message ?? code));
+    };
+
+    /* 1. The organisation's own server, if it has one. Not repeated when
+       the learner presses Send again only because the page's part failed. */
+    let receiptId = null;
+    if (!isAccount && delivery) {
+      const storable = toStorableSubmission(config, data);
+      const sameAnswers = JSON.stringify(storable);
+      if (this.delivered?.answers === sameAnswers) {
+        receiptId = this.delivered.receiptId;
+      } else {
+        try {
+          ({ receiptId } = await api.deliver(formId, {
+            version: published.version,
+            type: published.type,
+            language: lang === 'en' || lang === 'am' ? lang : undefined,
+            answers: storable,
+          }));
+          this.delivered = { answers: sameAnswers, receiptId };
+        } catch (error) {
+          fail(error, 'delivery_failed');
+        }
+      }
+    }
+
+    /* 2. The page. */
+    const waits = [];
+    this.emit('onboarding-submit', {
+      formId,
+      version: published.version,
+      type: published.type,
+      ...(extra?.mode ? { mode: extra.mode } : {}),
+      answers,
+      files,
+      delivered: Boolean(receiptId) || (!isAccount && delivery),
+      receiptId,
+      waitUntil(promise) {
+        waits.push(Promise.resolve(promise));
+      },
+    });
+
+    let results;
+    try {
+      results = await Promise.all(waits);
+    } catch (error) {
+      return fail(error, 'page_failed');
+    }
+
+    this.delivered = null;
+    /* A sign-in page's answer about the details, if it gave one. */
+    const problem = results.find((result) => result && (result.errors || result.message));
+    if (!problem) {
+      /* Everything worked: the form now says "sent". */
+      this.emit('onboarding-sent', { formId, version: published.version, type: published.type, receiptId });
+    }
+    return problem ?? undefined;
   }
 }
 

@@ -1,0 +1,217 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <meta name="description" content="How to walk through the accessible onboarding demo on ALX's Savanna pages." />
+    <title>Demo guide | ALX Savanna</title>
+    <link rel="stylesheet" href="../assets/css/google-fonts-poppins.css" />
+    <link rel="stylesheet" href="../assets/css/application_alx.css" media="all" />
+    <link rel="stylesheet" href="../assets/css/app.css" media="all" />
+    <link rel="stylesheet" href="../assets/css/guide.css" media="all" />
+  </head>
+  <body class="guide-page">
+    <a class="guide-skip" href="#guide-main">Skip to the guide</a>
+
+    <header class="guide-header">
+      <div class="guide-wrap guide-header__bar">
+        <a class="guide-header__brand" href="../">
+          <img src="../assets/img/alx-navy.png" alt="ALX" width="63" height="32" />
+          <span>Savanna demo guide</span>
+        </a>
+        <nav aria-label="Demo pages">
+          <ul class="guide-header__nav">
+            <li><a href="../">Sign in</a></li>
+            <li><a href="../pages/register.html">Register</a></li>
+            <li><a href="../pages/job-application.html">Apply for a job</a></li>
+          </ul>
+        </nav>
+      </div>
+    </header>
+
+    <main id="guide-main" tabindex="-1">
+      <!-- ---- What the demo is ---- -->
+      <section class="guide-hero" aria-labelledby="guide-title">
+        <div class="guide-wrap">
+          <p class="guide-eyebrow">Accessible onboarding on Savanna</p>
+          <h1 id="guide-title">Demo guide</h1>
+          <p class="guide-lead">
+            ALX's Savanna learner pages, with three forms built and published in
+            <strong>Allora Accessibility Bridge</strong> and placed on the pages with the one embed tag the Bridge
+            generates: sign in and sign up, learner registration, and a job application. Every form can be used by keyboard,
+            by voice and with a screen reader, in English or Amharic.
+          </p>
+          <div class="guide-start" role="note">
+            <span class="guide-start__label">Where to begin</span>
+            <p>
+              Start at the <a href="../">sign-in page</a>, then follow the steps below. Each step opens a real
+              page of the demo.
+            </p>
+          </div>
+        </div>
+      </section>
+
+      <!-- ---- Steps ---- -->
+      <section class="guide-section" aria-labelledby="steps-title">
+        <div class="guide-wrap">
+          <h2 id="steps-title">Walk through it in four steps</h2>
+
+          <ol class="guide-steps">
+            <li class="guide-step">
+              <span class="guide-step__number" aria-hidden="true">1</span>
+              <div class="guide-step__body">
+                <h3>Sign in, or create an account</h3>
+                <p>
+                  The <a href="../">sign-in page</a> shows ALX's published <em>Sign up / Sign in</em> form: an
+                  email address, then a password, one at a time. Its own <strong>New here? Create an account</strong>
+                  link switches it to sign-up (name, email, password), and the page's heading follows.
+                  <a href="../#create-account">Create an account</a> opens it in sign-up straight away.
+                </p>
+                <p class="guide-honest">
+                  This demo has no accounts to check or create. When you continue, the page removes the password in
+                  your browser straight away, sends nothing, and brings you here.
+                </p>
+              </div>
+            </li>
+
+            <li class="guide-step">
+              <span class="guide-step__number" aria-hidden="true">2</span>
+              <div class="guide-step__body">
+                <h3>Look around the learner portal</h3>
+                <p>
+                  Open the <a href="../pages/homepage-v1-self-paced.html">self-paced learner homepage</a>. The
+                  sidebar has a <strong>Get hired</strong> group, and a <strong>Ready for work?</strong> card sits
+                  under the dashboard's cards. Both lead to the two forms.
+                </p>
+              </div>
+            </li>
+
+            <li class="guide-step">
+              <span class="guide-step__number" aria-hidden="true">3</span>
+              <div class="guide-step__body">
+                <h3>Register as a learner</h3>
+                <p>
+                  Open <a href="../pages/register.html">Register</a>. The form appears in the portal's own card and
+                  asks one question per screen. Things to try:
+                </p>
+                <ul>
+                  <li>Use only the keyboard: <kbd>Tab</kbd> to move, <kbd>Enter</kbd> to answer and go on.</li>
+                  <li><strong>Answer by speaking</strong>, and <strong>Read aloud</strong> on any question.</li>
+                  <li><strong>Settings</strong> at the top: text size, contrast, simple words and Amharic.</li>
+                  <li>Choices show in full lists, without opening anything.</li>
+                  <li>Reload halfway through: you carry on where you were (private answers are not kept).</li>
+                  <li>Support needs are asked in a private section of their own.</li>
+                  <li>After sending, open <strong>What this page received</strong> to see the answers as JSON.</li>
+                </ul>
+              </div>
+            </li>
+
+            <li class="guide-step">
+              <span class="guide-step__number" aria-hidden="true">4</span>
+              <div class="guide-step__body">
+                <h3>Apply for a job</h3>
+                <p>
+                  Open <a href="../pages/job-application.html">Apply for a job</a>. It adds a CV upload (try a file
+                  of the wrong type, or one over the size limit), private interview accommodations, and
+                  <em>How can we identify you?</em>: a document with its number, or
+                  <strong>I have no document, refer me</strong>, which offers to text a referral partner.
+                </p>
+                <p class="guide-honest">
+                  No text-message provider is set up in this demo, so a referral says honestly that nothing was
+                  sent.
+                </p>
+              </div>
+            </li>
+          </ol>
+        </div>
+      </section>
+
+      <!-- ---- How it works ---- -->
+      <section class="guide-section guide-section--tinted" aria-labelledby="how-title">
+        <div class="guide-wrap">
+          <h2 id="how-title">How the forms work inside Savanna</h2>
+
+          <div class="guide-cards">
+            <article class="guide-card">
+              <h3>One tag per form</h3>
+              <p>
+                Each page holds a <code>&lt;script&gt;</code> and an <code>&lt;onboarding-form&gt;</code> element,
+                copied from the form's <strong>Embed tag</strong> page in the Bridge. View any page's source to see
+                it. Nothing else of the form lives in Savanna.
+              </p>
+            </article>
+
+            <article class="guide-card">
+              <h3>A fixed, published version</h3>
+              <p>
+                A tag names one published version. Changing a form in the Bridge shows here only after it is
+                published again and the new tag is pasted in.
+              </p>
+            </article>
+
+            <article class="guide-card">
+              <h3>Only allowed websites</h3>
+              <p>
+                The Bridge serves these forms only to the websites ALX has listed, so a copied tag does not work
+                anywhere else.
+              </p>
+            </article>
+
+            <article class="guide-card">
+              <h3>Answers go to the page, not the Bridge</h3>
+              <p>
+                When a learner sends a form, it hands every answer to this page as JSON, for ALX's own code to
+                save or process. Allora Accessibility Bridge never receives or keeps them. ALX can also have them
+                posted straight to its own server.
+              </p>
+            </article>
+          </div>
+        </div>
+      </section>
+
+      <!-- ---- For the presenter ---- -->
+      <section class="guide-section" aria-labelledby="setup-title">
+        <div class="guide-wrap">
+          <h2 id="setup-title">Before you present it</h2>
+          <p>The demo runs on this computer. For every step to work:</p>
+          <ul class="guide-checklist">
+            <li>The Bridge's API is running (<code>npm run api</code>), and the forms are published.</li>
+            <li>
+              Savanna is opened at exactly <code>http://localhost:8080</code>. Another address, such as
+              <code>127.0.0.1:8080</code>, counts as a different website and is refused.
+            </li>
+            <li>
+              Optional: to show answers also arriving on a server of ALX's own, run the example receiver
+              (<code>npm run delivery:receiver</code> in the Bridge) and save its address under
+              <strong>Your organisation → Where submitted forms go</strong>.
+            </li>
+          </ul>
+        </div>
+      </section>
+
+      <!-- ---- Every page ---- -->
+      <section class="guide-section guide-section--tinted" aria-labelledby="pages-title">
+        <div class="guide-wrap">
+          <h2 id="pages-title">Every page in the demo</h2>
+          <ul class="guide-pages">
+            <li><a href="../">Sign in</a><span>The published Sign up / Sign in form</span></li>
+            <li><a href="../#create-account">Create an account</a><span>The same form, opened in sign-up</span></li>
+            <li><a href="../pages/register.html">Register</a><span>Learner registration and profile</span></li>
+            <li><a href="../pages/job-application.html">Apply for a job</a><span>Job application</span></li>
+            <li><a href="../pages/homepage-v1-self-paced.html">Learner homepage, self-paced</a><span>Module progress, pacing and the Ready for work? card</span></li>
+            <li><a href="../pages/homepage-v1-paced.html">Learner homepage, paced</a><span>Week strip, deliverables and scores</span></li>
+            <li><a href="../pages/concept-with-navigation.html">Concept page</a><span>A course concept with its curriculum navigation</span></li>
+          </ul>
+          <p class="guide-note">
+            The portal pages are a static copy of ALX's learner pages: apart from the links added for this demo,
+            their own links go nowhere.
+          </p>
+        </div>
+      </section>
+    </main>
+
+    <footer class="guide-footer">
+      <div class="guide-wrap">Copyright © 2026 ALX, All rights reserved.</div>
+    </footer>
+  </body>
+</html>

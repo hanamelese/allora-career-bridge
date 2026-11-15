@@ -13,6 +13,7 @@ import { ErrorState } from '../ui/ErrorState.jsx';
 import { LiveRegion } from '../ui/LiveRegion.jsx';
 import { Skeleton } from '../ui/Skeleton.jsx';
 import { ReferralPartnerForm } from './ReferralPartnerForm.jsx';
+import { useT } from '../../i18n/index.js';
 import './ReferralPartnersPanel.css';
 
 /**
@@ -23,6 +24,7 @@ import './ReferralPartnersPanel.css';
  * to them. The email and phone number stay on the server.
  */
 export function ReferralPartnersPanel() {
+  const t = useT();
   const { status, data, error, reload } = useAsync(listReferralPartners, []);
   const [partners, setPartners] = useState(null);
   const [editingId, setEditingId] = useState(null);
@@ -36,14 +38,14 @@ export function ReferralPartnersPanel() {
   async function add(details) {
     const created = await addReferralPartner(details);
     setPartners([...list, created].sort((a, b) => a.name.localeCompare(b.name)));
-    setAnnouncement(`${created.name} was added.`);
+    setAnnouncement(t('organisation.partners.added', created.name));
   }
 
   async function update(id, details) {
     const updated = await updateReferralPartner(id, details);
     setPartners(list.map((item) => (item.id === id ? updated : item)));
     setEditingId(null);
-    setAnnouncement(`${updated.name} was updated.`);
+    setAnnouncement(t('organisation.partners.updated', updated.name));
     requestAnimationFrame(() => document.getElementById(`rp-edit-${id}`)?.focus());
   }
 
@@ -54,7 +56,7 @@ export function ReferralPartnersPanel() {
       await removeReferralPartner(item.id);
       setPartners(list.filter((other) => other.id !== item.id));
       setConfirmingId(null);
-      setAnnouncement(`${item.name} was removed.`);
+      setAnnouncement(t('organisation.partners.removed', item.name));
       requestAnimationFrame(() => document.getElementById('rp-new-name')?.focus());
     } catch (failure) {
       setActionError(failure.message);
@@ -64,7 +66,7 @@ export function ReferralPartnersPanel() {
   if (status === 'loading') {
     return (
       <div className="stack-md" aria-busy="true">
-        <p className="visually-hidden">Loading referral partners.</p>
+        <p className="visually-hidden">{t('organisation.partners.loading')}</p>
         <Skeleton height="3rem" />
         <Skeleton height="3rem" />
       </div>
@@ -74,7 +76,7 @@ export function ReferralPartnersPanel() {
   if (status === 'error') {
     return (
       <ErrorState
-        title="Referral partners could not be loaded"
+        title={t('organisation.partners.loadError')}
         description={error?.message}
         onRetry={reload}
       />
@@ -94,8 +96,8 @@ export function ReferralPartnersPanel() {
       {list.length === 0 ? (
         <EmptyState
           icon={Users}
-          title="No referral partners yet"
-          description="Add the organisations you work with. Learners with no identity document can then ask for one of them to help."
+          title={t('organisation.partners.emptyTitle')}
+          description={t('organisation.partners.emptyDescription')}
         />
       ) : (
         <ul className="referral-partners__list" role="list">
@@ -105,7 +107,7 @@ export function ReferralPartnersPanel() {
                 <ReferralPartnerForm
                   idPrefix={`rp-${item.id}`}
                   initial={{ name: item.name, email: item.email, phone: item.phone }}
-                  submitLabel={`Save ${item.name}`}
+                  submitLabel={t('organisation.partners.save', item.name)}
                   onSubmit={(details) => update(item.id, details)}
                   onCancel={() => setEditingId(null)}
                 />
@@ -115,25 +117,25 @@ export function ReferralPartnersPanel() {
                     <p className="referral-partners__name">{item.name}</p>
                     <p className="referral-partners__contact">
                       <Mail aria-hidden="true" />
-                      <span className="visually-hidden">Email: </span>
+                      <span className="visually-hidden">{t('organisation.partners.email')}</span>
                       {item.email}
                     </p>
                     <p className="referral-partners__contact">
                       <Phone aria-hidden="true" />
-                      <span className="visually-hidden">Phone: </span>
+                      <span className="visually-hidden">{t('organisation.partners.phone')}</span>
                       {item.phone}
                     </p>
                   </div>
 
                   {confirmingId === item.id ? (
-                    <div className="referral-partners__confirm" role="group" aria-label={`Remove ${item.name}?`}>
-                      <p>Remove {item.name}? Learners will no longer be able to choose it.</p>
+                    <div className="referral-partners__confirm" role="group" aria-label={t('organisation.partners.confirmLabel', item.name)}>
+                      <p>{t('organisation.partners.confirmText', item.name)}</p>
                       <div className="referral-partners__actions">
                         <Button variant="primary" size="sm" onClick={() => remove(item)}>
-                          Remove
+                          {t('organisation.partners.remove')}
                         </Button>
                         <Button size="sm" onClick={() => setConfirmingId(null)}>
-                          Keep
+                          {t('organisation.partners.keep')}
                         </Button>
                       </div>
                     </div>
@@ -143,18 +145,18 @@ export function ReferralPartnersPanel() {
                         id={`rp-edit-${item.id}`}
                         size="sm"
                         icon={Pencil}
-                        aria-label={`Edit ${item.name}`}
+                        aria-label={t('organisation.partners.editLabel', item.name)}
                         onClick={() => setEditingId(item.id)}
                       >
-                        Edit
+                        {t('organisation.partners.edit')}
                       </Button>
                       <Button
                         size="sm"
                         icon={Trash2}
-                        aria-label={`Remove ${item.name}`}
+                        aria-label={t('organisation.partners.removeLabel', item.name)}
                         onClick={() => setConfirmingId(item.id)}
                       >
-                        Remove
+                        {t('organisation.partners.remove')}
                       </Button>
                     </div>
                   )}
@@ -167,9 +169,9 @@ export function ReferralPartnersPanel() {
 
       <section className="referral-partners__add" aria-labelledby="rp-add-heading">
         <h3 className="referral-partners__add-heading" id="rp-add-heading">
-          Add a referral partner
+          {t('organisation.partners.addHeading')}
         </h3>
-        <ReferralPartnerForm idPrefix="rp-new" submitLabel="Add partner" onSubmit={add} />
+        <ReferralPartnerForm idPrefix="rp-new" submitLabel={t('organisation.partners.addSubmit')} onSubmit={add} />
       </section>
     </div>
   );

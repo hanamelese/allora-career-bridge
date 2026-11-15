@@ -168,7 +168,7 @@
             <h2 class="card-header fw-medium fs-6 mb-0" id="register-form-title">Learner registration and profile</h2>
             <div class="card-body onboarding-slot" data-onboarding-slot="learner-registration">
               <!--
-                The tag below is pasted unchanged from the Partner Dashboard (form -> Embed tag -> Copy the tag).
+                The tag below is pasted unchanged from Allora Accessibility Bridge (form -> Embed tag -> Copy the tag).
                 To update the form, publish a new version there and replace these lines with the new tag.
               -->
               <script src="http://localhost:3001/widget/v1/onboarding-widget.js" async></script>
@@ -189,8 +189,9 @@
 
           <p class="onboarding-credit">
             <i aria-hidden="true" class="fa-solid fa-universal-access me-1"></i>
-            This form comes from the Accessible Onboarding System. ALX set it up and published it in the
-            system's Partner Dashboard, and this page shows it with the one embed tag the dashboard generated.
+            This form comes from Allora Accessibility Bridge. ALX set it up and published it there, and this
+            page shows it with the one embed tag the Bridge generated. Your answers go to ALX; the Bridge does
+            not keep them.
           </p>
 
           <!-- Revealed once the form has been sent (onboarding-submit). -->
@@ -201,6 +202,17 @@
               <a class="btn btn-primary rounded-pill" href="job-application.html">Apply for a job</a>
               <a class="btn btn-outline-primary rounded-pill" href="homepage-v1-self-paced.html">Back to dashboard</a>
             </div>
+
+            <details class="onboarding-received">
+              <summary>What this page received</summary>
+              <p class="mb-2">
+                The form handed these answers to this page as JSON, in its <code>onboarding-submit</code> event
+                (files by name here). An organisation's page would save them on its own server; this demo only
+                shows them. Allora Accessibility Bridge did not receive or keep them.
+              </p>
+              <pre class="onboarding-received__json" tabindex="0" data-onboarding-received></pre>
+            </details>
+          </div>
           </div>
         </div>
       </article>

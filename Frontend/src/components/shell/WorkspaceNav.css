@@ -1,46 +1,95 @@
+/* The form's workflow as a row of cards: Configure, Preview, Publish,
+   Embed tag. Each card is a link; the current one is marked with an
+   accent edge, a tinted face and a filled step number, so it differs in
+   more than colour alone. */
+
+/* Sized by the room it actually has (a container query), so larger text
+   from the display controls - which also widens the sidebar - reflows
+   the cards instead of squeezing them. */
 .workspace-nav {
-  border-block-end: 1px solid var(--border-subtle);
+  container-type: inline-size;
 }
 
 .workspace-nav__list {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: var(--space-gutter);
+}
+
+.workspace-nav__list > li {
   display: flex;
-  gap: var(--space-xs);
-  overflow-x: auto;
+  min-width: 0;
 }
 
 .workspace-nav__link {
+  position: relative;
   display: flex;
+  flex: 1;
   align-items: center;
-  gap: var(--space-sm);
+  gap: var(--space-gutter);
+  min-width: 0;
+  min-height: 4rem;
   padding: var(--space-gutter) var(--space-md);
-  border-block-end: 2px solid transparent;
-  margin-block-end: -1px;
+  border: 1px solid var(--border-subtle);
+  border-radius: var(--radius-card);
+  background-color: var(--surface);
+  box-shadow: var(--shadow-card);
   color: var(--ink-secondary);
   text-decoration: none;
-  white-space: nowrap;
-  transition: color var(--transition-fast), border-color var(--transition-fast);
+  transition:
+    color var(--transition-fast),
+    border-color var(--transition-fast),
+    background-color var(--transition-fast),
+    box-shadow var(--transition-base);
 }
 
 .workspace-nav__link:hover {
+  border-color: var(--border-default);
+  box-shadow: var(--shadow-card-raised);
   color: var(--ink);
 }
 
-.workspace-nav__link--active {
+/* Pressed: the card settles onto the page. */
+.workspace-nav__link:active {
+  box-shadow: var(--shadow-sm);
+  background-color: var(--surface-sunken);
+}
+
+/* The current step. The inset ring thickens the edge without moving
+   anything. */
+.workspace-nav__link--active,
+.workspace-nav__link--active:hover {
+  border-color: var(--accent);
+  background-color: color-mix(in srgb, var(--accent-surface) 45%, var(--surface));
+  box-shadow:
+    inset 0 0 0 1px var(--accent),
+    var(--shadow-card-raised);
   color: var(--ink);
-  border-block-end-color: var(--accent);
+}
+
+/* Keyboard focus keeps the shared double ring alongside the card's own
+   shadow (the global ring is itself a box-shadow). */
+.workspace-nav__link:focus-visible {
+  outline: 2px solid var(--focus-ring-inner);
+  outline-offset: 1px;
+  border-radius: var(--radius-card);
+  box-shadow:
+    0 0 0 4px var(--focus-ring-outer),
+    var(--shadow-card-raised);
 }
 
 .workspace-nav__step {
   display: grid;
   place-items: center;
-  width: 1.5rem;
-  height: 1.5rem;
+  width: 2rem;
+  height: 2rem;
   flex-shrink: 0;
   border-radius: var(--radius-pill);
   background-color: var(--slate-100);
   color: var(--ink-secondary);
-  font-size: var(--font-size-xs);
+  font-size: var(--font-size-sm);
   font-weight: var(--font-weight-bold);
+  transition: background-color var(--transition-fast), color var(--transition-fast);
 }
 
 .workspace-nav__link--active .workspace-nav__step {
@@ -51,6 +100,8 @@
 .workspace-nav__text {
   display: flex;
   flex-direction: column;
+  gap: var(--space-2xs);
+  min-width: 0;
   text-align: start;
 }
 
@@ -62,17 +113,67 @@
 
 .workspace-nav__description {
   font-size: var(--font-size-xs);
+  line-height: var(--line-height-tight);
   color: var(--ink-muted);
 }
 
-@media (forced-colors: active) {
-  .workspace-nav__link--active {
-    border-block-end-color: Highlight;
+/* Movement only for people who have not asked for less of it. */
+@media (prefers-reduced-motion: no-preference) {
+  .workspace-nav__link {
+    transition:
+      color var(--transition-fast),
+      border-color var(--transition-fast),
+      background-color var(--transition-fast),
+      box-shadow var(--transition-base),
+      transform var(--transition-base);
+  }
+
+  .workspace-nav__link:hover {
+    transform: translateY(-2px);
+  }
+
+  .workspace-nav__link:active,
+  .workspace-nav__link--active:active {
+    transform: translateY(1px);
+    transition-duration: 60ms;
   }
 }
 
-@media (max-width: 40rem) {
+@media (forced-colors: active) {
+  .workspace-nav__link {
+    border: 1px solid CanvasText;
+  }
+
+  .workspace-nav__link--active {
+    border: 3px solid Highlight;
+  }
+
+  .workspace-nav__link--active .workspace-nav__step {
+    forced-color-adjust: none;
+    background-color: Highlight;
+    color: HighlightText;
+  }
+}
+
+/* Two by two when four would be cramped. */
+@container (max-width: 46rem) {
+  .workspace-nav__list {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
+
+@container (max-width: 34rem) {
   .workspace-nav__description {
     display: none;
+  }
+
+  .workspace-nav__link {
+    min-height: 3.25rem;
+    padding: var(--space-sm) var(--space-gutter);
+  }
+
+  .workspace-nav__step {
+    width: 1.75rem;
+    height: 1.75rem;
   }
 }

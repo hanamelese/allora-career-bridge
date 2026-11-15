@@ -8,6 +8,7 @@ import { ErrorState } from '../components/ui/ErrorState.jsx';
 import { Skeleton } from '../components/ui/Skeleton.jsx';
 import { WorkspaceNav } from '../components/shell/WorkspaceNav.jsx';
 import { FormEditor } from './FormEditor.jsx';
+import { useT } from '../i18n/index.js';
 import './FormWorkspace.css';
 
 /**
@@ -18,6 +19,7 @@ import './FormWorkspace.css';
 export function FormWorkspace() {
   const { formSlug } = useParams();
   const location = useLocation();
+  const t = useT();
   const formType = getFormTypeBySlug(formSlug);
   const renamedTo = formType ? null : getFormTypeByAlias(formSlug);
 
@@ -41,19 +43,21 @@ export function FormWorkspace() {
   if (!formType) {
     return (
       <ErrorState
-        title="That form does not exist"
-        description="Choose a form from the Forms list to continue."
+        title={t('workspace.unknownForm.title')}
+        description={t('workspace.unknownForm.description')}
       />
     );
   }
+
+  const formName = t(`formTypes.${formType.id}.name`);
 
   return (
     <div className="form-workspace">
       <header className="form-workspace__header">
         <div className="form-workspace__title-row">
           <div>
-            <h1 className="form-workspace__title">{formType.name}</h1>
-            <p className="form-workspace__audience">{formType.audience}</p>
+            <h1 className="form-workspace__title">{formName}</h1>
+            <p className="form-workspace__audience">{t(`formTypes.${formType.id}.audience`)}</p>
           </div>
         </div>
 
@@ -64,8 +68,8 @@ export function FormWorkspace() {
 
       <div className="form-workspace__panel">
         {status === 'loading' ? (
-          <Card as="section" aria-busy="true" aria-label={`Loading ${formType.name}`}>
-            <p className="visually-hidden">Loading {formType.name}.</p>
+          <Card as="section" aria-busy="true" aria-label={t('workspace.loadingLabel', formName)}>
+            <p className="visually-hidden">{t('workspace.loadingText', formName)}</p>
             <div className="stack-md">
               <Skeleton width="14rem" height="1.25rem" />
               <Skeleton height="3rem" />
@@ -78,11 +82,11 @@ export function FormWorkspace() {
         {status === 'error' ? (
           <Card as="section">
             <ErrorState
-              title="This form could not be loaded"
+              title={t('workspace.loadError.title')}
               description={
                 error?.code === 'form_not_found'
-                  ? 'No saved configuration was found for this form. Reloading will start it from the standard settings.'
-                  : 'The dashboard could not read this form. Check your connection and try again.'
+                  ? t('workspace.loadError.notFound')
+                  : t('workspace.loadError.generic')
               }
               onRetry={reload}
             />
@@ -97,7 +101,7 @@ export function FormWorkspace() {
       {status === 'success' && form.status !== 'published' ? (
         <p className="form-workspace__hint">
           <CircleAlert className="form-workspace__hint-icon" aria-hidden="true" />
-          Learners only ever see published versions. Changes stay in the draft until you publish.
+          {t('workspace.draftHint')}
         </p>
       ) : null}
     </div>

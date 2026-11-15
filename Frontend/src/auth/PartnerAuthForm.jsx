@@ -5,11 +5,17 @@ import { FormRenderer } from '@onboarding/form-engine/react';
 import { useAuth } from './authContext.js';
 import { renderIcon } from '../icons.js';
 import { FORM_TYPES } from '../formTypes.js';
+import { translate, useLanguage } from '../i18n/index.js';
 
 const FIRST_FORM_PATH = `/forms/${FORM_TYPES[0].slug}/configure`;
 
 /* The server's names for the sign-up fields, and the form's. */
 const TO_FIELD = { organisationName: 'name', email: 'email', password: 'password' };
+
+/* An override text in both languages, from the `auth` namespace. */
+function bothLanguages(key) {
+  return { en: translate('en', key), am: translate('am', key) };
+}
 
 /**
  * The partner's own Sign up / Sign in, for the dashboard.
@@ -28,6 +34,7 @@ export function PartnerAuthForm({ mode, onModeChange }) {
   const { signIn, signUp } = useAuth();
   const navigate = useNavigate();
   const location = useLocation();
+  const language = useLanguage();
 
   const config = useMemo(() => {
     const template = FORM_TEMPLATES.account;
@@ -35,30 +42,30 @@ export function PartnerAuthForm({ mode, onModeChange }) {
     return {
       ...template,
       formId: 'partner_dashboard_account',
-      languages: ['en'],
-      defaultLanguage: 'en',
+      languages: [language],
+      defaultLanguage: language,
       fields: template.fields.map((field) => {
         if (field.key === 'name') {
           return {
             ...field,
-            label: { en: 'Organisation name' },
-            simpleLabel: { en: 'Your organisation’s name' },
-            helpText: { en: 'The training provider, employer or NGO you work for.' },
+            label: bothLanguages('auth.name.label'),
+            simpleLabel: bothLanguages('auth.name.simpleLabel'),
+            helpText: bothLanguages('auth.name.help'),
           };
         }
 
         if (field.key === 'email') {
           return {
             ...field,
-            label: { en: 'Work email address' },
-            ...(mode === 'signUp' ? { helpText: { en: 'You will sign in with this.' } } : {}),
+            label: bothLanguages('auth.email.label'),
+            ...(mode === 'signUp' ? { helpText: bothLanguages('auth.email.help') } : {}),
           };
         }
 
         if (field.key === 'password' && mode === 'signUp') {
           return {
             ...field,
-            helpText: { en: 'At least 10 characters. A short phrase is easy to remember and hard to guess.' },
+            helpText: bothLanguages('auth.password.help'),
           };
         }
 
@@ -66,7 +73,7 @@ export function PartnerAuthForm({ mode, onModeChange }) {
       }),
       account: { ...template.account, mode, allowEmailPassword: true, socialProviders: [] },
     };
-  }, [mode]);
+  }, [mode, language]);
 
   async function handleSubmit(data) {
     try {
@@ -104,9 +111,9 @@ export function PartnerAuthForm({ mode, onModeChange }) {
 
   return (
     <FormRenderer
-      key={mode}
+      key={`${mode}-${language}`}
       config={config}
-      settings={{ language: 'en' }}
+      settings={{ language }}
       onSubmit={handleSubmit}
       onSwitchMode={onModeChange}
       renderIcon={renderIcon}

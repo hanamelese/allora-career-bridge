@@ -1,3 +1,8 @@
+import { translate } from '../i18n/index.js';
+
+/* The dashboard language, as <html lang> shows it (see display/). */
+const currentLanguage = () => (document.documentElement.lang === 'am' ? 'am' : 'en');
+
 /**
  * The HTTP layer.
  *
@@ -46,7 +51,7 @@ export async function apiFetch(path, { method = 'GET', body, auth = true } = {})
     throw new ApiError(
       0,
       'offline',
-      'The dashboard could not reach the server. Check that the API is running.',
+      translate(currentLanguage(), 'common.offline'),
     );
   }
 
@@ -62,7 +67,7 @@ export async function apiFetch(path, { method = 'GET', body, auth = true } = {})
     throw new ApiError(
       response.status,
       payload.error ?? 'request_failed',
-      payload.message ?? 'The request could not be completed.',
+      payload.message ?? translate(currentLanguage(), 'common.requestFailed'),
       payload.issues,
     );
   }

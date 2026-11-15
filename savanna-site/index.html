@@ -3,94 +3,62 @@
   <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
-    <title>Savanna static pages</title>
-    <link rel="stylesheet" href="assets/css/application_alx.css" media="all" />
-    <link rel="stylesheet" href="assets/css/app.css" media="all" />
-    <style>
-      body { padding: 2rem 1rem; }
-      .page-card { max-width: 46rem; }
-    </style>
+    <meta name="description" content="Sign in to Savanna, ALX's learner portal, or create an account." />
+    <title>Sign in | ALX Savanna</title>
+    <link rel="stylesheet" href="assets/css/google-fonts-poppins.css" />
+    <link rel="stylesheet" href="assets/css/login.css" />
   </head>
-  <body class="bg-body-tertiary">
-    <main class="container-lg">
-      <h1 class="mb-1">Savanna static pages</h1>
-      <p class="text-body-secondary mb-4">
-        Three learner pages frozen from the local dev app, for front-end and accessibility work.
-        No server, no application JavaScript, no network. The hamburger, the week strip, the score
-        details and programme modals, the module switcher and the courses dropdown still work;
-        every link is inert, and the language toggle and global search are removed.
-      </p>
+  <body class="login-page">
+    <a class="login-skip" href="#login-form">Skip to the sign-in form</a>
 
-      <div class="vstack gap-3 page-card">
-        <div class="card">
-          <div class="card-body">
-            <h2 class="h5 card-title"><a href="pages/homepage-v1-paced.html">Learner homepage — v1 paced</a></h2>
-            <p class="card-text mb-0">
-              Björn Sibanda, week 10 of <strong>WR 100: Fundamentals of Effective Communication</strong>
-              (cohort F26-SEM-16W, 31&nbsp;Aug – 20&nbsp;Dec 2026). Courses dropdown, a week strip with all
-              16 weeks preloaded, “continue where you left off”, immediate deliverables, period
-              progress, overall score and upcoming events.
-            </p>
-          </div>
-        </div>
-
-        <div class="card">
-          <div class="card-body">
-            <h2 class="h5 card-title"><a href="pages/homepage-v1-self-paced.html">Learner homepage — v1 self-paced</a></h2>
-            <p class="card-text mb-0">
-              Amara Nwosu, module 1 of 3 complete on <strong>VA-1: VA Foundations &amp; Professional Identity</strong>.
-              Course-progression gauge against the 70% graduation threshold, a working module
-              switcher, the programme modal preloaded, pacing boost and upcoming events.
-            </p>
-          </div>
-        </div>
-
-        <div class="card">
-          <div class="card-body">
-            <h2 class="h5 card-title"><a href="pages/concept-with-navigation.html">Concept page with curriculum navigation</a></h2>
-            <p class="card-text mb-0">
-              “The Future of the VA Industry” — a module&nbsp;2 concept with the navigation panel beside it,
-              showing read, current and unread activities, plus the full set of authored content blocks
-              (callouts, card grids, comparison columns). The language toggle, the “Need a Fast Track?”
-              block and the Padlet embed are removed.
-            </p>
-          </div>
-        </div>
+    <div class="login">
+      <!-- The brand side. Decorative apart from its words; on phones it becomes a slim band. -->
+      <div class="login__panel">
+        <img class="login__panel-logo" src="assets/img/alx-navy.png" alt="ALX" width="157" height="80" />
+        <p class="login__panel-title">Savanna</p>
+        <p class="login__panel-text">ALX's learner portal: your courses, your progress and your next step into work.</p>
       </div>
 
-      <h2 class="h4 mt-5 mb-1">Accessible onboarding demo</h2>
-      <p class="text-body-secondary mb-4 page-card">
-        Two pages added for the demo, in the same portal layout. Each shows a form published from the
-        Accessible Onboarding System's Partner Dashboard, loaded with the tag the dashboard generated. The forms
-        need the onboarding API running and these pages served over http, not opened as files (see
-        <code>README.md</code>).
-      </p>
+      <main class="login__main" id="main">
+        <div class="login__column">
+          <!-- The heading and line below follow the form's mode (assets/js/login.js). -->
+          <h1 class="login__title" data-login-title tabindex="-1">Welcome back!</h1>
+          <p class="login__lead" data-login-lead>Sign in to continue your learning.</p>
 
-      <div class="vstack gap-3 page-card">
-        <div class="card">
-          <div class="card-body">
-            <h3 class="h5 card-title"><a href="pages/register.html">Register — learner registration and profile</a></h3>
-            <p class="card-text mb-0">
-              A learner registers one question at a time, typing or speaking their answers, with questions
-              read aloud on request and support needs kept private.
+          <section class="login__form" id="login-form" aria-labelledby="login-form-label" tabindex="-1" data-onboarding-slot="login">
+            <h2 class="login__visually-hidden" id="login-form-label">Sign in or create an account</h2>
+            <!--
+              The tag below is pasted unchanged from Allora Accessibility Bridge (Sign up / Sign in form ->
+              Embed tag -> Copy the tag). To change the form, publish a new version there and replace these lines.
+            -->
+            <script src="http://localhost:3001/widget/v1/onboarding-widget.js" async></script>
+
+            <onboarding-form
+              form-id="frm_9907f7fc0113c63a"
+              public-key="pk_live_649f880df0dc14c902fce4a2"
+              form-version="1"
+              lang="en">
+            </onboarding-form>
+
+            <!-- Shown only if the form's script could not load (see assets/js/login.js). -->
+            <p class="login__unavailable" data-onboarding-unavailable hidden>
+              The sign-in form could not be loaded right now. Please refresh the page, or try again later.
             </p>
-          </div>
-        </div>
+            <p class="login__status" data-login-status role="status" aria-live="polite"></p>
+          </section>
 
-        <div class="card">
-          <div class="card-body">
-            <h3 class="h5 card-title"><a href="pages/job-application.html">Apply for a job</a></h3>
-            <p class="card-text mb-0">
-              A job application with a CV upload, private accommodation requests, and a referral to a partner
-              organisation for learners who have no identity document.
+          <aside class="login__demo" aria-label="About this demo">
+            <p>
+              <strong>Demo:</strong> this page shows the real Sign up / Sign in form published from Allora
+              Accessibility Bridge (its own link switches between signing in and creating an account), but it
+              does not check or create accounts. When you continue, your password is removed in this browser
+              straight away, nothing is sent or kept, and you go on to the <a href="guide/">demo guide</a>.
             </p>
-          </div>
+          </aside>
         </div>
-      </div>
+      </main>
+    </div>
 
-      <p class="mt-4 text-body-secondary">
-        See <code>README.md</code> for what is real, what was substituted, and how to regenerate.
-      </p>
-    </main>
+    <script src="assets/js/login.js"></script>
   </body>
 </html>

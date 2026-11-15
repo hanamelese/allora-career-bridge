@@ -89,3 +89,69 @@ describe('one screen at a time', () => {
     ).toBe('Email address: Enter your email address.');
   });
 });
+
+describe('questions the partner added', () => {
+  const withCustom = (mode) => ({
+    ...withAccount({ mode }),
+    customFields: [
+      {
+        key: 'cohort',
+        type: 'choice',
+        label: { en: 'Which cohort are you joining?' },
+        enabled: true,
+        required: true,
+        options: [
+          { value: 'jan', label: { en: 'January' } },
+          { value: 'jul', label: { en: 'July' } },
+        ],
+      },
+      {
+        key: 'cohort_note',
+        type: 'text',
+        label: { en: 'Anything about July we should know?' },
+        enabled: true,
+        required: false,
+        showIf: { field: 'cohort', equals: 'jul' },
+      },
+      { key: 'switched_off', type: 'yesNo', label: { en: 'Off' }, enabled: false, required: false },
+    ],
+  });
+
+  it('asks them after the standard questions when signing up', () => {
+    const questions = getAccountQuestions(withCustom('signUp'));
+
+    expect(questions.map((q) => q.key)).toEqual(['name', 'email', 'password', 'cohort']);
+    expect(questions.at(-1)).toMatchObject({ isCustom: true, label: 'Which cohort are you joining?', required: true });
+    expect(questions.at(-1).options.map((option) => option.label)).toEqual(['January', 'July']);
+  });
+
+  it('shows a dependent question only when its condition is met', () => {
+    expect(getAccountQuestions(withCustom('signUp'), {}, { cohort: 'jul' }).map((q) => q.key)).toContain('cohort_note');
+    expect(getAccountQuestions(withCustom('signUp'), {}, { cohort: 'jan' }).map((q) => q.key)).not.toContain('cohort_note');
+  });
+
+  it('never asks them when signing in, and never lets them block signing in', () => {
+    expect(getAccountQuestions(withCustom('signIn')).map((q) => q.key)).toEqual(['email', 'password']);
+    expect(validateAccount(withCustom('signIn'), { email: 'a@example.org', password: 'long enough' }).valid).toBe(true);
+  });
+
+  it('requires a required one when signing up, naming it in screen order', () => {
+    const answers = { name: 'Abebe Kebede', email: 'a@example.org', password: 'long enough' };
+    const result = validateAccount(withCustom('signUp'), answers, { labels: { cohort: 'Which cohort are you joining?' } });
+
+    expect(result.valid).toBe(false);
+    expect(result.errors).toEqual({ cohort: 'Which cohort are you joining?: Please answer this before moving on.' });
+    expect(validateAccountField(withCustom('signUp'), 'cohort', { ...answers, cohort: 'jul' })).toBeNull();
+
+    const complete = validateAccount(withCustom('signUp'), { ...answers, cohort: 'jul', cohort_note: 'Evenings' });
+    expect(complete).toMatchObject({ valid: true, data: { cohort: 'jul', cohort_note: 'Evenings' } });
+  });
+
+  it('drops the answer to a dependent question that is no longer shown', () => {
+    const answers = { name: 'Abebe Kebede', email: 'a@example.org', password: 'long enough', cohort: 'jan', cohort_note: 'stale' };
+    const result = validateAccount(withCustom('signUp'), answers);
+
+    expect(result.valid).toBe(true);
+    expect(result.data).not.toHaveProperty('cohort_note');
+  });
+});

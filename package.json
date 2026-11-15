@@ -16,6 +16,7 @@
     "lint": "npm run lint -w frontend",
     "test": "npm run test -w @onboarding/contracts -w @onboarding/form-engine -w api",
     "api": "npm run dev -w api",
-    "build:widget": "npm run build -w widget"
+    "build:widget": "npm run build -w widget",
+    "delivery:receiver": "node tools/delivery-receiver/receiver.mjs"
   }
 }

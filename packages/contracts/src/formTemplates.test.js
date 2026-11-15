@@ -50,6 +50,17 @@ describe('form templates', () => {
       }
     }
   });
+
+  it("asks the employer's workplace accommodations in a section of their own, not marked private", () => {
+    const definition = fieldCatalog.workplaceAccommodations;
+
+    expect(FORM_TEMPLATES.employer.fields.some((field) => field.key === 'workplaceAccommodations')).toBe(true);
+    expect(definition.section).toBe('accommodations');
+    expect(definition.private).toBe(false);
+    /* The learners' own support questions keep their private section. */
+    expect(fieldCatalog.supportNeeds.section).toBe('support');
+    expect(fieldCatalog.interviewAccommodations.section).toBe('support');
+  });
 });
 
 describe('new field types', () => {

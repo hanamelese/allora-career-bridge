@@ -9,6 +9,7 @@ import { CustomFieldEditor } from '../components/configure/CustomFieldEditor.jsx
 import { LanguageSettings } from '../components/configure/LanguageSettings.jsx';
 import { IdentityRoutesEditor } from '../components/configure/IdentityRoutesEditor.jsx';
 import { AccountSettings } from '../components/configure/AccountSettings.jsx';
+import { useT } from '../i18n/index.js';
 import './ConfigurePage.css';
 
 /**
@@ -19,6 +20,7 @@ import './ConfigurePage.css';
  */
 export function ConfigurePage() {
   const { formType, configState } = useOutletContext();
+  const t = useT();
   const {
     config,
     fieldErrors,
@@ -38,17 +40,20 @@ export function ConfigurePage() {
   const hasIdentityQuestion = config.fields.some((field) => field.key === 'identityRoute');
 
   /* Support and accommodation questions are kept in a section of their
-     own, as learners meet them. */
-  const isSupport = (field) => fieldCatalog[field.key]?.section === 'support';
-  const supportFields = config.fields.filter(isSupport);
-  const generalFields = config.fields.filter((field) => !isSupport(field));
+     own, as people filling in the form meet them: a learner's private
+     support needs, or the accommodations an employer offers. */
+  const sectionOf = (field) => fieldCatalog[field.key]?.section ?? null;
+  const supportFields = config.fields.filter((field) => sectionOf(field) === 'support');
+  const accommodationFields = config.fields.filter((field) => sectionOf(field) === 'accommodations');
+  const generalFields = config.fields.filter((field) => !sectionOf(field));
+  const isAccount = config.type === 'account';
 
   return (
     <div className="stack-lg">
       {generalErrors.length > 0 ? (
         <Card as="section" aria-labelledby="config-problems-heading">
           <h2 className="configure-page__problems-heading" id="config-problems-heading">
-            This form cannot be published yet
+            {t('configure.page.problemsHeading')}
           </h2>
           <ul className="configure-page__problems" role="list">
             {generalErrors.map((issue, index) => (
@@ -62,8 +67,8 @@ export function ConfigurePage() {
         <Card as="section" aria-labelledby="account-heading">
           <SectionHeading
             id="account-heading"
-            title="Sign-in options"
-            description="The form's title, and the ways people can sign up or sign in."
+            title={t('configure.page.accountTitle')}
+            description={t('configure.page.accountDescription')}
           />
 
           <AccountSettings
@@ -77,14 +82,15 @@ export function ConfigurePage() {
       <Card as="section" aria-labelledby="fields-heading">
         <SectionHeading
           id="fields-heading"
-          title="Questions this form asks"
-          description={`${enabledCount} ${enabledCount === 1 ? 'question is' : 'questions are'} switched on. Questions marked "Always on" are needed for the form to work and cannot be removed.`}
+          title={t('configure.page.fieldsTitle')}
+          description={t('configure.page.fieldsDescription', enabledCount)}
         />
 
         <SettingsPanel
           config={config}
           fields={generalFields}
           fieldErrors={fieldErrors}
+          formTypeId={formType.id}
           lockReasons={LOCK_REASONS[formType.id]}
           onUpdateField={updateField}
         />
@@ -94,27 +100,49 @@ export function ConfigurePage() {
         <Card as="section" aria-labelledby="support-fields-heading">
           <SectionHeading
             id="support-fields-heading"
-            title="Support and accommodations"
-            description="Asked in a section of their own, marked private. Answers are never shared with employers, people are never asked for medical proof, and nobody has to say why they need something."
+            title={t('configure.page.supportTitle')}
+            description={t('configure.page.supportDescription')}
           />
 
           <SettingsPanel
             config={config}
             fields={supportFields}
             fieldErrors={fieldErrors}
+            formTypeId={formType.id}
             lockReasons={LOCK_REASONS[formType.id]}
             onUpdateField={updateField}
           />
         </Card>
       ) : null}
 
-      {/* A sign-in form asks only for what signing in needs. */}
-      {config.type !== 'account' ? (
+      {accommodationFields.length > 0 ? (
+        <Card as="section" aria-labelledby="accommodation-fields-heading">
+          <SectionHeading
+            id="accommodation-fields-heading"
+            title={t('configure.page.accommodationTitle')}
+            description={t('configure.page.accommodationDescription')}
+          />
+
+          <SettingsPanel
+            config={config}
+            fields={accommodationFields}
+            fieldErrors={fieldErrors}
+            formTypeId={formType.id}
+            lockReasons={LOCK_REASONS[formType.id]}
+            onUpdateField={updateField}
+          />
+        </Card>
+      ) : null}
+
       <Card as="section" aria-labelledby="custom-fields-heading">
         <SectionHeading
           id="custom-fields-heading"
-          title="Questions you added"
-          description="Your own questions are asked after the standard ones. They can be short written answers, a choice from a list, or yes and no."
+          title={t('configure.page.customTitle')}
+          description={
+            isAccount
+              ? t('configure.page.customDescriptionAccount')
+              : t('configure.page.customDescription')
+          }
         />
 
         {config.customFields.length > 0 ? (
@@ -131,8 +159,8 @@ export function ConfigurePage() {
           </ul>
         ) : (
           <EmptyState
-            title="You have not added any questions"
-            description="Add one below if your organisation needs something the standard questions do not cover."
+            title={t('configure.page.customEmptyTitle')}
+            description={t('configure.page.customEmptyDescription')}
           />
         )}
 
@@ -141,12 +169,11 @@ export function ConfigurePage() {
           onAdd={addCustomField}
         />
       </Card>
-      ) : null}
 
       <Card as="section" aria-labelledby="language-heading">
         <SectionHeading
           id="language-heading"
-          title="Language"
+          title={t('configure.page.languageTitle')}
         />
 
         <LanguageSettings
@@ -159,8 +186,8 @@ export function ConfigurePage() {
         <Card as="section" aria-labelledby="identity-heading">
           <SectionHeading
             id="identity-heading"
-            title="How learners can identify themselves"
-            description="Choose which documents this form accepts. Learners without any of them still have a way through."
+            title={t('configure.page.identityTitle')}
+            description={t('configure.page.identityDescription')}
           />
 
           <IdentityRoutesEditor

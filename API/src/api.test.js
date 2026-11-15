@@ -9,6 +9,7 @@ import { partnerForms, referrals } from './db/schema.js';
 import { createRateLimiter } from './referrals.js';
 import { ensurePartnerForms, upgradeStoredDrafts } from './db/upgrades.js';
 import { createApp } from './app.js';
+import { verifyDeliveryToken } from './delivery.js';
 
 /* NODE_ENV=test makes the config use a fixed signing secret, so these
    tests do not need a .env file. */
@@ -548,11 +549,15 @@ describe('referral links', () => {
     expect(sms.sent[0].body).toMatch(/^\[TEST\] ALX Ethiopia: Abebe Kebede/);
     expect(sms.sent[0].body).toContain('0911234567');
 
+    /* The name and phone travel in the message only; nothing keeps them. */
+    const [row] = app.locals.db.select().from(referrals).all();
+    expect(row).toMatchObject({ learnerName: null, learnerPhone: null, status: 'sent' });
+
     const link = await request(app).get(`/api/v1/public/referrals/${tokenFrom(sms.sent[0].body)}`);
     expect(link.status).toBe(200);
     expect(link.body).toMatchObject({
-      learnerName: 'Abebe Kebede',
-      learnerPhone: '0911234567',
+      learnerName: null,
+      learnerPhone: null,
       organisationName: 'ALX Ethiopia',
       referralPartnerName: details.name,
       status: 'sent',
@@ -889,130 +894,133 @@ describe('embedding on a partner’s website', () => {
   });
 });
 
-describe('learners sending an embedded form', () => {
+describe('delivering a submitted form to the organisation', () => {
   const SITE = 'https://jobs.example.org';
-  const submit = (body, { id = formId, key = seeded.publicKey, origin = SITE } = {}) =>
-    request(app).post(`/api/v1/public/forms/${id}/submissions?key=${key}`).set('origin', origin).send(body);
-  const answers = {
-    name: 'Hana Tesfaye',
-    phone: '0911234567',
-    currentLevel: 'beginner',
-    identityRoute: 'passport',
-  };
+  const RECEIVER = 'https://forms.alx.example/receive';
+  const askForDelivery = (body, { id = formId, key = seeded.publicKey, origin = SITE, server = app } = {}) =>
+    request(server).post(`/api/v1/public/forms/${id}/delivery?key=${key}`).set('origin', origin).send(body);
 
   beforeEach(async () => {
     await authed('post', '/api/v1/organisation/allowed-origins').send({ origin: SITE });
   });
 
-  it('stores the answers against the published version, and the partner can read them', async () => {
-    await authed('post', `/api/v1/forms/${formId}/publish`);
+  it('starts with no delivery address, and only accepts https (or http on localhost)', async () => {
+    expect((await authed('get', '/api/v1/organisation/delivery')).body).toEqual({ url: null, secret: null });
 
-    const sent = await submit({ version: 1, answers, language: 'am' });
-    expect(sent.status).toBe(201);
-    expect(sent.body.submissionId).toMatch(/^sub_/);
-    expect(sent.headers['access-control-allow-origin']).toBe(SITE);
-
-    const list = await authed('get', `/api/v1/forms/${formId}/submissions`);
-    expect(list.status).toBe(200);
-    expect(list.body).toHaveLength(1);
-    expect(list.body[0]).toMatchObject({ submissionId: sent.body.submissionId, version: 1, language: 'am', answers });
-  });
-
-  it('refuses private answers, ID numbers and anything not on the form, storing nothing', async () => {
-    await authed('post', `/api/v1/forms/${formId}/publish`);
-
-    for (const extra of [
-      { supportNote: 'I use a screen reader.' },
-      { documentId: 'EP1234567' },
-      { favouriteColour: 'blue' },
-    ]) {
-      const response = await submit({ version: 1, answers: { ...answers, ...extra } });
+    for (const url of ['http://forms.example.org/x', 'ftp://example.org', 'https://user:pw@example.org/x', 'not a url']) {
+      const response = await authed('put', '/api/v1/organisation/delivery').send({ url });
       expect(response.status).toBe(422);
-      expect(response.body.error).toBe('answers_not_storable');
-      expect(response.body.issues.map((issue) => issue.path)).toEqual(Object.keys(extra));
     }
 
-    const list = await authed('get', `/api/v1/forms/${formId}/submissions`);
-    expect(list.body).toHaveLength(0);
+    expect((await authed('put', '/api/v1/organisation/delivery').send({ url: 'http://localhost:4000/submissions' })).status).toBe(200);
   });
 
-  it('still requires the answers the form requires, and checks them', async () => {
-    await authed('post', `/api/v1/forms/${formId}/publish`);
+  it('saves an address with a signing secret, keeps the secret on a new address, renews it on request, and stops', async () => {
+    const saved = await authed('put', '/api/v1/organisation/delivery').send({ url: RECEIVER });
+    expect(saved.status).toBe(200);
+    expect(saved.body.url).toBe(RECEIVER);
+    expect(saved.body.secret).toMatch(/^dsec_/);
+    expect(saved.headers['cache-control']).toBe('no-store');
 
-    const missing = await submit({ version: 1, answers: { ...answers, name: undefined } });
-    expect(missing.status).toBe(422);
-    expect(missing.body.error).toBe('invalid_answers');
+    const moved = await authed('put', '/api/v1/organisation/delivery').send({ url: `${RECEIVER}/v2` });
+    expect(moved.body.secret).toBe(saved.body.secret);
 
-    const short = await submit({ version: 1, answers: { ...answers, name: 'H' } });
-    expect(short.status).toBe(422);
+    const renewed = await authed('post', '/api/v1/organisation/delivery/secret');
+    expect(renewed.body.secret).toMatch(/^dsec_/);
+    expect(renewed.body.secret).not.toBe(saved.body.secret);
+
+    const stopped = await authed('put', '/api/v1/organisation/delivery').send({ url: null });
+    expect(stopped.body).toEqual({ url: null, secret: null });
   });
 
-  it('keeps a CV only as its name, size and type, and refuses one that breaks the rules', async () => {
-    const jobId = seeded.formIds.jobApplication;
-    await authed('post', `/api/v1/forms/${jobId}/publish`);
-    const job = {
-      name: 'Abebe Kebede',
-      phone: '0911234567',
-      jobReference: 'VA-12',
-      identityRoute: 'no_document',
-      cvFile: { name: 'cv.pdf', size: 2048, type: 'application/pdf' },
-    };
-
-    const sent = await submit({ version: 1, answers: job }, { id: jobId });
-    expect(sent.status).toBe(201);
-
-    const withContents = await submit(
-      { version: 1, answers: { ...job, cvFile: { ...job.cvFile, data: 'JVBERi0xLjQK' } } },
-      { id: jobId },
-    );
-    expect(withContents.status).toBe(422);
-    expect(withContents.body.issues[0].path).toBe('cvFile');
-
-    const exe = await submit(
-      { version: 1, answers: { ...job, cvFile: { name: 'cv.exe', size: 10, type: 'application/x-msdownload' } } },
-      { id: jobId },
-    );
-    expect(exe.status).toBe(422);
-    expect(exe.body.error).toBe('invalid_answers');
-
-    const list = await authed('get', `/api/v1/forms/${jobId}/submissions`);
-    expect(list.body.map((row) => row.answers.cvFile)).toEqual([job.cvFile]);
-  });
-
-  it('accepts nothing for an unpublished form, an unknown version, a wrong key or another website', async () => {
-    expect((await submit({ version: 1, answers })).body.error).toBe('form_not_published');
-
-    await authed('post', `/api/v1/forms/${formId}/publish`);
-    expect((await submit({ version: 7, answers })).status).toBe(404);
-    /* An unknown key has no websites, so the browser is refused before the key is even checked. */
-    expect((await submit({ version: 1, answers }, { key: 'pk_live_nope' })).status).toBe(403);
-    expect((await submit({ version: 1, answers }, { origin: 'https://elsewhere.example' })).status).toBe(403);
-  });
-
-  it('shows a partner only their own forms’ submissions', async () => {
-    await authed('post', `/api/v1/forms/${formId}/publish`);
-    await submit({ version: 1, answers });
+  it('keeps each organisation’s delivery settings to itself', async () => {
+    await authed('put', '/api/v1/organisation/delivery').send({ url: RECEIVER });
 
     const other = await request(app)
       .post('/api/v1/auth/signup')
       .send({ organisationName: 'Other NGO', email: 'other@ngo.example', password: 'another long password' });
-    const response = await request(app)
-      .get(`/api/v1/forms/${formId}/submissions`)
-      .set('authorization', `Bearer ${other.body.token}`);
+    const theirs = await request(app).get('/api/v1/organisation/delivery').set('authorization', `Bearer ${other.body.token}`);
 
-    expect(response.status).toBe(404);
+    expect(theirs.body).toEqual({ url: null, secret: null });
   });
 
-  it('limits how many forms one place can send', async () => {
-    const limited = createApp(app.locals.db, { submissionLimiter: createRateLimiter({ limit: 1 }) });
+  it('tells the form whether answers also go to a server, without giving the address', async () => {
     await authed('post', `/api/v1/forms/${formId}/publish`);
-    const send = () =>
-      request(limited)
-        .post(`/api/v1/public/forms/${formId}/submissions?key=${seeded.publicKey}`)
-        .set('origin', SITE)
-        .send({ version: 1, answers });
+    const read = () =>
+      request(app).get(`/api/v1/public/forms/${formId}?key=${seeded.publicKey}`).set('origin', SITE);
 
-    expect((await send()).status).toBe(201);
-    expect((await send()).status).toBe(429);
+    expect((await read()).body.delivery).toBe(false);
+    await authed('put', '/api/v1/organisation/delivery').send({ url: RECEIVER });
+    const form = (await read()).body;
+    expect(form.delivery).toBe(true);
+    expect(JSON.stringify(form)).not.toContain(RECEIVER);
+  });
+
+  it('says plainly when no address is set up, so nothing is sent anywhere', async () => {
+    await authed('post', `/api/v1/forms/${formId}/publish`);
+
+    const response = await askForDelivery({ version: 1 });
+    expect(response.status).toBe(409);
+    expect(response.body.error).toBe('delivery_not_configured');
+  });
+
+  it('gives the address and a signed, short-lived token that holds no answers', async () => {
+    const { body: settings } = await authed('put', '/api/v1/organisation/delivery').send({ url: RECEIVER });
+    await authed('post', `/api/v1/forms/${formId}/publish`);
+
+    const response = await askForDelivery({ version: 1 });
+    expect(response.status).toBe(200);
+    expect(response.headers['access-control-allow-origin']).toBe(SITE);
+    expect(response.headers['cache-control']).toBe('no-store');
+    expect(response.body.deliveryUrl).toBe(RECEIVER);
+
+    const claims = verifyDeliveryToken(settings.secret, response.body.token);
+    expect(claims).toMatchObject({ formId, version: 1, publicKey: seeded.publicKey });
+    expect(Object.keys(claims).sort()).toEqual(['exp', 'formId', 'iat', 'nonce', 'publicKey', 'version']);
+    expect(claims.exp - claims.iat).toBe(600);
+
+    /* Wrong secret, a changed payload, or after it expires: refused. */
+    expect(verifyDeliveryToken('dsec_someone_else', response.body.token)).toBeNull();
+    const [v, payload, sig] = response.body.token.split('.');
+    const forged = Buffer.from(JSON.stringify({ ...claims, version: 2 })).toString('base64url');
+    expect(verifyDeliveryToken(settings.secret, `${v}.${forged}.${sig}`)).toBeNull();
+    expect(verifyDeliveryToken(settings.secret, `${v}.${payload}.${sig}`, (claims.exp + 1) * 1000)).toBeNull();
+  });
+
+  it('never delivers a sign-in form, and refuses an unpublished form, an unknown version, a wrong key or another website', async () => {
+    await authed('put', '/api/v1/organisation/delivery').send({ url: RECEIVER });
+    expect((await askForDelivery({ version: 1 })).body.error).toBe('form_not_published');
+
+    const accountId = seeded.formIds.account;
+    await authed('post', `/api/v1/forms/${accountId}/publish`);
+    const account = await askForDelivery({ version: 1 }, { id: accountId });
+    expect(account.status).toBe(422);
+    expect(account.body.error).toBe('not_delivered');
+
+    await authed('post', `/api/v1/forms/${formId}/publish`);
+    expect((await askForDelivery({ version: 7 })).status).toBe(404);
+    expect((await askForDelivery({ version: 1 }, { key: 'pk_live_nope' })).status).toBe(403);
+    expect((await askForDelivery({ version: 1 }, { origin: 'https://elsewhere.example' })).status).toBe(403);
+    expect((await askForDelivery({ version: 1, answers: { name: 'Hana' } })).status).toBe(422);
+  });
+
+  it('no longer accepts or lists learners’ answers', async () => {
+    await authed('post', `/api/v1/forms/${formId}/publish`);
+
+    const store = await request(app)
+      .post(`/api/v1/public/forms/${formId}/submissions?key=${seeded.publicKey}`)
+      .set('origin', SITE)
+      .send({ version: 1, answers: { name: 'Hana Tesfaye' } });
+    expect(store.status).toBe(404);
+    expect((await authed('get', `/api/v1/forms/${formId}/submissions`)).status).toBe(404);
+  });
+
+  it('limits how many tokens one place can ask for', async () => {
+    await authed('put', '/api/v1/organisation/delivery').send({ url: RECEIVER });
+    await authed('post', `/api/v1/forms/${formId}/publish`);
+    const limited = createApp(app.locals.db, { deliveryLimiter: createRateLimiter({ limit: 1 }) });
+
+    expect((await askForDelivery({ version: 1 }, { server: limited })).status).toBe(200);
+    expect((await askForDelivery({ version: 1 }, { server: limited })).status).toBe(429);
   });
 });

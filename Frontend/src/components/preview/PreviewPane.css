@@ -32,8 +32,21 @@
   width: 100%;
 }
 
+/* Full view: a larger screen, so the form is seen at the size a learner
+   on a laptop meets it. */
+.preview-pane--full {
+  margin-block-start: 0;
+}
+
+.preview-pane--full .preview-pane__frame {
+  max-width: 46rem;
+  padding: var(--space-xl) var(--space-2xl);
+  box-shadow: var(--shadow-card);
+}
+
 @media (max-width: 40rem) {
-  .preview-pane__frame {
+  .preview-pane__frame,
+  .preview-pane--full .preview-pane__frame {
     padding: var(--space-md);
   }
 }

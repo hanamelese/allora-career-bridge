@@ -8,7 +8,23 @@
       name="description"
       content="Configure accessible onboarding and career forms, preview the learner experience, and publish them to your website."
     />
-    <title>Partner Dashboard · Accessible Onboarding</title>
+    <title>Allora Accessibility Bridge · Accessible Onboarding</title>
+    <!-- The dashboard's display settings (text size, contrast, motion,
+         language), applied before the first paint so the page never flashes
+         at the wrong size. Keep in step with src/display/displaySettings.js. -->
+    <script>
+      (function () {
+        try {
+          var s = JSON.parse(localStorage.getItem('bridge-display') || '{}') || {};
+          var root = document.documentElement;
+          if ([110, 125, 140, 150].indexOf(s.textScale) !== -1) root.style.fontSize = s.textScale + '%';
+          root.setAttribute('data-contrast', s.contrast === 'high' ? 'high' : 'standard');
+          var reduce = s.motion === 'reduce' || (s.motion !== 'full' && matchMedia('(prefers-reduced-motion: reduce)').matches);
+          root.setAttribute('data-motion', reduce ? 'reduce' : 'full');
+          if (s.language === 'am') root.lang = 'am';
+        } catch (e) {}
+      })();
+    </script>
   </head>
   <body>
     <div id="root"></div>

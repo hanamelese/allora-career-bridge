@@ -187,3 +187,35 @@
   --color-error: var(--danger);
   --color-error-bg: var(--danger-surface);
 }
+
+/* ---------- High contrast (the dashboard's Contrast control) ----------
+   Black text, dark borders and solid surfaces: every pairing reaches at
+   least 7:1 for text and 4.5:1 for edges. Set by data-contrast on <html>. */
+:root[data-contrast='high'] {
+  --ink: #000000;
+  --ink-secondary: #111827;
+  --ink-muted: #1f2937;
+  --ink-accent: #003a35;
+  --border-subtle: #4b5563;
+  --border-default: #374151;
+  --border-strong: #111827;
+  --border-control: #000000;
+  --border-glass: #000000;
+  --surface-glass: #ffffff;
+  --surface-canvas: #ffffff;
+  --surface-sunken: #eef0f3;
+  --accent: #00463f;
+  --accent-surface: #d5efe9;
+  --highlight: #22359a;
+  --focus-ring-outer: #000000;
+  --shadow-glass: none;
+}
+
+:root[data-contrast='high'] a {
+  text-decoration-thickness: 2px;
+}
+
+:root[data-contrast='high'] :focus-visible {
+  outline-width: 3px;
+  box-shadow: 0 0 0 5px #000000;
+}

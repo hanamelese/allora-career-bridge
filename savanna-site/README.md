@@ -3,8 +3,8 @@
 Three Savanna learner pages, frozen from the **local dev app** into plain HTML + CSS so they can be
 opened offline and used as a reference for front-end and accessibility work.
 
-Open `index.html` (or any file in `pages/`) directly with `file://` — double-clicking works, no
-server needed.
+Open any file in `pages/` directly with `file://` — double-clicking works, no server needed. The
+sign-in page (`index.html`) and the embedded forms need the pages served over http (see below).
 
 ## What is here
 
@@ -19,7 +19,8 @@ server needed.
 
 ```
 savanna_static_pages/
-├── index.html                 landing page linking the three captures
+├── index.html                 the sign-in page (the site's root, /)
+├── guide/index.html           the demo guide (/guide/)
 ├── pages/*.html               the frozen pages (relative links into ../assets)
 ├── assets/
    ├── css/                   the application's own stylesheets, unminified — application_alx.css 
@@ -59,20 +60,29 @@ Everything else is inert.
 
 ## Accessible onboarding demo
 
-Two pages were added in the same portal layout, built from the self-paced homepage's header and sidebar:
+Pages added for the demo, each showing a form built and published in **Allora Accessibility Bridge** (the
+`allora-career-bridge` repository):
 
-| Page | What it shows |
-|------|---------------|
-| `pages/register.html` | **Learner Registration & Profile**, a form from the Accessible Onboarding System |
-| `pages/job-application.html` | **Job Application**, a form from the same system |
+| Address | Page | What it shows |
+|---------|------|---------------|
+| `/` | `index.html` | **Sign in / Create account**: ALX's published Sign up / Sign in form in a sign-in page styled after ALX's other sign-in pages. The form's own link switches to creating an account; `/#create-account` opens there. |
+| `/guide/` | `guide/index.html` | **The demo guide**: what the demo is, where to begin, and the steps through it |
+| `/pages/register.html` | `pages/register.html` | **Learner Registration & Profile**, in the portal layout |
+| `/pages/job-application.html` | `pages/job-application.html` | **Job Application**, in the portal layout |
 
-Each form is placed with the embed tag that system's Partner Dashboard generates (a `<script>` and an
-`<onboarding-form>` element), pasted unchanged into the page. Nothing of the form lives in this repository:
-the script, the questions and the answers all come from the Form Engine's API. Both pages also link from the
-sidebar of every page ("Get hired"), from a "Ready for work?" card on the self-paced homepage, and from
-`index.html`.
+Each form is placed with the embed tag the Bridge generates (a `<script>` and an `<onboarding-form>`
+element), pasted unchanged into the page. Nothing of the form lives in this repository: the script and the
+questions come from the Bridge's API, and sent answers are handed to the page as JSON (the demo pages show
+what they received; the Bridge keeps none). The two portal forms also link from the sidebar of every page ("Get hired")
+and from a "Ready for work?" card on the self-paced homepage.
 
-Also added: `assets/css/onboarding-demo.css` (spacing around the form) and `assets/js/onboarding-demo.js`
+**Sign in and sign up are a demo.** This static site has no accounts. The form hands what was typed to the
+page; the page (`assets/js/login.js`) removes the password at once, sends and keeps nothing, and opens the
+guide. The sign-in cover photo is ALX's own, loaded from ehub.alxafrica.com; without a connection the panel
+shows its gradient.
+
+Also added: `assets/css/login.css` and `assets/js/login.js` (the sign-in page), `assets/css/guide.css` (the
+guide), `assets/css/onboarding-demo.css` (spacing around the portal forms) and `assets/js/onboarding-demo.js`
 (a message if the form's script cannot load, and the page's own "What next?" links once the form is sent).
 
 ### Running it
@@ -84,14 +94,17 @@ everything else, but the form is refused there.
 ```bash
 cd Savanna-static-pages
 python3 -m http.server 8080 --bind 127.0.0.1
-# open http://localhost:8080/
+# open http://localhost:8080/          (the sign-in page; the guide is /guide/)
 ```
+
+`/guide/` is a folder with an `index.html`, so it works on this server and on any static host without
+rewrite rules.
 
 The full walk-through, with the Form Engine's commands, is in the `allora-career-bridge` README under
 "ALX Savanna demo".
 
 ### Updating a form
 
-Change the form in the Partner Dashboard, publish it, open **Embed tag**, **Copy the tag**, and replace the
+Change the form in Allora Accessibility Bridge, publish it, open **Embed tag**, **Copy the tag**, and replace the
 tag in the page (between the comment that says so and the "could not be loaded" message). Until then the
 page keeps showing the version it names in `form-version`.

@@ -26,7 +26,11 @@ export function useFormEngine(config, settings = {}, { onSubmit, progressKey = n
   /* What this tab remembered from before a reload, read once. */
   const [restored, setRestored] = useState(() => loadProgress(progressKey, config));
   const [canRemember] = useState(() => Boolean(progressKey) && canSave());
-  const [hasSaved, setHasSaved] = useState(false);
+  /* True from the start when answers came back from before a reload, so
+     the quiet "saved in this tab" note tells a returning learner at once. */
+  const [hasSaved, setHasSaved] = useState(
+    () => Boolean(restored) && Object.keys(restored.answers).length > 0,
+  );
   /* Bumped by "Start over", which builds a fresh engine. */
   const [generation, restart] = useReducer((count) => count + 1, 0);
 

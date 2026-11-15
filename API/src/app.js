@@ -20,7 +20,7 @@ import { organisationRoutes } from './routes/organisation.js';
  * in-memory one, and routes are versioned under /api/v1 so a later release
  * can add /v2 without breaking a partner pinned to this one.
  */
-export function createApp(db, { sms = null, rateLimiter, submissionLimiter, signupLimiter } = {}) {
+export function createApp(db, { sms = null, rateLimiter, deliveryLimiter, signupLimiter } = {}) {
   const app = express();
 
   app.disable('x-powered-by');
@@ -75,7 +75,7 @@ export function createApp(db, { sms = null, rateLimiter, submissionLimiter, sign
       throw new ApiError(
         403,
         'origin_not_allowed',
-        `${origin} is not on this organisation’s list of websites allowed to show its forms. Add it in the Partner Dashboard under Organisation → Websites.`,
+        `${origin} is not on this organisation’s list of websites allowed to show its forms. Add it in Allora Accessibility Bridge under Your organisation → Websites.`,
       );
     }
 
@@ -133,7 +133,7 @@ export function createApp(db, { sms = null, rateLimiter, submissionLimiter, sign
   app.use('/api/v1/auth', authRoutes(db, signupLimiter ? { signupLimiter } : {}));
   app.use('/api/v1/forms', requireAuth, formRoutes(db, { sms }));
   app.use('/api/v1/organisation', requireAuth, organisationRoutes(db));
-  app.use('/api/v1/public', publicFormRoutes(db, { sms, rateLimiter, submissionLimiter }));
+  app.use('/api/v1/public', publicFormRoutes(db, { sms, rateLimiter, deliveryLimiter }));
 
   app.use(notFound);
   app.use(errorHandler);

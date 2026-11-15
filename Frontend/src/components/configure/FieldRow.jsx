@@ -6,6 +6,7 @@ import { TextInput } from '../ui/TextInput.jsx';
 import { FieldOptionsEditor } from './FieldOptionsEditor.jsx';
 import { UploadRulesEditor } from './UploadRulesEditor.jsx';
 import { describeUploadRules } from '../../fieldDisplay.js';
+import { useLanguage, useT } from '../../i18n/index.js';
 import './FieldRow.css';
 
 /**
@@ -44,6 +45,8 @@ function patchOverride(current, language, value, catalogText) {
 }
 
 export function FieldRow({ fieldConfig, field, lockReason, error, onUpdate }) {
+  const t = useT();
+  const language = useLanguage();
   const idPrefix = `field-${fieldConfig.key}`;
   const catalogLabel = field.definition?.label;
   const catalogHelp = field.definition?.helpText;
@@ -69,12 +72,12 @@ export function FieldRow({ fieldConfig, field, lockReason, error, onUpdate }) {
         <div className="field-row__badges">
           {field.isPrivate ? (
             <Badge tone="private" icon={EyeOff}>
-              Private
+              {t('configure.field.private')}
             </Badge>
           ) : null}
           {fieldConfig.locked ? (
             <Badge tone="locked" icon={Lock}>
-              Always on
+              {t('configure.field.alwaysOn')}
             </Badge>
           ) : null}
         </div>
@@ -83,7 +86,7 @@ export function FieldRow({ fieldConfig, field, lockReason, error, onUpdate }) {
       <div className="field-row__controls">
         <Switch
           id={`${idPrefix}-enabled`}
-          label="Ask this question"
+          label={t('configure.field.ask')}
           checked={fieldConfig.enabled}
           disabled={fieldConfig.locked}
           lockedReason={fieldConfig.locked ? lockReason : null}
@@ -94,7 +97,7 @@ export function FieldRow({ fieldConfig, field, lockReason, error, onUpdate }) {
 
         <Checkbox
           id={`${idPrefix}-required`}
-          label="An answer is required"
+          label={t('configure.field.required')}
           checked={fieldConfig.required}
           disabled={!fieldConfig.enabled}
           onChange={(checked) => onUpdate({ required: checked })}
@@ -105,7 +108,7 @@ export function FieldRow({ fieldConfig, field, lockReason, error, onUpdate }) {
 
       {/* What applicants will be allowed to upload, always in view. */}
       {field.type === 'file' && fieldConfig.enabled ? (
-        <p className="field-row__upload">{describeUploadRules(fieldConfig.upload ?? field.definition?.upload)}</p>
+        <p className="field-row__upload">{describeUploadRules(fieldConfig.upload ?? field.definition?.upload, language)}</p>
       ) : null}
 
       {error ? (
@@ -117,30 +120,30 @@ export function FieldRow({ fieldConfig, field, lockReason, error, onUpdate }) {
       {canEditWording ? (
         <details className="field-row__details">
           <summary className="field-row__summary">
-            {field.type === 'file' ? 'Wording, upload restrictions and privacy' : 'Wording, privacy and voice'}
+            {field.type === 'file' ? t('configure.field.detailsFile') : t('configure.field.detailsVoice')}
           </summary>
 
           <div className="field-row__panel">
             <fieldset className="field-row__group">
-              <legend className="field-row__legend">Question wording</legend>
+              <legend className="field-row__legend">{t('configure.field.wording')}</legend>
               <div className="field-row__pair">
                 <TextInput
                   id={`${idPrefix}-label-en`}
-                  label="English"
+                  label={t('configure.field.english')}
                   value={fieldConfig.label?.en ?? ''}
                   placeholder={catalogLabel?.en}
-                  help="Leave blank to use the standard wording."
+                  help={t('configure.field.labelEnHelp')}
                   onChange={(value) =>
                     onUpdate({ label: patchOverride(fieldConfig.label, 'en', value, catalogLabel) })
                   }
                 />
                 <TextInput
                   id={`${idPrefix}-label-am`}
-                  label="Amharic"
+                  label={t('configure.field.amharic')}
                   lang="am"
                   value={fieldConfig.label?.am ?? ''}
                   placeholder={catalogLabel?.am}
-                  help="Leave blank to use the reviewed Amharic translation."
+                  help={t('configure.field.labelAmHelp')}
                   onChange={(value) =>
                     onUpdate({ label: patchOverride(fieldConfig.label, 'am', value, catalogLabel) })
                   }
@@ -149,14 +152,14 @@ export function FieldRow({ fieldConfig, field, lockReason, error, onUpdate }) {
             </fieldset>
 
             <fieldset className="field-row__group">
-              <legend className="field-row__legend">Help text</legend>
+              <legend className="field-row__legend">{t('configure.field.helpText')}</legend>
               <div className="field-row__pair">
                 <TextInput
                   id={`${idPrefix}-help-en`}
-                  label="English"
+                  label={t('configure.field.english')}
                   multiline
                   value={fieldConfig.helpText?.en ?? ''}
-                  placeholder={catalogHelp?.en ?? 'Optional guidance shown under the question'}
+                  placeholder={catalogHelp?.en ?? t('configure.field.helpPlaceholder')}
                   onChange={(value) =>
                     onUpdate({
                       helpText: patchOverride(fieldConfig.helpText, 'en', value, catalogHelp),
@@ -165,11 +168,11 @@ export function FieldRow({ fieldConfig, field, lockReason, error, onUpdate }) {
                 />
                 <TextInput
                   id={`${idPrefix}-help-am`}
-                  label="Amharic"
+                  label={t('configure.field.amharic')}
                   lang="am"
                   multiline
                   value={fieldConfig.helpText?.am ?? ''}
-                  placeholder={catalogHelp?.am ?? 'Falls back to English'}
+                  placeholder={catalogHelp?.am ?? t('configure.field.fallsBackToEnglish')}
                   onChange={(value) =>
                     onUpdate({
                       helpText: patchOverride(fieldConfig.helpText, 'am', value, catalogHelp),
@@ -181,7 +184,7 @@ export function FieldRow({ fieldConfig, field, lockReason, error, onUpdate }) {
 
             {field.type === 'file' ? (
               <fieldset className="field-row__group">
-                <legend className="field-row__legend">Upload restrictions</legend>
+                <legend className="field-row__legend">{t('configure.field.uploadRestrictions')}</legend>
                 <UploadRulesEditor
                   idPrefix={idPrefix}
                   settings={fieldConfig.upload ?? field.definition?.upload}
@@ -192,7 +195,7 @@ export function FieldRow({ fieldConfig, field, lockReason, error, onUpdate }) {
 
             {field.optionsEditable ? (
               <fieldset className="field-row__group">
-                <legend className="field-row__legend">Answer options</legend>
+                <legend className="field-row__legend">{t('configure.field.answerOptions')}</legend>
                 <FieldOptionsEditor
                   idPrefix={idPrefix}
                   options={field.options}
@@ -202,18 +205,17 @@ export function FieldRow({ fieldConfig, field, lockReason, error, onUpdate }) {
             ) : null}
 
             <fieldset className="field-row__group">
-              <legend className="field-row__legend">Privacy and voice</legend>
+              <legend className="field-row__legend">{t('configure.field.privacyAndVoice')}</legend>
 
               {field.isPrivateByCatalog ? (
                 <p className="field-row__fixed">
-                  Answers to this question are always private. They are never included in the
-                  answers shared with your organisation or with an employer.
+                  {t('configure.field.alwaysPrivate')}
                 </p>
               ) : (
                 <Checkbox
                   id={`${idPrefix}-private`}
-                  label="Keep answers to this question private"
-                  description="Private answers are left out of the data shared with your organisation and with employers."
+                  label={t('configure.field.keepPrivate')}
+                  description={t('configure.field.keepPrivateDescription')}
                   checked={fieldConfig.visibility === 'private'}
                   onChange={(checked) =>
                     onUpdate({ visibility: checked ? 'private' : 'public' })
@@ -223,11 +225,11 @@ export function FieldRow({ fieldConfig, field, lockReason, error, onUpdate }) {
 
               {field.supportsVoice ? (
                 <p className="field-row__fixed">
-                  Learners can always answer this question by speaking, as well as by typing.
+                  {t('configure.field.voiceAlways')}
                 </p>
               ) : (
                 <p className="field-row__fixed">
-                  This question cannot be answered by voice, so voice input is not offered for it.
+                  {t('configure.field.voiceNever')}
                 </p>
               )}
             </fieldset>

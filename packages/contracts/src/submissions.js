@@ -1,16 +1,16 @@
 // packages/contracts/src/submissions.js
 //
-// What the system keeps when a learner sends an embedded form.
+// What an embedded form delivers to the organisation's own server (see
+// delivery.js). This service keeps none of it.
 //
-// The answers an organisation can act on are stored against the published
-// version the learner answered. Left out, in the browser before anything is
-// sent, and refused again by the server if they arrive anyway:
+// Left out, in the browser before anything is sent:
 //   - private answers: support needs, accommodations, the referral choice,
 //     and the identity document file (see `private` in the field catalog
 //     and `getPartnerSafeAnswers`);
 //   - ID numbers (`documentId`);
-//   - the contents of any file. A CV is kept as its name, size and type;
-//     the file itself is handed to the website the form is on.
+//   - the contents of any file. A CV is described by its name, size and
+//     type; the file itself is handed to the website the form is on, in
+//     the onboarding-submit event, along with the private answers.
 
 import { z } from 'zod';
 import { fieldCatalog } from './fieldCatalog.js';

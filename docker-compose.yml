@@ -1,0 +1,46 @@
+# Allora Accessibility Bridge in containers: the API and the dashboard.
+#
+#   cp .env.docker.example .env      # then set JWT_SECRET
+#   docker compose up --build -d
+#
+# Dashboard: http://localhost:${WEB_PORT:-8090}   API: http://localhost:${API_PORT:-3001}
+# The SQLite database is kept in the named volume `bridge-data`.
+
+services:
+  api:
+    build:
+      context: .
+      target: api
+    environment:
+      # Required, never defaulted: the API refuses to start without it.
+      JWT_SECRET: ${JWT_SECRET:?Set JWT_SECRET in .env (see .env.docker.example)}
+      TOKEN_LIFETIME: ${TOKEN_LIFETIME:-2h}
+      # The dashboard's address, which may call the API from a browser.
+      CORS_ORIGINS: ${CORS_ORIGINS:-http://localhost:8090}
+      PUBLIC_APP_URL: ${PUBLIC_APP_URL:-http://localhost:8090}
+      REFERRAL_LIFETIME_DAYS: ${REFERRAL_LIFETIME_DAYS:-14}
+      DATABASE_URL: /data/onboarding.db
+    volumes:
+      - bridge-data:/data
+    # Published too, because partners' websites load the widget and the
+    # public form API from here directly.
+    ports:
+      - "${API_PORT:-3001}:3001"
+    restart: unless-stopped
+
+  web:
+    build:
+      context: .
+      target: web
+      args:
+        # Where embed tags made in this dashboard point.
+        VITE_PUBLIC_API_ORIGIN: ${PUBLIC_API_ORIGIN:-http://localhost:3001}
+    ports:
+      - "${WEB_PORT:-8090}:80"
+    depends_on:
+      api:
+        condition: service_healthy
+    restart: unless-stopped
+
+volumes:
+  bridge-data:

@@ -1,0 +1,251 @@
+/* The sign-in page (index.html): a brand panel beside a clean sign-in column, as on ALX's other
+   sign-in pages. The form itself is the embedded <onboarding-form>, which draws inside its own
+   shadow root; nothing here reaches into it. */
+
+:root {
+  --login-ink: #101828;
+  --login-ink-secondary: #475467;
+  --login-navy: #1a2b52;
+  --login-border: #d0d5dd;
+  --login-surface-soft: #f9fafb;
+  --login-red: #db3e3e;
+}
+
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+}
+
+html,
+body {
+  margin: 0;
+}
+
+body.login-page {
+  min-height: 100vh;
+  background: #ffffff;
+  color: var(--login-ink);
+  font-family: 'Poppins', system-ui, -apple-system, 'Segoe UI', Roboto, 'Noto Sans Ethiopic', sans-serif;
+  font-size: 1rem;
+  line-height: 1.5;
+}
+
+a {
+  color: var(--login-navy);
+  font-weight: 600;
+  text-underline-offset: 0.2em;
+}
+
+a:hover {
+  text-decoration-thickness: 2px;
+}
+
+:focus-visible {
+  outline: 3px solid var(--login-navy);
+  outline-offset: 2px;
+  border-radius: 4px;
+}
+
+/* Hidden until a keyboard user reaches it. */
+.login-skip {
+  position: absolute;
+  inset-inline-start: 1rem;
+  inset-block-start: -10rem;
+  z-index: 10;
+  padding: 0.75rem 1rem;
+  border-radius: 0.5rem;
+  background: var(--login-navy);
+  color: #ffffff;
+}
+
+.login-skip:focus {
+  inset-block-start: 1rem;
+}
+
+/* ---- Layout ---- */
+.login {
+  display: grid;
+  min-height: 100vh;
+  min-height: 100dvh;
+}
+
+@media (min-width: 62rem) {
+  .login {
+    grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+  }
+}
+
+/* ---- Brand panel ---- */
+.login__panel {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  justify-content: flex-end;
+  gap: 0.75rem;
+  padding: 3rem;
+  overflow: hidden;
+  color: #ffffff;
+  background-color: #22306b;
+  /* ALX's sign-in cover photo under a deep indigo tint, which keeps the white text readable. If the
+     photo cannot load, the gradient alone shows. */
+  background-image:
+    linear-gradient(160deg, rgb(16 29 64 / 0.78) 0%, rgb(34 48 107 / 0.62) 55%, rgb(59 42 120 / 0.8) 100%),
+    url('https://ehub.alxafrica.com/static/login-cover.d35d10eb2b65fff7.webp'),
+    linear-gradient(160deg, #101d40 0%, #22306b 55%, #3b2a78 100%);
+  background-position: center;
+  background-size: cover;
+}
+
+.login__panel-logo {
+  position: relative;
+  width: 7rem;
+  height: auto;
+  margin-block-end: auto;
+  /* The navy wordmark, shown in white on the dark panel. */
+  filter: brightness(0) invert(1);
+}
+
+.login__panel-title,
+.login__panel-text {
+  position: relative;
+  margin: 0;
+}
+
+.login__panel-title {
+  font-size: 2.75rem;
+  font-weight: 700;
+  line-height: 1.1;
+  letter-spacing: -0.02em;
+}
+
+.login__panel-text {
+  max-width: 26rem;
+  font-size: 1.125rem;
+  color: rgb(255 255 255 / 0.9);
+}
+
+/* Phones and tablets: the panel is a slim band at the top. */
+@media (max-width: 61.99rem) {
+  .login__panel {
+    flex-direction: row;
+    align-items: center;
+    gap: 1rem;
+    padding: 1rem 1.25rem;
+  }
+
+  .login__panel-logo {
+    width: 3.5rem;
+    margin-block-end: 0;
+  }
+
+  .login__panel-title {
+    font-size: 1.25rem;
+  }
+
+  .login__panel-text {
+    display: none;
+  }
+}
+
+/* ---- Sign-in column ---- */
+.login__main {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 3rem 1.5rem;
+}
+
+.login__column {
+  width: min(100%, 28rem);
+}
+
+.login__title {
+  margin: 0;
+  font-size: 2rem;
+  font-weight: 700;
+  line-height: 1.2;
+  letter-spacing: -0.01em;
+}
+
+.login__lead {
+  margin: 0.375rem 0 0;
+  color: var(--login-ink-secondary);
+}
+
+.login__form {
+  margin-block-start: 1.5rem;
+  /* Long words (an email address) wrap rather than widen the page. */
+  min-width: 0;
+  overflow-wrap: anywhere;
+}
+
+.login__form:focus,
+.login__title:focus {
+  outline: none;
+}
+
+.login__visually-hidden {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  overflow: hidden;
+  clip-path: inset(50%);
+  white-space: nowrap;
+}
+
+.login__status:empty {
+  display: none;
+}
+
+.login__status {
+  margin: 0.75rem 0 0;
+  font-weight: 600;
+}
+
+.login__unavailable {
+  margin: 0;
+  padding: 1rem;
+  border: 2px solid var(--login-red);
+  border-radius: 0.5rem;
+  background: #fdf7f7;
+}
+
+.login__unavailable[hidden] {
+  display: none;
+}
+
+
+.login__demo {
+  margin-block-start: 1.5rem;
+  padding: 1rem 1.125rem;
+  border: 1px solid var(--login-border);
+  border-radius: 0.75rem;
+  background: var(--login-surface-soft);
+  color: #344054;
+  font-size: 0.875rem;
+}
+
+.login__demo p {
+  margin: 0;
+}
+
+@media (max-width: 30rem) {
+  .login__main {
+    padding: 2rem 1rem;
+  }
+
+  .login__title {
+    font-size: 1.625rem;
+  }
+}
+
+@media (forced-colors: active) {
+  .login__panel {
+    border-block-end: 1px solid CanvasText;
+  }
+
+  .login__panel-logo {
+    filter: none;
+  }
+}

@@ -2,24 +2,37 @@ import { Card } from '../components/ui/Card.jsx';
 import { SectionHeading } from '../components/ui/SectionHeading.jsx';
 import { ReferralPartnersPanel } from '../components/organisation/ReferralPartnersPanel.jsx';
 import { AllowedOriginsPanel } from '../components/organisation/AllowedOriginsPanel.jsx';
+import { DeliveryPanel } from '../components/organisation/DeliveryPanel.jsx';
 import { useAuth } from '../auth/authContext.js';
+import { useT } from '../i18n/index.js';
 
 /** Settings that belong to the organisation rather than to one form. */
 export function OrganisationPage() {
   const { partner } = useAuth();
+  const t = useT();
 
   return (
     <div className="stack-lg">
       <header>
-        <h1 className="form-workspace__title">Your organisation</h1>
+        <h1 className="form-workspace__title">{t('organisation.title')}</h1>
         <p className="form-workspace__purpose">{partner?.name}</p>
       </header>
+
+      <Card as="section" aria-labelledby="delivery-heading">
+        <SectionHeading
+          id="delivery-heading"
+          title={t('organisation.deliveryTitle')}
+          description={t('organisation.deliveryDescription')}
+        />
+
+        <DeliveryPanel />
+      </Card>
 
       <Card as="section" aria-labelledby="referral-partners-heading">
         <SectionHeading
           id="referral-partners-heading"
-          title="Referral partners"
-          description="Organisations that can help someone who has no identity document. On the learner and job application forms, a person who chooses “I have no document, refer me” can ask for a link to be sent to one or more of them by SMS. They see only the names."
+          title={t('organisation.partnersTitle')}
+          description={t('organisation.partnersDescription')}
         />
 
         <ReferralPartnersPanel />
@@ -28,8 +41,8 @@ export function OrganisationPage() {
       <Card as="section" aria-labelledby="websites-heading">
         <SectionHeading
           id="websites-heading"
-          title="Websites"
-          description="The websites allowed to show your embedded forms. A browser on any other site is refused, so your embed tag only works where you put it."
+          title={t('organisation.websitesTitle')}
+          description={t('organisation.websitesDescription')}
         />
 
         <AllowedOriginsPanel />

@@ -13,7 +13,10 @@ const COPY = {
     back: 'Back',
     private: 'Private',
     privateNote: 'Answers marked private are not shared with employers.',
-    supportSection: 'Support and accommodations (private)',
+    sections: {
+      support: 'Support and accommodations (private)',
+      accommodations: 'Workplace accessibility and accommodations',
+    },
   },
   am: {
     heading: 'መልሶችዎን ያረጋግጡ',
@@ -26,7 +29,10 @@ const COPY = {
     back: 'ተመለስ',
     private: 'የግል',
     privateNote: 'የግል ተብለው የተመለከቱ መልሶች ለአሠሪዎች አይጋሩም።',
-    supportSection: 'ድጋፍ እና ማመቻቻዎች (የግል)',
+    sections: {
+      support: 'ድጋፍ እና ማመቻቻዎች (የግል)',
+      accommodations: 'የሥራ ቦታ ተደራሽነት እና ማመቻቻዎች',
+    },
   },
 };
 
@@ -42,8 +48,9 @@ export function ReviewStep({ items, summary, language, onEdit, onSubmit, onBack,
   const copy = COPY[language] ?? COPY.en;
   const hasPrivateAnswers = items.some((item) => item.isPrivate);
   /* Support and accommodation answers are listed apart, as they were
-     asked apart. */
-  const supportItems = items.filter((item) => item.section === 'support');
+     asked apart: each section under its own heading, after the rest. */
+  const sectioned = Object.keys(copy.sections);
+  const inSection = (item) => sectioned.includes(item.section);
 
   function renderList(list) {
     if (list.length === 0) return null;
@@ -82,16 +89,21 @@ export function ReviewStep({ items, summary, language, onEdit, onSubmit, onBack,
 
       <p className="fe-question__help">{copy.intro}</p>
 
-      {renderList(items.filter((item) => item.section !== 'support'))}
+      {renderList(items.filter((item) => !inSection(item)))}
 
-      {supportItems.length > 0 ? (
-        <section className="fe-review__section" aria-labelledby="fe-review-support">
-          <h3 className="fe-review__section-heading" id="fe-review-support">
-            {copy.supportSection}
-          </h3>
-          {renderList(supportItems)}
-        </section>
-      ) : null}
+      {sectioned.map((name) => {
+        const sectionItems = items.filter((item) => item.section === name);
+        if (sectionItems.length === 0) return null;
+
+        return (
+          <section className="fe-review__section" aria-labelledby={`fe-review-${name}`} key={name}>
+            <h3 className="fe-review__section-heading" id={`fe-review-${name}`}>
+              {copy.sections[name]}
+            </h3>
+            {renderList(sectionItems)}
+          </section>
+        );
+      })}
 
       {hasPrivateAnswers ? <p className="fe-question__note">{copy.privateNote}</p> : null}
 

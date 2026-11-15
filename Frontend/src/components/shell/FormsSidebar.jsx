@@ -1,6 +1,7 @@
 import { NavLink } from 'react-router-dom';
 import { Building } from 'lucide-react';
 import { FORM_TYPES } from '../../formTypes.js';
+import { useT } from '../../i18n/index.js';
 import './FormsSidebar.css';
 
 /**
@@ -17,13 +18,15 @@ import './FormsSidebar.css';
  * strip of links across the top instead, so the workspace keeps its width.
  */
 export function FormsSidebar({ id }) {
+  const t = useT();
+
   return (
     <nav
       id={id}
       className="forms-sidebar"
-      aria-label="Dashboard"
+      aria-label={t('shell.sidebar.label')}
     >
-      <h2 className="forms-sidebar__heading">Organisation</h2>
+      <h2 className="forms-sidebar__heading">{t('shell.sidebar.organisationHeading')}</h2>
 
       <ul className="forms-sidebar__list forms-sidebar__list--section" role="list">
         <li>
@@ -37,14 +40,14 @@ export function FormsSidebar({ id }) {
           >
             <Building className="forms-sidebar__icon" aria-hidden="true" />
             <span className="forms-sidebar__text">
-              <span className="forms-sidebar__name">Your organisation</span>
-              <span className="forms-sidebar__summary">Referral partners and the websites that show your forms</span>
+              <span className="forms-sidebar__name">{t('shell.sidebar.yourOrganisation')}</span>
+              <span className="forms-sidebar__summary">{t('shell.sidebar.organisationSummary')}</span>
             </span>
           </NavLink>
         </li>
       </ul>
 
-      <h2 className="forms-sidebar__heading">Forms</h2>
+      <h2 className="forms-sidebar__heading">{t('shell.sidebar.formsHeading')}</h2>
 
       <ul className="forms-sidebar__list" role="list">
         {FORM_TYPES.map((formType) => {
@@ -62,8 +65,8 @@ export function FormsSidebar({ id }) {
                   >
                 <Icon className="forms-sidebar__icon" aria-hidden="true" />
                 <span className="forms-sidebar__text">
-                  <span className="forms-sidebar__name">{formType.name}</span>
-                  <span className="forms-sidebar__summary">{formType.summary}</span>
+                  <span className="forms-sidebar__name">{t(`formTypes.${formType.id}.name`)}</span>
+                  <span className="forms-sidebar__summary">{t(`formTypes.${formType.id}.summary`)}</span>
                 </span>
               </NavLink>
             </li>

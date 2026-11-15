@@ -13,6 +13,9 @@ import { ApiError } from './middleware/errors.js';
  * test endpoint, so both send exactly the same message the learner was
  * shown (`buildReferralMessage`, from the contracts package).
  *
+ * The learner's name and phone are put in the text message and nowhere
+ * else: the referral row keeps only who it went to and what happened.
+ *
  * Honesty rules:
  * - With no SMS provider configured, nothing is recorded and the request
  *   fails with `sms_not_configured`.
@@ -68,8 +71,10 @@ export async function sendReferrals(db, sms, { partnerId, partnerFormId, request
         partnerId,
         referralPartnerId: recipient.id,
         partnerFormId,
-        learnerName: request.learner.name,
-        learnerPhone: request.learner.phone || null,
+        /* The learner's name and phone go in the text message only; they
+           are not kept here. */
+        learnerName: null,
+        learnerPhone: null,
         language: request.language,
         tokenHash: hashSecretKey(token),
         status: 'pending',

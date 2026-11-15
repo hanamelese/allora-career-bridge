@@ -3,6 +3,7 @@ import { Check, CloudUpload, Save } from 'lucide-react';
 import { Badge } from '../ui/Badge.jsx';
 import { Button } from '../ui/Button.jsx';
 import { PublishDialog } from './PublishDialog.jsx';
+import { useLanguage, useT } from '../../i18n/index.js';
 import './WorkspaceActions.css';
 
 /**
@@ -12,16 +13,21 @@ import './WorkspaceActions.css';
  * stays across all three. It also carries the fact they most need: whether
  * what they are looking at has been saved.
  */
-function formatSavedAt(value) {
-  if (!value) return 'Not saved yet';
+function formatSavedAt(value, t, language) {
+  if (!value) return t('workspace.actions.notSavedYet');
 
-  return `Saved ${new Date(value).toLocaleString(undefined, {
-    dateStyle: 'medium',
-    timeStyle: 'short',
-  })}`;
+  return t(
+    'workspace.actions.savedAt',
+    new Date(value).toLocaleString(language === 'am' ? 'am-ET' : undefined, {
+      dateStyle: 'medium',
+      timeStyle: 'short',
+    }),
+  );
 }
 
 export function WorkspaceActions({ form, isDirty, isValid, actions }) {
+  const t = useT();
+  const language = useLanguage();
   const [isConfirming, setIsConfirming] = useState(false);
 
   async function confirmPublish() {
@@ -37,15 +43,17 @@ export function WorkspaceActions({ form, isDirty, isValid, actions }) {
       <div className="workspace-actions__row">
         <div className="workspace-actions__state">
           <Badge tone={form.status === 'published' ? 'published' : 'draft'}>
-            {form.status === 'published' ? `Published · version ${form.currentVersion}` : 'Draft'}
+            {form.status === 'published'
+              ? t('workspace.actions.publishedVersion', form.currentVersion)
+              : t('workspace.actions.draft')}
           </Badge>
 
           {isDirty ? (
-            <Badge tone="draft">Unsaved changes</Badge>
+            <Badge tone="draft">{t('workspace.actions.unsavedChanges')}</Badge>
           ) : (
             <span className="workspace-actions__saved">
               <Check className="workspace-actions__saved-icon" aria-hidden="true" />
-              {formatSavedAt(form.updatedAt)}
+              {formatSavedAt(form.updatedAt, t, language)}
             </span>
           )}
         </div>
@@ -57,7 +65,7 @@ export function WorkspaceActions({ form, isDirty, isValid, actions }) {
             disabled={!isDirty || !isValid || actions.isSaving}
             onClick={actions.save}
           >
-            {actions.isSaving ? 'Saving…' : 'Save draft'}
+            {actions.isSaving ? t('workspace.actions.saving') : t('workspace.actions.saveDraft')}
           </Button>
 
           <Button
@@ -66,7 +74,7 @@ export function WorkspaceActions({ form, isDirty, isValid, actions }) {
             disabled={!actions.canPublish}
             onClick={() => setIsConfirming(true)}
           >
-            Publish
+            {t('workspace.actions.publish')}
           </Button>
         </div>
       </div>
@@ -84,8 +92,7 @@ export function WorkspaceActions({ form, isDirty, isValid, actions }) {
 
       {!isValid ? (
         <p className="workspace-actions__blocked">
-          Some settings need attention before this form can be saved or published. The Configure
-          view explains what.
+          {t('workspace.actions.blocked')}
         </p>
       ) : null}
 

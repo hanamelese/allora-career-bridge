@@ -8,6 +8,7 @@ import { sendTestReferral } from '../../api/formsClient.js';
 import { listReferralPartners } from '../../api/organisationClient.js';
 import { useAsync } from '../../hooks/useAsync.js';
 import { useAuth } from '../../auth/authContext.js';
+import { useT } from '../../i18n/index.js';
 import './PreviewPane.css';
 
 /**
@@ -21,26 +22,33 @@ import './PreviewPane.css';
 
 /* What the embedded form would hand to the partner's page. Files are
    named, not opened: this system never uploads or keeps them. */
-function describeSubmission(data) {
+function describeSubmission(data, t) {
   const files = Object.entries(data)
     .filter(([, value]) => isFileLike(value))
     .map(([key, file]) => `${key}: ${file.name} (${formatFileSize(file.size)})`);
   const count = Object.keys(data).length;
 
   return [
-    `On your site, ${count} ${count === 1 ? 'answer goes' : 'answers go'} to your page in the onboarding-submit event.`,
-    files.length ? `Files passed with them: ${files.join('; ')}.` : null,
-    'Nothing was sent from this preview.',
+    t('workspace.preview.answersSent', count),
+    files.length ? t('workspace.preview.filesPassed', files.join('; ')) : null,
+    t('workspace.preview.nothingSent'),
   ]
     .filter(Boolean)
     .join(' ');
 }
 
-export function PreviewPane({ config, formId }) {
+/**
+ * `variant="full"` is the larger copy shown in the Full view popup: the same
+ * renderer and draft, with its own saved place, so starting it again never
+ * disturbs the preview on the page.
+ */
+export function PreviewPane({ config, formId, variant = 'inline' }) {
+  const t = useT();
   const [runId, setRunId] = useState(0);
+  const isFull = variant === 'full';
   /* The preview keeps its place across a reload too, as a learner's form
      does - under its own key, so it never mixes with a published form. */
-  const progressKey = `fe-progress:preview:${formId}`;
+  const progressKey = `fe-progress:${isFull ? 'preview-full' : 'preview'}:${formId}`;
   /* What a sign-in button or the sign-in form would have done on the
      partner's site; the preview reports it instead of leaving the page. */
   const [accountNote, setAccountNote] = useState('');
@@ -64,7 +72,7 @@ export function PreviewPane({ config, formId }) {
   );
 
   return (
-    <div className="preview-pane">
+    <div className={`preview-pane${isFull ? ' preview-pane--full' : ''}`}>
       <div className="preview-pane__controls">
         <Button
           variant="secondary"
@@ -78,21 +86,20 @@ export function PreviewPane({ config, formId }) {
             setRunId((current) => current + 1);
           }}
         >
-          Start again
+          {t('workspace.preview.startAgain')}
         </Button>
       </div>
 
       {asksForReferral ? (
         <p className="preview-pane__note">
           {partners.status === 'error'
-            ? 'Your referral partners could not be loaded, so the referral step shows none.'
-            : 'Send link in this preview really sends a text message to the referral partners you choose, marked as a test.'}
+            ? t('workspace.preview.partnersError')
+            : t('workspace.preview.partnersNote')}
         </p>
       ) : null}
 
       <p className="preview-pane__note">
-        Learners change contrast, text size, language and simple words from the Settings button at
-        the top of the form.
+        {t('workspace.preview.settingsNote')}
       </p>
 
       <p className="preview-pane__note" role="status">
@@ -109,17 +116,22 @@ export function PreviewPane({ config, formId }) {
           settings={{ language: config.defaultLanguage }}
           referral={referral}
           onSocialSignIn={(provider) =>
-            setAccountNote(`On your site, “${provider.name}” opens ${provider.url}. The preview stays here.`)
+            setAccountNote(t('workspace.preview.socialSignIn', provider.name, provider.url))
           }
           onSubmit={
             config.type === 'account'
               ? (data) =>
                   setAccountNote(
-                    `On your site, these details go to your own sign-in system: ${Object.keys(data)
-                      .map((key) => (key === 'password' ? 'password (hidden)' : `${key} “${data[key]}”`))
-                      .join(', ')}.`,
+                    t(
+                      'workspace.preview.accountSubmit',
+                      Object.keys(data)
+                        .map((key) =>
+                          key === 'password' ? t('workspace.preview.passwordHidden') : `${key} “${data[key]}”`,
+                        )
+                        .join(t('workspace.preview.listSeparator')),
+                    ),
                   )
-              : (data) => setAccountNote(describeSubmission(data))
+              : (data) => setAccountNote(describeSubmission(data, t))
           }
           renderIcon={renderIcon}
         />

@@ -2,6 +2,7 @@ import { useState } from 'react';
 import { referralPartnerSchema } from '@onboarding/contracts';
 import { Button } from '../ui/Button.jsx';
 import { TextInput } from '../ui/TextInput.jsx';
+import { useT } from '../../i18n/index.js';
 
 const EMPTY = { name: '', email: '', phone: '' };
 
@@ -13,6 +14,7 @@ const EMPTY = { name: '', email: '', phone: '' };
  * the phone number is where the referral SMS goes.
  */
 export function ReferralPartnerForm({ initial = EMPTY, idPrefix, submitLabel, onSubmit, onCancel }) {
+  const t = useT();
   const [values, setValues] = useState(initial);
   const [errors, setErrors] = useState({});
   const [formError, setFormError] = useState('');
@@ -57,12 +59,12 @@ export function ReferralPartnerForm({ initial = EMPTY, idPrefix, submitLabel, on
 
   return (
     <form className="referral-form" onSubmit={handleSubmit} noValidate>
-      <p className="referral-form__note">All three details are required.</p>
+      <p className="referral-form__note">{t('organisation.partnerForm.allRequired')}</p>
 
       <div className="referral-form__fields">
         <TextInput
           id={`${idPrefix}-name`}
-          label="Organisation name *"
+          label={t('organisation.partnerForm.name')}
           value={values.name}
           onChange={(value) => set('name', value)}
           error={errors.name}
@@ -71,7 +73,7 @@ export function ReferralPartnerForm({ initial = EMPTY, idPrefix, submitLabel, on
         />
         <TextInput
           id={`${idPrefix}-email`}
-          label="Email address *"
+          label={t('organisation.partnerForm.email')}
           type="email"
           value={values.email}
           onChange={(value) => set('email', value)}
@@ -81,12 +83,12 @@ export function ReferralPartnerForm({ initial = EMPTY, idPrefix, submitLabel, on
         />
         <TextInput
           id={`${idPrefix}-phone`}
-          label="Mobile number for SMS *"
+          label={t('organisation.partnerForm.phone')}
           type="tel"
           value={values.phone}
           onChange={(value) => set('phone', value)}
           error={errors.phone}
-          help="Start with the country code, for example +251 911 234 567. Referral links are sent here by SMS."
+          help={t('organisation.partnerForm.phoneHelp')}
           required
           autoComplete="tel"
         />
@@ -100,11 +102,11 @@ export function ReferralPartnerForm({ initial = EMPTY, idPrefix, submitLabel, on
 
       <div className="referral-form__actions">
         <Button type="submit" variant="primary" disabled={isSaving}>
-          {isSaving ? 'Saving…' : submitLabel}
+          {isSaving ? t('organisation.partnerForm.saving') : submitLabel}
         </Button>
         {onCancel ? (
           <Button variant="secondary" onClick={onCancel} disabled={isSaving}>
-            Cancel
+            {t('organisation.partnerForm.cancel')}
           </Button>
         ) : null}
       </div>

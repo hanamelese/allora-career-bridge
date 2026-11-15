@@ -45,3 +45,23 @@ export function addAllowedOrigin(origin) {
 export function removeAllowedOrigin(id) {
   return apiFetch(`${ORIGINS}/${encodeURIComponent(id)}`, { method: 'DELETE' });
 }
+
+/*
+ *   getDelivery()              GET  /api/v1/organisation/delivery
+ *   saveDelivery(url | null)   PUT  /api/v1/organisation/delivery
+ *   renewDeliverySecret()      POST /api/v1/organisation/delivery/secret
+ * Each resolves to { url, secret }.
+ */
+const DELIVERY = '/organisation/delivery';
+
+export function getDelivery() {
+  return apiFetch(DELIVERY);
+}
+
+export function saveDelivery(url) {
+  return apiFetch(DELIVERY, { method: 'PUT', body: { url } });
+}
+
+export function renewDeliverySecret() {
+  return apiFetch(`${DELIVERY}/secret`, { method: 'POST' });
+}

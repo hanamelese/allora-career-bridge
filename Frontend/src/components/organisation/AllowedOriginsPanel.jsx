@@ -8,6 +8,7 @@ import { ErrorState } from '../ui/ErrorState.jsx';
 import { LiveRegion } from '../ui/LiveRegion.jsx';
 import { Skeleton } from '../ui/Skeleton.jsx';
 import { TextInput } from '../ui/TextInput.jsx';
+import { useT } from '../../i18n/index.js';
 import './AllowedOriginsPanel.css';
 
 /**
@@ -17,6 +18,7 @@ import './AllowedOriginsPanel.css';
  * embed tag only works where the organisation says it may.
  */
 export function AllowedOriginsPanel() {
+  const t = useT();
   const { status, data, error, reload } = useAsync(listAllowedOrigins, []);
   const [rows, setRows] = useState(null);
   const [value, setValue] = useState('');
@@ -32,7 +34,7 @@ export function AllowedOriginsPanel() {
     const origin = normalizeOrigin(value);
 
     if (!origin) {
-      setFieldError('Enter the address your form will be on, starting with https://, like https://www.example.org.');
+      setFieldError(t('organisation.origins.invalid'));
       inputRef.current?.focus();
       return;
     }
@@ -44,7 +46,7 @@ export function AllowedOriginsPanel() {
       setRows(next);
       setValue('');
       setFieldError('');
-      setAnnouncement(`${created.origin} can now show your forms.`);
+      setAnnouncement(t('organisation.origins.added', created.origin));
     } catch (failure) {
       setFieldError(failure.issues?.[0]?.message ?? failure.message);
       inputRef.current?.focus();
@@ -57,7 +59,7 @@ export function AllowedOriginsPanel() {
     try {
       await removeAllowedOrigin(row.id);
       setRows(list.filter((other) => other.id !== row.id));
-      setAnnouncement(`${row.origin} was removed. Forms embedded there will stop loading.`);
+      setAnnouncement(t('organisation.origins.removed', row.origin));
       requestAnimationFrame(() => inputRef.current?.focus());
     } catch (failure) {
       setAnnouncement(failure.message);
@@ -78,15 +80,14 @@ export function AllowedOriginsPanel() {
               <Globe className="allowed-origins__icon" aria-hidden="true" />
               <span className="allowed-origins__origin">{row.origin}</span>
               <Button variant="ghost" size="sm" icon={Trash2} onClick={() => remove(row)}>
-                Remove<span className="visually-hidden"> {row.origin}</span>
+                {t('organisation.origins.remove')}<span className="visually-hidden"> {row.origin}</span>
               </Button>
             </li>
           ))}
         </ul>
       ) : status === 'success' || rows ? (
         <p className="allowed-origins__empty">
-          No websites yet. Until you add one, your embedded forms only load on this dashboard’s own
-          address.
+          {t('organisation.origins.empty')}
         </p>
       ) : null}
 
@@ -94,7 +95,7 @@ export function AllowedOriginsPanel() {
         <TextInput
           id="allowed-origin"
           ref={inputRef}
-          label="Website address"
+          label={t('organisation.origins.label')}
           type="url"
           inputMode="url"
           autoComplete="url"
@@ -105,10 +106,10 @@ export function AllowedOriginsPanel() {
             if (fieldError) setFieldError('');
           }}
           error={fieldError}
-          help="Only the start of the address counts (https://www.example.org), so every page on that site can show your forms. Use https; http is only accepted for localhost, for testing."
+          help={t('organisation.origins.help')}
         />
         <Button type="submit" variant="secondary" icon={Plus} disabled={isSaving}>
-          Add website
+          {t('organisation.origins.add')}
         </Button>
       </form>
     </div>

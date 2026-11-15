@@ -1,4 +1,5 @@
 import { Select } from '../ui/Select.jsx';
+import { useT } from '../../i18n/index.js';
 import './LanguageSettings.css';
 
 /**
@@ -9,18 +10,20 @@ import './LanguageSettings.css';
  * partner can never publish a form without them.
  */
 export function LanguageSettings({ defaultLanguage, onDefaultLanguageChange }) {
+  const t = useT();
+
   return (
     <div className="language-settings">
       <Select
         id="default-language"
-        label="Language the form opens in"
+        label={t('configure.language.label')}
         value={defaultLanguage}
         onChange={onDefaultLanguageChange}
         options={[
-          { value: 'en', label: 'English' },
-          { value: 'am', label: 'Amharic (አማርኛ)' },
+          { value: 'en', label: t('configure.language.english') },
+          { value: 'am', label: t('configure.language.amharic') },
         ]}
-        help="Learners can switch language at any point while filling the form in."
+        help={t('configure.language.help')}
       />
     </div>
   );

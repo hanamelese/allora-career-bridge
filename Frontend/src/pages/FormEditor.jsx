@@ -3,6 +3,7 @@ import { Outlet } from 'react-router-dom';
 import { publish as publishForm, saveDraft } from '../api/formsClient.js';
 import { useFormConfig } from '../hooks/useFormConfig.js';
 import { WorkspaceActions } from '../components/forms/WorkspaceActions.jsx';
+import { useT } from '../i18n/index.js';
 
 /**
  * Owns the draft configuration for the form currently open, and the two
@@ -16,6 +17,7 @@ import { WorkspaceActions } from '../components/forms/WorkspaceActions.jsx';
  * save, because each save and publish returns the updated form.
  */
 export function FormEditor({ form: loadedForm, formType }) {
+  const t = useT();
   const [form, setForm] = useState(loadedForm);
   const [isSaving, setIsSaving] = useState(false);
   const [isPublishing, setIsPublishing] = useState(false);
@@ -33,7 +35,7 @@ export function FormEditor({ form: loadedForm, formType }) {
       const updated = await saveDraft(form.formId, config);
       setForm(updated);
       markSaved(updated.draftConfig);
-      setLastAction('Draft saved.');
+      setLastAction(t('workspace.actions.draftSaved'));
       return updated;
     } catch (error) {
       setActionError(error.message);
@@ -41,7 +43,7 @@ export function FormEditor({ form: loadedForm, formType }) {
     } finally {
       setIsSaving(false);
     }
-  }, [form.formId, config, markSaved]);
+  }, [form.formId, config, markSaved, t]);
 
   /**
    * Publishing freezes whatever the server holds, so an unsaved change is
@@ -62,7 +64,7 @@ export function FormEditor({ form: loadedForm, formType }) {
       const published = await publishForm(form.formId);
       setForm(published);
       markSaved(published.draftConfig);
-      setLastAction(`Version ${published.currentVersion} published.`);
+      setLastAction(t('workspace.actions.versionPublished', published.currentVersion));
       return published;
     } catch (error) {
       setActionError(error.message);
@@ -70,7 +72,7 @@ export function FormEditor({ form: loadedForm, formType }) {
     } finally {
       setIsPublishing(false);
     }
-  }, [form.formId, config, isDirty, markSaved]);
+  }, [form.formId, config, isDirty, markSaved, t]);
 
   const actions = {
     save,

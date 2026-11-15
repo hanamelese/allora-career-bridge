@@ -2,6 +2,7 @@ import { MAX_UPLOAD_MB, UPLOAD_FILE_TYPES, UPLOAD_FILE_TYPE_KEYS, resolveUploadR
 import { Checkbox } from '../ui/Checkbox.jsx';
 import { TextInput } from '../ui/TextInput.jsx';
 import { describeUploadRules } from '../../fieldDisplay.js';
+import { useLanguage, useT } from '../../i18n/index.js';
 
 /**
  * The restrictions on an upload question: the largest file, and which
@@ -10,6 +11,8 @@ import { describeUploadRules } from '../../fieldDisplay.js';
  * applicants will see.
  */
 export function UploadRulesEditor({ idPrefix, settings, onChange }) {
+  const t = useT();
+  const language = useLanguage();
   const rules = resolveUploadRules(settings);
 
   function setSize(raw) {
@@ -33,12 +36,12 @@ export function UploadRulesEditor({ idPrefix, settings, onChange }) {
   return (
     <div className="upload-rules">
       <p className="upload-rules__summary" aria-live="polite">
-        {describeUploadRules(settings)}
+        {describeUploadRules(settings, language)}
       </p>
 
       <TextInput
         id={`${idPrefix}-max-size`}
-        label="Largest file, in MB"
+        label={t('configure.upload.maxSize')}
         type="number"
         inputMode="numeric"
         min={1}
@@ -46,12 +49,12 @@ export function UploadRulesEditor({ idPrefix, settings, onChange }) {
         step={1}
         value={settings?.maxSizeMb === undefined ? '' : String(settings.maxSizeMb)}
         placeholder={String(MAX_UPLOAD_MB)}
-        help={`From 1 to ${MAX_UPLOAD_MB}. Leave blank to allow the most, ${MAX_UPLOAD_MB} MB.`}
+        help={t('configure.upload.maxSizeHelp', MAX_UPLOAD_MB)}
         onChange={setSize}
       />
 
       <fieldset className="upload-rules__kinds">
-        <legend className="upload-rules__legend">Kinds of file accepted</legend>
+        <legend className="upload-rules__legend">{t('configure.upload.kinds')}</legend>
         {UPLOAD_FILE_TYPE_KEYS.map((key) => {
           const isOnlyOne = rules.accept.length === 1 && rules.accept.includes(key);
 
@@ -60,7 +63,7 @@ export function UploadRulesEditor({ idPrefix, settings, onChange }) {
               key={key}
               id={`${idPrefix}-kind-${key}`}
               label={UPLOAD_FILE_TYPES[key].label}
-              description={isOnlyOne ? 'At least one kind of file must stay allowed.' : undefined}
+              description={isOnlyOne ? t('configure.upload.atLeastOne') : undefined}
               checked={rules.accept.includes(key)}
               disabled={isOnlyOne}
               onChange={(checked) => setKind(key, checked)}
@@ -70,8 +73,7 @@ export function UploadRulesEditor({ idPrefix, settings, onChange }) {
       </fieldset>
 
       <p className="upload-rules__note">
-        Files are checked in the applicant’s browser and passed to your website with the other
-        answers when they send the form. This system does not store them.
+        {t('configure.upload.note')}
       </p>
     </div>
   );

@@ -10,10 +10,10 @@
   inset-block-start: 0;
   z-index: 20;
   display: flex;
+  flex-wrap: wrap;
   align-items: center;
   justify-content: space-between;
-  gap: var(--space-md);
-  min-height: var(--header-height);
+  gap: 0 var(--space-md);
   padding-inline: var(--space-lg);
   /* Frosted glass: the page shows through softly as it scrolls under. */
   background-color: var(--surface-glass);
@@ -61,8 +61,26 @@
 
 .app-shell__brand {
   display: flex;
+  margin-block: var(--space-sm);
   align-items: center;
   gap: var(--space-gutter);
+  min-width: 0;
+  min-height: 2.75rem;
+  padding-inline-end: var(--space-xs);
+  border-radius: var(--radius-md);
+  color: var(--ink);
+  text-decoration: none;
+}
+
+.app-shell__brand:hover .app-shell__product {
+  text-decoration: underline;
+  text-underline-offset: 0.2em;
+}
+
+.app-shell__brand-text,
+.app-shell__product,
+.app-shell__tagline {
+  display: block;
   min-width: 0;
 }
 
@@ -83,8 +101,11 @@
 
 .app-shell__account {
   display: flex;
+  margin-block: var(--space-sm);
+  flex-wrap: wrap;
   align-items: center;
-  gap: var(--space-md);
+  justify-content: flex-end;
+  gap: var(--space-sm) var(--space-md);
   font-size: var(--font-size-sm);
 }
 
@@ -114,6 +135,35 @@
 .app-shell__content {
   max-width: var(--content-max-width);
   margin-inline: auto;
+}
+
+/* ---- Small screens: the header keeps the name, Home and Sign out ---- */
+@media (max-width: 40rem) {
+  .app-shell__header {
+    padding-inline: var(--space-md);
+  }
+
+  .app-shell__tagline,
+  .app-shell__org {
+    display: none;
+  }
+
+  .app-shell__account {
+    gap: var(--space-xs);
+  }
+}
+
+@media (max-width: 24rem) {
+  /* At 320px the mark alone stands for the brand link; its name stays
+     available to screen readers. */
+  .app-shell__product {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    overflow: hidden;
+    clip-path: inset(50%);
+    white-space: nowrap;
+  }
 }
 
 /* ---- Narrow screens: the sidebar becomes a disclosure ---- */

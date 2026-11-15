@@ -1,5 +1,6 @@
 import { useEffect, useRef } from 'react';
 import { X } from 'lucide-react';
+import { useT } from '../../i18n/index.js';
 import './Modal.css';
 
 /**
@@ -13,7 +14,8 @@ import './Modal.css';
  * It scrolls inside itself, so at 200% zoom or on a small phone nothing
  * is cut off and the page behind never scrolls instead.
  */
-export function Modal({ isOpen, onClose, label, closeLabel = 'Close', children, className = '' }) {
+export function Modal({ isOpen, onClose, label, closeLabel, header = null, children, className = '' }) {
+  const t = useT();
   const dialogRef = useRef(null);
   const openerRef = useRef(null);
 
@@ -62,13 +64,16 @@ export function Modal({ isOpen, onClose, label, closeLabel = 'Close', children, 
       tabIndex={-1}
       onClick={handleBackdrop}
     >
-      <div className="modal__panel">
+      {/* An optional top row (a brand, a title) shares its line with the
+          close button, so the button never sits over the content. */}
+      <div className="modal__top">
+        {header ? <div className="modal__header">{header}</div> : null}
         <button type="button" className="modal__close" onClick={onClose}>
           <X aria-hidden="true" />
-          <span className="visually-hidden">{closeLabel}</span>
+          <span className="visually-hidden">{closeLabel ?? t('common.close')}</span>
         </button>
-        {isOpen ? children : null}
       </div>
+      <div className="modal__panel">{isOpen ? children : null}</div>
     </dialog>
   );
 }
