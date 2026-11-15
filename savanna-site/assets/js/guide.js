@@ -43,6 +43,28 @@
     if (status) status.textContent = '';
   });
 
+  // The social sign-in buttons are links to ALX's own sign-in with each provider. In this demo those
+  // addresses are placeholders (example.org), so the page says so instead of leaving the demo. The
+  // click comes up from inside the form, so its path is checked for the button.
+  function socialButtonIn(event, stopAt) {
+    var path = event.composedPath ? event.composedPath() : [];
+    for (var i = 0; i < path.length && path[i] !== stopAt; i++) {
+      if (path[i].classList && path[i].classList.contains('fe-social__button')) return path[i];
+    }
+    return null;
+  }
+
+  slot.addEventListener('click', function (event) {
+    var button = socialButtonIn(event, slot);
+    if (!button) return;
+    event.preventDefault();
+    if (status) {
+      status.textContent =
+        'Demo: "' + button.textContent.replace(/\s+/g, ' ').trim() + '" would open ALX\'s sign-up with that provider. ' +
+        'Its address here is a placeholder, so nothing opens. Choose Next to continue with your email address.';
+    }
+  });
+
   // Heard on the way up from the form, so nothing else on the page ever sees the password.
   slot.addEventListener('onboarding-submit', function (event) {
     var detail = event.detail || {};

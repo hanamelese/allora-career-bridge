@@ -171,14 +171,26 @@ describe('speech routes', () => {
     expect(response.body.error).toBe('speech_unavailable');
   });
 
-  it('the dashboard route is for signed-in partners only', async () => {
+  it('the dashboard route: signed-in partners, or the signed-out sign-in form on the dashboard’s own address', async () => {
     expect((await request(app()).post('/api/v1/speech').send({ text: 'Hi' })).status).toBe(401);
+    expect(
+      (await request(app()).post('/api/v1/speech').set('authorization', 'Bearer not-a-token').send({ text: 'Hi' })).status,
+    ).toBe(401);
+
+    const signedOut = await request(app())
+      .post('/api/v1/speech')
+      .set('origin', 'http://localhost:5173')
+      .send({ text: 'Email address', lang: 'am' });
+    expect(signedOut.status).toBe(200);
 
     const response = await request(app())
       .post('/api/v1/speech')
       .set('authorization', `Bearer ${token}`)
       .send({ text: 'Preview question', lang: 'en' });
     expect(response.status).toBe(200);
-    expect(spoken).toEqual([['Preview question', 'en']]);
+    expect(spoken).toEqual([
+      ['Email address', 'am'],
+      ['Preview question', 'en'],
+    ]);
   });
 });

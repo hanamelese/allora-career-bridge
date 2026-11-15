@@ -6,6 +6,7 @@ import { useAuth } from './authContext.js';
 import { renderIcon } from '../icons.js';
 import { FORM_TYPES } from '../formTypes.js';
 import { translate, useLanguage } from '../i18n/index.js';
+import { fetchSpeech } from '../api/http.js';
 
 const FIRST_FORM_PATH = `/forms/${FORM_TYPES[0].slug}/configure`;
 
@@ -117,6 +118,9 @@ export function PartnerAuthForm({ mode, onModeChange }) {
       onSubmit={handleSubmit}
       onSwitchMode={onModeChange}
       renderIcon={renderIcon}
+      /* Read aloud, Read my answer and Voice control speak with the same
+         natural voices (including Amharic) as every other form. */
+      voice={fetchSpeech}
     />
   );
 }

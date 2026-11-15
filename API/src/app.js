@@ -117,7 +117,15 @@ export function createApp(
       response.set('Access-Control-Allow-Origin', '*');
       next();
     },
-    express.static(widgetDir, { maxAge: '1h', index: false }),
+    /* Revalidated on every load (a quick 304 when unchanged), so a rebuilt
+       widget reaches every site at once instead of up to an hour later. The
+       version in the path is what pins its behaviour. */
+    express.static(widgetDir, {
+      index: false,
+      setHeaders(response) {
+        response.set('Cache-Control', 'no-cache');
+      },
+    }),
     (request, response) => {
       response.status(404).json({
         error: existsSync(widgetDir) ? 'not_found' : 'widget_not_built',
@@ -141,7 +149,6 @@ export function createApp(
   app.use('/api/v1/organisation', requireAuth, organisationRoutes(db));
   app.use(
     '/api/v1/speech',
-    requireAuth,
     partnerSpeechRoutes({ speech, limiter: speechLimiter ?? createRateLimiter({ limit: 240, windowMs: 60_000 }) }),
   );
   app.use(

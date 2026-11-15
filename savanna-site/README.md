@@ -65,7 +65,7 @@ Pages added for the demo, each showing a form built and published in **Allora Ac
 
 | Address | Page | What it shows |
 |---------|------|---------------|
-| `/` | `index.html` | **Sign in / Create account**: ALX's published Sign up / Sign in form in a sign-in page styled after ALX's other sign-in pages. A **Sign in | Create account** switch above the form (and the form's own link) switches to creating an account; `/#create-account` opens there. |
+| `/` | `index.html` | **Sign in / Create account**: ALX's published Sign up / Sign in form in a sign-in page styled after ALX's other sign-in pages. The form's own **New here? Create an account** link switches to creating an account; `/#create-account` opens there. |
 | `/guide/` | `guide/index.html` | **The demo guide**: what the demo is, where to begin, and the steps through it. Its **Create an account** buttons open the same sign-up form in a pop-up. |
 | `/pages/register.html` | `pages/register.html` | **Learner Registration & Profile**, in the portal layout |
 | `/pages/job-application.html` | `pages/job-application.html` | **Job Application**, in the portal layout |
