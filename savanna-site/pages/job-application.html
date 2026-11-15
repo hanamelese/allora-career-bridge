@@ -4,212 +4,204 @@
   Built from the self-paced homepage's shell; see ../README.md.
 -->
 <html lang="en">
-  <head>
-    <style class="vjs-styles-defaults">
-      .video-js {
-        width: 300px;
-        height: 150px;
-      }
 
-      .vjs-fluid:not(.vjs-audio-only-mode) {
-        padding-top: 56.25%;
-      }
-    </style>
-    <meta charset="utf-8" />
-    <meta http-equiv="X-UA-Compatible" content="IE=edge" />
-    <meta name="viewport" content="width=device-width, initial-scale=1" />
-    <!-- The above 3 meta tags *must* come first in the head; any other head content must come *after* these tags -->
-    <meta name="description" content="" />
-    <meta name="google" content="notranslate" />
+<head>
+  <style class="vjs-styles-defaults">
+    .video-js {
+      width: 300px;
+      height: 150px;
+    }
 
-    <!-- Google Tag Manager -->
+    .vjs-fluid:not(.vjs-audio-only-mode) {
+      padding-top: 56.25%;
+    }
+  </style>
+  <meta charset="utf-8" />
+  <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <!-- The above 3 meta tags *must* come first in the head; any other head content must come *after* these tags -->
+  <meta name="description" content="" />
+  <meta name="google" content="notranslate" />
 
-    <!-- End Google Tag Manager -->
+  <!-- Google Tag Manager -->
 
-    <title>Job application | G-School Intranet</title>
+  <!-- End Google Tag Manager -->
 
-    <link rel="stylesheet" href="../assets/css/typekit-xgz4ilr-css.css" />
-    <link rel="stylesheet" href="../assets/css/application_alx.css" media="all" />
+  <title>Job application | G-School Intranet</title>
 
-    <link rel="icon" type="image/x-icon" href="/favicon_alx.ico" />
+  <link rel="stylesheet" href="../assets/css/typekit-xgz4ilr-css.css" />
+  <link rel="stylesheet" href="../assets/css/application_alx.css" media="all" />
 
-    <link rel="apple-touch-icon" href="/apple-touch-icon_alx.png" />
+  <link rel="icon" type="image/x-icon" href="/favicon_alx.ico" />
 
-    <!-- HTML5 shim and Respond.js for IE8 support of HTML5 elements and media queries -->
-    <!--[if lt IE 9]>
+  <link rel="apple-touch-icon" href="/apple-touch-icon_alx.png" />
+
+  <!-- HTML5 shim and Respond.js for IE8 support of HTML5 elements and media queries -->
+  <!--[if lt IE 9]>
       <script src="https://oss.maxcdn.com/html5shiv/3.7.2/html5shiv.min.js"></script>
       <script src="https://oss.maxcdn.com/respond/1.4.2/respond.min.js"></script>
     <![endif]-->
 
-    <!-- React -->
+  <!-- React -->
 
-    <link rel="stylesheet" href="../assets/css/app.css" media="all" />
+  <link rel="stylesheet" href="../assets/css/app.css" media="all" />
 
-    <link rel="stylesheet" href="../assets/css/static-page.css" media="all" />
-    <link rel="stylesheet" href="../assets/css/onboarding-demo.css" media="all" />
-  </head>
+  <link rel="stylesheet" href="../assets/css/static-page.css" media="all" />
+  <link rel="stylesheet" href="../assets/css/onboarding-demo.css" media="all" />
+</head>
 
-  <body class="signed_in env_development notranslate" translate="no" data-theme-suffix="_alx">
-    <!-- Google Tag Manager (noscript) -->
+<body class="signed_in env_development notranslate" translate="no" data-theme-suffix="_alx">
+  <!-- Google Tag Manager (noscript) -->
 
-    <!-- End Google Tag Manager (noscript) -->
+  <!-- End Google Tag Manager (noscript) -->
 
-    <div data-react-class="header/Header" data-react-cache-id="header/Header-0">
-      <div class="header d-flex align-items-center position-fixed top-0 w-100" style="z-index: 1000">
-        <div class="header-left align-items-center d-flex position-fixed px-2" style="z-index: 2">
-          <div class="hamburger mb-0 p-2 color-primary" style="cursor: pointer; font-size: 24px">
-            <i class="fa-solid fa-fas fa-bars"></i>
-          </div>
-          <a class="logo-container p-1" href="#" rel="noreferrer" target=""
-            ><div
-              class="logo mx-auto"
-              style="background-image: url(&quot;../assets/img/holberton-logo-full-alx.png&quot;)"
-            ></div
-          ></a>
+  <div data-react-class="header/Header" data-react-cache-id="header/Header-0">
+    <div class="header d-flex align-items-center position-fixed top-0 w-100" style="z-index: 1000">
+      <div class="header-left align-items-center d-flex position-fixed px-2" style="z-index: 2">
+        <div class="hamburger mb-0 p-2 color-primary" style="cursor: pointer; font-size: 24px">
+          <i class="fa-solid fa-fas fa-bars"></i>
         </div>
-        <div class="header-right d-flex align-items-center flex-grow-1 justify-content-center" style="z-index: 1"></div>
+        <a class="logo-container p-1" href="#" rel="noreferrer" target="">
+          <div class="logo mx-auto"
+            style="background-image: url(&quot;../assets/img/holberton-logo-full-alx.png&quot;)"></div>
+        </a>
       </div>
-      <div
-        class="sidebar navigation bg-white border-end position-fixed overflow-scroll bottom-0 start-0 expanded"
-        id="sidebar"
-        style="background-color: rgb(255, 255, 255); border-color: rgb(238, 238, 238)"
-      >
-        <ul class="px-2">
-          <li>
-            <a href="homepage-v1-self-paced.html" rel="noreferrer" target="_self"
-              ><div class="icon"><i aria-hidden="true" class="fa-solid fa-home"></i></div>
-              <div class="ps-3 overflow-hidden text-nowrap" style="display: block">Home</div></a
-            >
-          </li>
-          <li>
-            <a href="#" rel="noreferrer" target="_self"
-              ><div class="icon"><i aria-hidden="true" class="fa-solid fa-chalkboard-teacher"></i></div>
-              <div class="ps-3 overflow-hidden text-nowrap" style="display: block">Access my learning</div></a
-            >
-          </li>
-          <hr title="My resources" />
-          <li>
-            <a href="#" rel="noreferrer" target="_self"
-              ><div class="icon"><i aria-hidden="true" class="fa-solid fa-graduation-cap"></i></div>
-              <div class="ps-3 overflow-hidden text-nowrap" style="display: block">My courses</div></a
-            >
-          </li>
-          <li id="sidebar-dashboards-video-rooms">
-            <a href="#" rel="noreferrer" target="_self"
-              ><div class="icon"><i aria-hidden="true" class="fa-solid fa-comments"></i></div>
-              <div class="ps-3 overflow-hidden text-nowrap" style="display: block">Conference rooms</div></a
-            >
-          </li>
-          <li>
-            <a href="#" rel="noreferrer" target="_self"
-              ><div class="icon"><i aria-hidden="true" class="fa-solid fa-server"></i></div>
-              <div class="ps-3 overflow-hidden text-nowrap" style="display: block">Servers</div></a
-            >
-          </li>
-          <li id="sidebar-dashboards-my-containers">
-            <a href="#" rel="noreferrer" target="_self"
-              ><div class="icon"><i aria-hidden="true" class="fa-solid fa-terminal"></i></div>
-              <div class="ps-3 overflow-hidden text-nowrap" style="display: block">Sandboxes</div></a
-            >
-          </li>
-          <li>
-            <a href="#" rel="noreferrer" target="_self"
-              ><div class="icon"><i aria-hidden="true" class="fa-solid fa-film"></i></div>
-              <div class="ps-3 overflow-hidden text-nowrap" style="display: block">Video on demand</div></a
-            >
-          </li>
-          <hr title="My Campus" />
-          <li>
-            <a href="#" rel="noreferrer" target="_self"
-              ><div class="icon"><i aria-hidden="true" class="fa-solid fa-users"></i></div>
-              <div class="ps-3 overflow-hidden text-nowrap" style="display: block">Peers</div></a
-            >
-          </li>
-          <hr title="Get hired" />
-          <li>
-            <a href="register.html" rel="noreferrer" target="_self"
-              ><div class="icon"><i aria-hidden="true" class="fa-solid fa-user-plus"></i></div>
-              <div class="ps-3 overflow-hidden text-nowrap" style="display: block">Register</div></a
-            >
-          </li>
-          <li>
-            <a href="job-application.html" rel="noreferrer" target="_self" aria-current="page"
-              ><div class="icon active"><i aria-hidden="true" class="fa-solid fa-briefcase"></i></div>
-              <div class="ps-3 overflow-hidden text-nowrap" style="display: block">Job application</div></a
-            >
-          </li>
-          <li
-            class="bg-white border-top border-end position-fixed p-2 bottom-0 start-0 mb-0"
-            style="background-color: rgb(255, 255, 255); border-color: rgb(238, 238, 238)"
-          >
-            <a href="#"
-              ><div class="image"><i aria-hidden="true" class="fa-solid fa-user"></i></div>
-              <div class="flex-grow-1 ps-3 overflow-hidden text-nowrap" style="display: block">My Profile</div></a
-            >
-          </li>
-        </ul>
-      </div>
+      <div class="header-right d-flex align-items-center flex-grow-1 justify-content-center" style="z-index: 1"></div>
     </div>
-
-    <main class="content" id="content">
-      <article class="">
-        <div class="student-home onboarding-page">
-          <a class="onboarding-back" href="homepage-v1-self-paced.html">
-            <i aria-hidden="true" class="fa-solid fa-arrow-left me-1"></i> Back to dashboard
+    <div class="sidebar navigation bg-white border-end position-fixed overflow-scroll bottom-0 start-0 expanded"
+      id="sidebar" style="background-color: rgb(255, 255, 255); border-color: rgb(238, 238, 238)">
+      <ul class="px-2">
+        <li>
+          <a href="homepage-v1-self-paced.html" rel="noreferrer" target="_self">
+            <div class="icon"><i aria-hidden="true" class="fa-solid fa-home"></i></div>
+            <div class="ps-3 overflow-hidden text-nowrap" style="display: block">Home</div>
           </a>
+        </li>
+        <li>
+          <a href="#" rel="noreferrer" target="_self">
+            <div class="icon"><i aria-hidden="true" class="fa-solid fa-chalkboard-teacher"></i></div>
+            <div class="ps-3 overflow-hidden text-nowrap" style="display: block">Access my learning</div>
+          </a>
+        </li>
+        <hr title="My resources" />
+        <li>
+          <a href="#" rel="noreferrer" target="_self">
+            <div class="icon"><i aria-hidden="true" class="fa-solid fa-graduation-cap"></i></div>
+            <div class="ps-3 overflow-hidden text-nowrap" style="display: block">My courses</div>
+          </a>
+        </li>
+        <li id="sidebar-dashboards-video-rooms">
+          <a href="#" rel="noreferrer" target="_self">
+            <div class="icon"><i aria-hidden="true" class="fa-solid fa-comments"></i></div>
+            <div class="ps-3 overflow-hidden text-nowrap" style="display: block">Conference rooms</div>
+          </a>
+        </li>
+        <li>
+          <a href="#" rel="noreferrer" target="_self">
+            <div class="icon"><i aria-hidden="true" class="fa-solid fa-server"></i></div>
+            <div class="ps-3 overflow-hidden text-nowrap" style="display: block">Servers</div>
+          </a>
+        </li>
+        <li id="sidebar-dashboards-my-containers">
+          <a href="#" rel="noreferrer" target="_self">
+            <div class="icon"><i aria-hidden="true" class="fa-solid fa-terminal"></i></div>
+            <div class="ps-3 overflow-hidden text-nowrap" style="display: block">Sandboxes</div>
+          </a>
+        </li>
+        <li>
+          <a href="#" rel="noreferrer" target="_self">
+            <div class="icon"><i aria-hidden="true" class="fa-solid fa-film"></i></div>
+            <div class="ps-3 overflow-hidden text-nowrap" style="display: block">Video on demand</div>
+          </a>
+        </li>
+        <hr title="My Campus" />
+        <li>
+          <a href="#" rel="noreferrer" target="_self">
+            <div class="icon"><i aria-hidden="true" class="fa-solid fa-users"></i></div>
+            <div class="ps-3 overflow-hidden text-nowrap" style="display: block">Peers</div>
+          </a>
+        </li>
+        <hr title="Get hired" />
+        <li>
+          <a href="register.html" rel="noreferrer" target="_self">
+            <div class="icon"><i aria-hidden="true" class="fa-solid fa-user-plus"></i></div>
+            <div class="ps-3 overflow-hidden text-nowrap" style="display: block">Register</div>
+          </a>
+        </li>
+        <li>
+          <a href="job-application.html" rel="noreferrer" target="_self" aria-current="page">
+            <div class="icon active"><i aria-hidden="true" class="fa-solid fa-briefcase"></i></div>
+            <div class="ps-3 overflow-hidden text-nowrap" style="display: block">Job application</div>
+          </a>
+        </li>
+        <li class="bg-white border-top border-end position-fixed p-2 bottom-0 start-0 mb-0"
+          style="background-color: rgb(255, 255, 255); border-color: rgb(238, 238, 238)">
+          <a href="#">
+            <div class="image"><i aria-hidden="true" class="fa-solid fa-user"></i></div>
+            <div class="flex-grow-1 ps-3 overflow-hidden text-nowrap" style="display: block">My Profile</div>
+          </a>
+        </li>
+      </ul>
+    </div>
+  </div>
 
-          <h1 class="fs-3 fw-semibold mt-3 mb-2">Apply for a job</h1>
-          <p class="onboarding-intro text-muted mb-4">Apply to ALX's hiring partners, one question at a time. You can add your CV, answer by typing or by voice, and say privately what would help you at this job.</p>
+  <main class="content" id="content">
+    <article class="">
+      <div class="student-home onboarding-page">
+        <a class="onboarding-back" href="homepage-v1-self-paced.html">
+          <i aria-hidden="true" class="fa-solid fa-arrow-left me-1"></i> Back to dashboard
+        </a>
 
-          <section
-            class="card homepage-card border-primary-subtle rounded-3 onboarding-card"
-            aria-labelledby="job-application-form-title"
-          >
-            <h2 class="card-header fw-medium fs-6 mb-0" id="job-application-form-title">Job application</h2>
-            <div class="card-body onboarding-slot" data-onboarding-slot="job-application">
-              <!--
+        <h1 class="fs-3 fw-semibold mt-3 mb-2">Apply for a job</h1>
+        <p class="onboarding-intro text-muted mb-4">Apply to ALX's hiring partners, one question at a time. You can add
+          your CV, answer by typing or by voice, and say privately what would help you at this job.</p>
+
+        <section class="card homepage-card border-primary-subtle rounded-3 onboarding-card"
+          aria-labelledby="job-application-form-title">
+          <h2 class="card-header fw-medium fs-6 mb-0" id="job-application-form-title">Job application</h2>
+          <div class="card-body onboarding-slot" data-onboarding-slot="job-application">
+            <!--
                 The tag below is pasted unchanged from the Partner Dashboard (form -> Embed tag -> Copy the tag).
                 To update the form, publish a new version there and replace these lines with the new tag.
               -->
-              <script src="http://localhost:3001/widget/v1/onboarding-widget.js" async></script>
+            <script src="http://localhost:3001/widget/v1/onboarding-widget.js" async></script>
 
-              <onboarding-form
-                form-id="frm_b883f8fd2a3f719f"
-                public-key="pk_live_649f880df0dc14c902fce4a2"
-                form-version="1"
-                lang="en">
-              </onboarding-form>
+            <onboarding-form form-id="frm_52687143c636c013" public-key="pk_live_674a72fbcea540afc62a2c7c"
+              form-version="1" lang="en">
+            </onboarding-form>
 
-              <!-- Shown only if the form's script could not load (see ../assets/js/onboarding-demo.js). -->
-              <p class="onboarding-unavailable mb-0" data-onboarding-unavailable hidden>
-                The job application form could not be loaded right now. Please refresh the page, or try again later.
-              </p>
-            </div>
-          </section>
+            <!-- Shown only if the form's script could not load (see ../assets/js/onboarding-demo.js). -->
+            <p class="onboarding-unavailable mb-0" data-onboarding-unavailable hidden>
+              The job application form could not be loaded right now. Please refresh the page, or try again later.
+            </p>
+          </div>
+        </section>
 
-          <p class="onboarding-credit">
-            <i aria-hidden="true" class="fa-solid fa-universal-access me-1"></i>
-            This form comes from the Accessible Onboarding System. ALX set it up and published it in the
-            system's Partner Dashboard, and this page shows it with the one embed tag the dashboard generated.
-          </p>
+        <p class="onboarding-credit">
+          <i aria-hidden="true" class="fa-solid fa-universal-access me-1"></i>
+          This form comes from the Accessible Onboarding System. ALX set it up and published it in the
+          system's Partner Dashboard, and this page shows it with the one embed tag the dashboard generated.
+        </p>
 
-          <!-- Revealed once the form has been sent (onboarding-submit). -->
-          <div class="onboarding-next" data-onboarding-after="job-application" hidden>
-            <h2 class="fs-5 fw-semibold mb-2">What next?</h2>
-            <p class="mb-3">Your application has been received. The hiring team will contact you using the details you gave.</p>
-            <div class="d-flex flex-wrap gap-2">
-              <a class="btn btn-primary rounded-pill" href="homepage-v1-self-paced.html">Back to dashboard</a>
-            </div>
+        <!-- Revealed once the form has been sent (onboarding-submit). -->
+        <div class="onboarding-next" data-onboarding-after="job-application" hidden>
+          <h2 class="fs-5 fw-semibold mb-2">What next?</h2>
+          <p class="mb-3">Your application has been received. The hiring team will contact you using the details you
+            gave.</p>
+          <div class="d-flex flex-wrap gap-2">
+            <a class="btn btn-primary rounded-pill" href="homepage-v1-self-paced.html">Back to dashboard</a>
           </div>
         </div>
-      </article>
+      </div>
+    </article>
 
-      <div class="copyright">Copyright © 2026 ALX, All rights reserved.</div>
-    </main>
+    <div class="copyright">Copyright © 2026 ALX, All rights reserved.</div>
+  </main>
 
-    <script src="../assets/js/popper.js"></script>
-    <script src="../assets/js/bootstrap.bundle.js"></script>
-    <script src="../assets/js/static-page.js"></script>
-    <script src="../assets/js/onboarding-demo.js"></script>
-  </body>
+  <script src="../assets/js/popper.js"></script>
+  <script src="../assets/js/bootstrap.bundle.js"></script>
+  <script src="../assets/js/static-page.js"></script>
+  <script src="../assets/js/onboarding-demo.js"></script>
+</body>
+
 </html>

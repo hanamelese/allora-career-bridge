@@ -50,6 +50,10 @@ export async function sendReferrals(db, sms, { partnerId, partnerFormId, request
     );
   }
 
+
+
+
+
   const organisation = db.select().from(partners).where(eq(partners.id, partnerId)).get();
   const now = new Date();
   const expiresAt = new Date(now.getTime() + config.referralLifetimeDays * 86_400_000);

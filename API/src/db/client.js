@@ -6,6 +6,7 @@ import { migrate } from 'drizzle-orm/better-sqlite3/migrator';
 import * as schema from './schema.js';
 import { ensurePartnerForms, upgradeStoredDrafts } from './upgrades.js';
 
+import { fileURLToPath } from 'node:url';
 /**
  * Published form versions must never change. The route only ever inserts
  * them, and these triggers make that true of the database as well - so a
@@ -37,8 +38,9 @@ export function createDatabase(url) {
 
   const db = drizzle(sqlite, { schema });
 
-  migrate(db, { migrationsFolder: new URL('../../drizzle', import.meta.url).pathname });
-  sqlite.exec(IMMUTABILITY_TRIGGERS);
+  migrate(db, {
+    migrationsFolder: fileURLToPath(new URL('../../drizzle', import.meta.url)),
+  }); sqlite.exec(IMMUTABILITY_TRIGGERS);
   upgradeStoredDrafts(db);
   ensurePartnerForms(db);
 

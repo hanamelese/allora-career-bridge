@@ -14,6 +14,7 @@ import { NotFoundPage } from './pages/NotFoundPage.jsx';
 import { OrganisationPage } from './pages/OrganisationPage.jsx';
 import { ReferralPage } from './pages/ReferralPage.jsx';
 import { FORM_TYPES } from './formTypes.js';
+import ReferralReviewPage from './pages/ReferalReviewPage.jsx';
 
 const firstFormPath = `/forms/${FORM_TYPES[0].slug}/configure`;
 
@@ -50,6 +51,7 @@ function DashboardRoutes() {
         </Route>
 
         <Route path="*" element={<NotFoundPage />} />
+        <Route path="/referrals/:token" element={<ReferralReviewPage />} />
       </Route>
     </Routes>
   );

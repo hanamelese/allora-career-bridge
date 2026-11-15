@@ -1,0 +1,339 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Referral Review | ALX Career Bridge</title>
+    <style>
+        :root {
+            --primary: #0f172a;
+            --accent: #2563eb;
+            --success: #16a34a;
+            --danger: #dc2626;
+            --bg: #f8fafc;
+            --card-bg: #ffffff;
+            --text: #334155;
+            --text-light: #64748b;
+            --border: #e2e8f0;
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+        }
+
+        body {
+            background-color: var(--bg);
+            color: var(--text);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            padding: 1rem;
+        }
+
+        .container {
+            width: 100%;
+            max-width: 600px;
+            background: var(--card-bg);
+            border-radius: 12px;
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.05);
+            overflow: hidden;
+            border: 1px solid var(--border);
+        }
+
+        .header {
+            background: var(--primary);
+            color: white;
+            padding: 1.5rem 2rem;
+            text-align: left;
+        }
+
+        .header h1 {
+            font-size: 1.25rem;
+            font-weight: 600;
+            margin-bottom: 0.25rem;
+        }
+
+        .header p {
+            font-size: 0.875rem;
+            color: #94a3b8;
+        }
+
+        .content {
+            padding: 2rem;
+        }
+
+        .alert {
+            padding: 0.75rem 1rem;
+            border-radius: 6px;
+            margin-bottom: 1.5rem;
+            font-size: 0.875rem;
+            display: none;
+        }
+
+        .alert.success {
+            background: #dcfce7;
+            color: #166534;
+            border: 1px solid #bbf7d0;
+            display: block;
+        }
+
+        .alert.danger {
+            background: #fee2e2;
+            color: #991b1b;
+            border: 1px solid #fecaca;
+            display: block;
+        }
+
+        .card-section {
+            margin-bottom: 1.5rem;
+        }
+
+        .card-section h3 {
+            font-size: 0.75rem;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+            color: var(--text-light);
+            margin-bottom: 0.5rem;
+        }
+
+        .candidate-name {
+            font-size: 1.5rem;
+            font-weight: 700;
+            color: var(--primary);
+            margin-bottom: 0.25rem;
+        }
+
+        .meta-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 1rem;
+            background: #f1f5f9;
+            padding: 1rem;
+            border-radius: 8px;
+            margin-top: 1rem;
+        }
+
+        .meta-item label {
+            display: block;
+            font-size: 0.75rem;
+            color: var(--text-light);
+            margin-bottom: 0.125rem;
+        }
+
+        .meta-item span {
+            font-size: 0.95rem;
+            font-weight: 500;
+            color: var(--primary);
+        }
+
+        .skills-list {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 0.5rem;
+            margin-top: 0.5rem;
+        }
+
+        .skill-tag {
+            background: #e0f2fe;
+            color: #0369a1;
+            padding: 0.25rem 0.75rem;
+            border-radius: 999px;
+            font-size: 0.75rem;
+            font-weight: 500;
+        }
+
+        .actions {
+            display: flex;
+            gap: 1rem;
+            margin-top: 2rem;
+            padding-top: 1.5rem;
+            border-top: 1px solid var(--border);
+        }
+
+        button {
+            flex: 1;
+            padding: 0.75rem 1rem;
+            border-radius: 6px;
+            font-size: 0.95rem;
+            font-weight: 600;
+            cursor: pointer;
+            border: none;
+            transition: background 0.2s;
+        }
+
+        .btn-accept {
+            background: var(--success);
+            color: white;
+        }
+
+        .btn-accept:hover {
+            background: #15803d;
+        }
+
+        .btn-decline {
+            background: #f1f5f9;
+            color: var(--danger);
+            border: 1px solid var(--border);
+        }
+
+        .btn-decline:hover {
+            background: #fee2e2;
+        }
+
+        button:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+        }
+
+        .loading,
+        .error-state {
+            text-align: center;
+            padding: 3rem 1rem;
+            color: var(--text-light);
+        }
+    </style>
+</head>
+
+<body>
+
+    <div class="container">
+        <div class="header">
+            <h1>Candidate Referral Review</h1>
+            <p id="partner-org-banner">Secure Partner Portal</p>
+        </div>
+
+        <div class="content">
+            <div id="alert-box" class="alert"></div>
+
+            <div id="loading-state" class="loading">
+                <p>Loading referral details securely...</p>
+            </div>
+
+            <div id="error-state" class="error-state" style="display: none;">
+                <h3>Invalid or Expired Link</h3>
+                <p>This referral token could not be found or has already been processed.</p>
+            </div>
+
+            <div id="referral-content" style="display: none;">
+                <div class="card-section">
+                    <h3>Referred Candidate</h3>
+                    <div class="candidate-name" id="candidate-name">Abebe Kebede</div>
+                    <p style="color: var(--text-light); font-size: 0.9rem;" id="candidate-email">abebe.k@example.com</p>
+                </div>
+
+                <div class="meta-grid">
+                    <div class="meta-item">
+                        <label>Career Track</label>
+                        <span id="candidate-track">Full-Stack Development</span>
+                    </div>
+                    <div class="meta-item">
+                        <label>Location</label>
+                        <span id="candidate-location">Addis Ababa, Ethiopia</span>
+                    </div>
+                </div>
+
+                <div class="card-section" style="margin-top: 1.5rem;">
+                    <h3>Core Competencies</h3>
+                    <div class="skills-list" id="skills-container">
+                        <span class="skill-tag">React</span>
+                        <span class="skill-tag">Node.js</span>
+                        <span class="skill-tag">PostgreSQL</span>
+                    </div>
+                </div>
+
+                <div class="actions" id="action-buttons">
+                    <button class="btn-decline" onclick="handleAction('decline')">Decline Referral</button>
+                    <button class="btn-accept" onclick="handleAction('accept')">Accept &amp; Confirm</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Extract token dynamically from path (e.g., /referrals/ref_123)
+        const pathSegments = window.location.pathname.split('/');
+        const token = pathSegments[pathSegments.length - 1] || new URLSearchParams(window.location.search).get('token');
+
+        // Mock Database for local testing matching your tokens
+        const MOCK_REFERRALS = {
+            'ref_123': {
+                partnerOrg: 'AADP (Addis Ababa Developers Partner)',
+                name: 'Abebe Kebede',
+                email: 'abebe.k@example.com',
+                track: 'Full-Stack Software Engineering',
+                location: 'Addis Ababa, Ethiopia',
+                skills: ['React', 'Node.js', 'Python', 'PostgreSQL'],
+                status: 'pending'
+            },
+            'ref_456': {
+                partnerOrg: 'EthioTech Partners',
+                name: 'Selamawit Tadesse',
+                email: 'selam.t@example.com',
+                track: 'Cybersecurity & Networks',
+                location: 'Addis Ababa, Ethiopia',
+                skills: ['Linux', 'Wireshark', 'PKI / SSL', 'Python'],
+                status: 'pending'
+            }
+        };
+
+        window.addEventListener('DOMContentLoaded', () => {
+            const loadingState = document.getElementById('loading-state');
+            const errorState = document.getElementById('error-state');
+            const referralContent = document.getElementById('referral-content');
+
+            // Simulate network lookup delay
+            setTimeout(() => {
+                loadingState.style.display = 'none';
+
+                const data = MOCK_REFERRALS[token];
+                if (!data) {
+                    errorState.style.display = 'block';
+                    return;
+                }
+
+                // Populate UI
+                document.getElementById('partner-org-banner').innerText = `Partner Review: ${data.partnerOrg}`;
+                document.getElementById('candidate-name').innerText = data.name;
+                document.getElementById('candidate-email').innerText = data.email;
+                document.getElementById('candidate-track').innerText = data.track;
+                document.getElementById('candidate-location').innerText = data.location;
+
+                const skillsContainer = document.getElementById('skills-container');
+                skillsContainer.innerHTML = data.skills.map(s => `<span class="skill-tag">${s}</span>`).join('');
+
+                if (data.status !== 'pending') {
+                    lockUI(data.status);
+                }
+
+                referralContent.style.display = 'block';
+            }, 400);
+        });
+
+        function handleAction(action) {
+            const alertBox = document.getElementById('alert-box');
+            const buttons = document.getElementById('action-buttons');
+
+            if (action === 'accept') {
+                alertBox.className = 'alert success';
+                alertBox.innerText = 'Success! You have accepted this candidate referral. Our team will coordinate the onboarding follow-up.';
+                lockUI('accepted');
+            } else {
+                alertBox.className = 'alert danger';
+                alertBox.innerText = 'Referral declined. Thank you for reviewing this candidate notice.';
+                lockUI('declined');
+            }
+        }
+
+        function lockUI(status) {
+            const buttons = document.getElementById('action-buttons');
+            buttons.innerHTML = `<p style="width: 100%; text-align: center; font-weight: 600; color: ${status === 'accepted' ? 'var(--success)' : 'var(--danger)'}; text-transform: uppercase; font-size: 0.85rem; letter-spacing: 0.05em;">Status: ${status}</p>`;
+        }
+    </script>
+</body>
+
+</html>

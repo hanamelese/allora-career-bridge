@@ -1,0 +1,268 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Candidate Referral Review - Partner Portal</title>
+    <style>
+        :root {
+            --primary-color: #10b981;
+            --primary-hover: #059669;
+            --bg-color: #f9fafb;
+            --card-bg: #ffffff;
+            --text-main: #1f2937;
+            --text-muted: #6b7280;
+            --border-color: #e5e7eb;
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+        }
+
+        body {
+            background-color: var(--bg-color);
+            color: var(--text-main);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            padding: 1rem;
+        }
+
+        .review-container {
+            background-color: var(--card-bg);
+            width: 100%;
+            max-width: 550px;
+            border-radius: 12px;
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+            border: 1px solid var(--border-color);
+            overflow: hidden;
+        }
+
+        .header {
+            padding: 1.5rem;
+            border-bottom: 1px solid var(--border-color);
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-start;
+        }
+
+        .header h1 {
+            font-size: 1.25rem;
+            font-weight: 700;
+            color: var(--text-main);
+            margin-bottom: 0.25rem;
+        }
+
+        .header p {
+            font-size: 0.85rem;
+            color: var(--text-muted);
+        }
+
+        .badge {
+            background-color: #fef3c7;
+            color: #92400e;
+            font-size: 0.75rem;
+            font-weight: 600;
+            padding: 0.25rem 0.75rem;
+            border-radius: 9999px;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+        }
+
+        .content {
+            padding: 1.5rem;
+        }
+
+        .section-group {
+            margin-bottom: 1.25rem;
+        }
+
+        .section-group:last-child {
+            margin-bottom: 0;
+        }
+
+        .label {
+            font-size: 0.75rem;
+            font-weight: 600;
+            text-transform: uppercase;
+            color: var(--text-muted);
+            letter-spacing: 0.05em;
+            margin-bottom: 0.35rem;
+            display: block;
+        }
+
+        .value {
+            font-size: 1rem;
+            color: var(--text-main);
+            font-weight: 500;
+        }
+
+        .skills-container {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 0.5rem;
+            margin-top: 0.25rem;
+        }
+
+        .skill-tag {
+            background-color: #f3f4f6;
+            color: #374151;
+            font-size: 0.8rem;
+            padding: 0.25rem 0.6rem;
+            border-radius: 6px;
+            font-weight: 500;
+        }
+
+        .actions {
+            padding: 1.5rem;
+            background-color: #f9fafb;
+            border-top: 1px solid var(--border-color);
+            display: flex;
+            gap: 1rem;
+        }
+
+        .btn {
+            flex: 1;
+            padding: 0.75rem 1rem;
+            font-size: 0.9rem;
+            font-weight: 600;
+            border-radius: 8px;
+            border: none;
+            cursor: pointer;
+            transition: background-color 0.2s, transform 0.1s;
+        }
+
+        .btn:active {
+            transform: scale(0.98);
+        }
+
+        .btn-primary {
+            background-color: var(--primary-color);
+            color: white;
+        }
+
+        .btn-primary:hover {
+            background-color: var(--primary-hover);
+        }
+
+        .btn-secondary {
+            background-color: #ffffff;
+            color: #374151;
+            border: 1px solid var(--border-color);
+        }
+
+        .btn-secondary:hover {
+            background-color: #f3f4f6;
+        }
+    </style>
+</head>
+
+<body>
+
+    <div class="review-container">
+        <!-- Header -->
+        <div class="header">
+            <div>
+                <h1>Candidate Referral Review</h1>
+                <p>Partner Organization: <span id="partnerOrg">Loading...</span></p>
+            </div>
+            <span class="badge" id="statusBadge">Pending</span>
+        </div>
+
+        <!-- Main Candidate Information -->
+        <div class="content">
+            <div class="section-group">
+                <span class="label">Candidate Name</span>
+                <div class="value" id="candidateName">Loading...</div>
+            </div>
+
+            <div class="section-group">
+                <span class="label">Career Track</span>
+                <div class="value" id="careerTrack">Loading...</div>
+            </div>
+
+            <div class="section-group">
+                <span class="label">Core Skills</span>
+                <div class="skills-container" id="skillsContainer">
+                    <!-- Dynamically inserted skills -->
+                </div>
+            </div>
+        </div>
+
+        <!-- Action Buttons -->
+        <div class="actions">
+            <button class="btn btn-secondary" onclick="handleAction('declined')">Decline</button>
+            <button class="btn btn-primary" onclick="handleAction('accepted')">Accept & Verify</button>
+        </div>
+    </div>
+
+    <script>
+        // Mock database for frontend testing purposes
+        const mockReferralsDatabase = {
+            "ref_123": {
+                partnerOrganization: "AADP",
+                status: "Pending",
+                candidateName: "Abebe Kebede",
+                careerTrack: "Software Engineering / Full-Stack",
+                skills: ["React", "Node.js", "Python", "TypeScript"]
+            },
+            "ref_456": {
+                partnerOrganization: "TechEthiopia Hub",
+                status: "Pending",
+                candidateName: "Tigist Mulugeta",
+                careerTrack: "Mobile Development / Flutter",
+                skills: ["Flutter", "Dart", "Firebase", "REST APIs"]
+            }
+        };
+
+        // Extract token from URL query params (e.g., ?token=ref_123) or default to ref_123
+        const urlParams = new URLSearchParams(window.location.search);
+        const token = urlParams.get('token') || 'ref_123';
+
+        // Fetch mock data based on token, or fallback to a default candidate if token is unknown
+        const referralData = mockReferralsDatabase[token] || {
+            partnerOrganization: "Partner Network",
+            status: "Pending",
+            candidateName: "Sample Candidate",
+            careerTrack: "General Tech Track",
+            skills: ["Problem Solving", "Communication"]
+        };
+
+        // Populate HTML elements dynamically
+        document.getElementById('partnerOrg').textContent = referralData.partnerOrganization;
+        document.getElementById('statusBadge').textContent = referralData.status;
+        document.getElementById('candidateName').textContent = referralData.candidateName;
+        document.getElementById('careerTrack').textContent = referralData.careerTrack;
+
+        const skillsContainer = document.getElementById('skillsContainer');
+        referralData.skills.forEach(skill => {
+            const span = document.createElement('span');
+            span.className = 'skill-tag';
+            span.textContent = skill;
+            skillsContainer.appendChild(span);
+        });
+
+        // Action button handler
+        function handleAction(actionType) {
+            if (actionType === 'accepted') {
+                alert(`Success! Referral for ${referralData.candidateName} has been marked as Accepted.`);
+                document.getElementById('statusBadge').textContent = 'Accepted';
+                document.getElementById('statusBadge').style.backgroundColor = '#d1fae5';
+                document.getElementById('statusBadge').style.color = '#065f46';
+            } else {
+                alert(`Referral for ${referralData.candidateName} has been declined.`);
+                document.getElementById('statusBadge').textContent = 'Declined';
+                document.getElementById('statusBadge').style.backgroundColor = '#fee2e2';
+                document.getElementById('statusBadge').style.color = '#991b1b';
+            }
+        }
+    </script>
+
+</body>
+
+</html>
