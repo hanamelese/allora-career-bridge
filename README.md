@@ -149,11 +149,24 @@ form, for a link to be sent by SMS to the organisation's referral partners
 `/referrals/:token`, where the partner sees the learner's name and phone and
 can accept the referral.
 
-**No SMS provider is wired up yet.** With `SMS_PROVIDER` unset, every send
-fails with `sms_not_configured` and nothing is reported as sent. To enable
-it, add a provider in `API/src/sms/index.js` and put its credentials in
-`API/.env` (never in the frontend). Set `PUBLIC_APP_URL` to where the
-dashboard is served so links in messages point to it.
+**Sending goes through [AfroMessage](https://afromessage.com)** (Ethiopia), set
+up in `API/.env` (never in the frontend):
+
+```env
+SMS_PROVIDER=afromessage
+AFROMESSAGE_API_KEY=...        # the account's API token
+IDENTIFIER_KEY=...             # optional: the identifier ("from")
+AFROMESSAGE_SENDER=...         # optional: an approved sender name
+PUBLIC_APP_URL=http://localhost:5173   # the dashboard: links in messages open its referral page
+```
+
+A referral is marked `sent` only once AfroMessage accepts the message (it
+returns a message id); otherwise `failed`, with AfroMessage's error code.
+The message is the one the learner was shown (`buildReferralMessage`), with
+the organisation's name and a one-time link. With `SMS_PROVIDER` unset,
+every send fails with `sms_not_configured` and nothing is reported as sent.
+Another provider can be added beside it in `API/src/sms/providers/`
+(`API/src/sms/index.js` explains how).
 
 ## Partner accounts and the Sign up / Sign in form
 

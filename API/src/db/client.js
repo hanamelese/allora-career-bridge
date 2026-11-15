@@ -1,3 +1,4 @@
+import { fileURLToPath } from 'node:url';
 import { mkdirSync } from 'node:fs';
 import { dirname } from 'node:path';
 import Database from 'better-sqlite3';
@@ -37,7 +38,9 @@ export function createDatabase(url) {
 
   const db = drizzle(sqlite, { schema });
 
-  migrate(db, { migrationsFolder: new URL('../../drizzle', import.meta.url).pathname });
+  /* fileURLToPath, not URL.pathname: a path with spaces (or a Windows
+     drive letter) must be a real file path for the migrator. */
+  migrate(db, { migrationsFolder: fileURLToPath(new URL('../../drizzle', import.meta.url)) });
   sqlite.exec(IMMUTABILITY_TRIGGERS);
   upgradeStoredDrafts(db);
   ensurePartnerForms(db);
