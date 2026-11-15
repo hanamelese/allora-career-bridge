@@ -1,28 +1,32 @@
-import { useRef, useState } from 'react';
+import { useId, useRef, useState } from 'react';
 import { Link } from 'react-router-dom';
 import { Check, Copy } from 'lucide-react';
 import { Button } from '../ui/Button.jsx';
-import { WIDGET_VERSION, buildEmbedTag, draftDiffersFromPublished, latestPublished, widgetUrl } from './embedTag.js';
+import { WIDGET_VERSION, draftDiffersFromPublished, latestPublished, widgetUrl } from './embedTag.js';
+import { DEFAULT_FRAMEWORK, FRAMEWORKS, buildSnippet, findFramework } from './embedSnippets.js';
 import { useLanguage, useT } from '../../i18n/index.js';
 import './EmbedTagBox.css';
 
 
-/* How a page collects the answers. Code, so it is not translated. */
-const ANSWERS_SNIPPET = `<script>
-  document.addEventListener('onboarding-submit', (event) => {
-    const { answers, files } = event.detail; // answers: plain JSON; files: File objects
-    // Optional: make the form wait for your save, so it says "sent" only once it worked.
-    event.detail.waitUntil(
-      fetch('/your-endpoint', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(answers),
-      }).then((response) => {
-        if (!response.ok) throw new Error('Not saved');
-      }),
-    );
-  });
-</script>`;
+const FRAMEWORK_KEY = 'bridge-embed-framework';
+
+/* The chosen framework is a per-viewer convenience: remembered in this
+   browser if it can be, and fine without it. */
+function readFramework() {
+  try {
+    return findFramework(window.localStorage.getItem(FRAMEWORK_KEY) ?? DEFAULT_FRAMEWORK).id;
+  } catch {
+    return DEFAULT_FRAMEWORK;
+  }
+}
+
+function saveFramework(id) {
+  try {
+    window.localStorage.setItem(FRAMEWORK_KEY, id);
+  } catch {
+    /* Storage can be blocked; the choice then lasts until the page closes. */
+  }
+}
 
 /**
  * The tag a partner pastes into their own website - always for the
@@ -40,7 +44,10 @@ export function EmbedTagBox({ form, hasUnsavedChanges = false }) {
   const t = useT();
   const language = useLanguage();
   const [status, setStatus] = useState('');
+  const [frameworkId, setFrameworkId] = useState(readFramework);
   const codeRef = useRef(null);
+  const tabRefs = useRef({});
+  const panelId = useId();
   const published = latestPublished(form);
 
   if (!published) {
@@ -56,12 +63,37 @@ export function EmbedTagBox({ form, hasUnsavedChanges = false }) {
     );
   }
 
-  const snippet = buildEmbedTag({
+  const framework = findFramework(frameworkId);
+  const snippet = buildSnippet(framework.id, {
     formId: form.formId,
     publicKey: form.publicKey,
     version: published.version,
     language: published.config.defaultLanguage ?? 'en',
+    widgetSrc: widgetUrl(),
   });
+
+  function choose(id, moveFocus) {
+    setFrameworkId(id);
+    setStatus('');
+    saveFramework(id);
+    if (moveFocus) tabRefs.current[id]?.focus();
+  }
+
+  /* Tabs pattern: arrows move along the row (and wrap), Home and End jump
+     to the ends; the chosen tab is the only one in the Tab order. */
+  function onTabKeyDown(event) {
+    const index = FRAMEWORKS.findIndex((item) => item.id === framework.id);
+    const last = FRAMEWORKS.length - 1;
+    const target = {
+      ArrowRight: index === last ? 0 : index + 1,
+      ArrowLeft: index === 0 ? last : index - 1,
+      Home: 0,
+      End: last,
+    }[event.key];
+    if (target === undefined) return;
+    event.preventDefault();
+    choose(FRAMEWORKS[target].id, true);
+  }
   const draftDiffers = hasUnsavedChanges || draftDiffersFromPublished(form);
 
   async function copy() {
@@ -122,17 +154,50 @@ export function EmbedTagBox({ form, hasUnsavedChanges = false }) {
         </p>
       ) : null}
 
-      <pre className="embed-tag__code" tabIndex={0} aria-label={t('workspace.embed.codeLabel', published.version)} ref={codeRef}>
-        <code>{snippet}</code>
-      </pre>
+      <div className="embed-tag__tabs" role="tablist" aria-label={t('workspace.embed.frameworksLabel')}>
+        {FRAMEWORKS.map((item) => {
+          const selected = item.id === framework.id;
+          return (
+            <button
+              key={item.id}
+              type="button"
+              role="tab"
+              id={`${panelId}-tab-${item.id}`}
+              className="embed-tag__tab"
+              aria-selected={selected}
+              aria-controls={panelId}
+              tabIndex={selected ? 0 : -1}
+              ref={(node) => {
+                tabRefs.current[item.id] = node;
+              }}
+              onClick={() => choose(item.id, false)}
+              onKeyDown={onTabKeyDown}
+            >
+              {item.label}
+            </button>
+          );
+        })}
+      </div>
+
+      <div className="embed-tag__panel" role="tabpanel" id={panelId} aria-labelledby={`${panelId}-tab-${framework.id}`}>
+        <p className="embed-tag__how">{t(`workspace.embed.how.${framework.id}`)}</p>
+        <pre
+          className="embed-tag__code"
+          tabIndex={0}
+          aria-label={t('workspace.embed.codeLabel', published.version, framework.label)}
+          ref={codeRef}
+        >
+          <code>{snippet}</code>
+        </pre>
+      </div>
 
       <div className="embed-tag__actions">
         <Button variant="secondary" icon={status === 'copied' ? Check : Copy} onClick={copy}>
-          {status === 'copied' ? t('workspace.embed.copied') : t('workspace.embed.copyTag')}
+          {status === 'copied' ? t('workspace.embed.copied') : t('workspace.embed.copyTag', framework.label)}
         </Button>
         <p className="embed-tag__status" role="status">
           {status === 'copied'
-            ? t('workspace.embed.copiedStatus', published.version)
+            ? t('workspace.embed.copiedStatus', published.version, framework.label)
             : status === 'selected'
               ? t('workspace.embed.selectedStatus')
               : ''}
@@ -166,9 +231,6 @@ export function EmbedTagBox({ form, hasUnsavedChanges = false }) {
           <dt>{t('workspace.embed.answersTitle')}</dt>
           <dd>
             <p>{t('workspace.embed.answersText')}</p>
-            <pre className="embed-tag__code embed-tag__code--small" tabIndex={0} aria-label={t('workspace.embed.answersCodeLabel')}>
-              <code>{ANSWERS_SNIPPET}</code>
-            </pre>
             <p>{t('workspace.embed.answersNote')}</p>
           </dd>
         </div>

@@ -176,8 +176,15 @@ own link switches between them (`onboarding-mode` event).
 4. **Find the tag.** Open the form's **Embed tag** tab (the fourth item). It
    always shows the latest *published* version; if your draft has changed
    since, it says so.
-5. **Copy it.** **Copy the tag**. If the browser blocks copying, the tag is
-   selected for you: press Ctrl+C (Cmd+C on a Mac).
+5. **Choose where it goes, and copy it.** A row of tabs gives the tag for
+   **HTML, React, Next.js, Vue, Angular, Svelte, WordPress and PHP**, each as
+   a complete example in that framework's own style: it loads the script
+   once, places the form, and receives the answers. **Copy the … code**
+   copies the chosen one; the choice is remembered in that browser. If the
+   browser blocks copying, the code is selected for you: press Ctrl+C
+   (Cmd+C on a Mac). The examples are in
+   `Frontend/src/components/preview/embedSnippets.js` and are checked by its
+   tests (each parses; the PHP one is linted and run when `php` is installed).
 6. **Paste it** into your page's HTML where the form should appear:
 
    ```html
@@ -395,7 +402,7 @@ tag point straight at the API on `:3001`, as it would when deployed.
    `tools/delivery-receiver/received/`.
 6. **Configuring and publishing.** In the dashboard: **Configure** (switch a
    question on or off, change upload limits), **Preview**, **Save draft**,
-   **Publish** (version *N+1*), then **Embed tag** → **Copy the tag**. Paste
+   **Publish** (version *N+1*), then **Embed tag** → **HTML** → **Copy the HTML code**. Paste
    it over the tag in the Savanna page and reload: the page now shows the new
    version. Until the tag is replaced, the page keeps the version it names.
    The Savanna website is allowed under **Your organisation → Websites**

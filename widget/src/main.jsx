@@ -33,6 +33,17 @@ const HOST_CSS = `
   .ow-message--error { border: 2px solid #9b1c1c; border-radius: 8px; background: #fdf2f2; }
 `;
 
+/* The form sizes its text in rem. A page that shrinks its root font (the
+   Savanna portal sets 14px) would shrink the whole form with it, so the
+   widget measures that and puts it back: --fe-root-fix (set in fitText)
+   is folded into every text size, the A-/A/A+ setting included. It only
+   ever enlarges, back to the reader's own browser default. */
+const TEXT_FIX_CSS = `
+  .fe-form { --fe-scale: var(--fe-root-fix, 1); }
+  .fe-form[data-text-size='small'] { --fe-scale: calc(0.875 * var(--fe-root-fix, 1)); }
+  .fe-form[data-text-size='large'] { --fe-scale: calc(1.25 * var(--fe-root-fix, 1)); }
+`;
+
 /**
  * <onboarding-form form-id="…" public-key="pk_live_…" form-version="3" lang="en">
  *
@@ -66,13 +77,27 @@ class OnboardingFormElement extends HTMLElement {
     if (!this.shadowRoot) {
       const shadow = this.attachShadow({ mode: 'open' });
       const style = document.createElement('style');
-      style.textContent = `${HOST_CSS}\n${formCss}`;
+      style.textContent = `${HOST_CSS}\n${formCss}\n${TEXT_FIX_CSS}`;
       this.mountPoint = document.createElement('div');
       shadow.append(style, this.mountPoint);
     }
 
+    this.fitText();
+
     this.root ??= createRoot(this.mountPoint);
     this.load();
+  }
+
+  /** Undo a page's smaller root font size inside the form (see TEXT_FIX_CSS). */
+  fitText() {
+    const probe = document.createElement('span');
+    probe.style.cssText = 'position:absolute;visibility:hidden;font-size:medium';
+    this.shadowRoot.append(probe);
+    const browserDefault = parseFloat(getComputedStyle(probe).fontSize);
+    probe.remove();
+    const pageRoot = parseFloat(getComputedStyle(document.documentElement).fontSize);
+    const fix = pageRoot > 0 && browserDefault > pageRoot ? browserDefault / pageRoot : 1;
+    this.mountPoint.style.setProperty('--fe-root-fix', String(Math.round(fix * 1000) / 1000));
   }
 
   disconnectedCallback() {

@@ -7,6 +7,7 @@
     <title>Sign in | ALX Savanna</title>
     <link rel="stylesheet" href="assets/css/google-fonts-poppins.css" />
     <link rel="stylesheet" href="assets/css/login.css" />
+    <link rel="stylesheet" href="assets/css/full-view.css" />
   </head>
   <body class="login-page">
     <a class="login-skip" href="#login-form">Skip to the sign-in form</a>
@@ -24,6 +25,11 @@
           <!-- The heading and line below follow the form's mode (assets/js/login.js). -->
           <h1 class="login__title" data-login-title tabindex="-1">Welcome back!</h1>
           <p class="login__lead" data-login-lead>Sign in to continue your learning.</p>
+
+          <!-- Opens the form below as a large pop-up (assets/js/full-view.js); hidden without that script. -->
+          <div class="full-view-bar">
+            <button type="button" class="full-view-open" data-full-view-open="login-form" aria-haspopup="dialog" hidden>Full view</button>
+          </div>
 
           <section class="login__form" id="login-form" aria-labelledby="login-form-label" tabindex="-1" data-onboarding-slot="login">
             <h2 class="login__visually-hidden" id="login-form-label">Sign in or create an account</h2>
@@ -50,7 +56,7 @@
           <aside class="login__demo" aria-label="About this demo">
             <p>
               <strong>Demo:</strong> this page shows the real Sign up / Sign in form published from Allora
-              Accessibility Bridge (its own link switches between signing in and creating an account), but it
+              Accessibility Bridge (choose <strong>Create account</strong> above, or use the form's own link, to sign up), but it
               does not check or create accounts. When you continue, your password is removed in this browser
               straight away, nothing is sent or kept, and you go on to the <a href="guide/">demo guide</a>.
             </p>
@@ -60,5 +66,6 @@
     </div>
 
     <script src="assets/js/login.js"></script>
+    <script src="assets/js/full-view.js"></script>
   </body>
 </html>

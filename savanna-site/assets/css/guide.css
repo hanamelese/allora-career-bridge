@@ -325,3 +325,48 @@ kbd {
     padding-block: 2.5rem 2rem;
   }
 }
+
+/* ---- Create an account (opens the sign-up form in a dialog; see ../js/guide.js) ---- */
+.guide-cta {
+  display: inline-flex;
+  align-items: center;
+  min-height: 2.75rem;
+  padding: 0.5rem 1.125rem;
+  border: 2px solid var(--guide-navy);
+  border-radius: 0.5rem;
+  background: var(--guide-navy);
+  color: #ffffff;
+  font: inherit;
+  font-weight: 600;
+  line-height: 1.2;
+  cursor: pointer;
+}
+
+.guide-cta:hover {
+  background: #0f1b38;
+}
+
+.guide-cta--outline {
+  background: #ffffff;
+  color: var(--guide-navy);
+}
+
+.guide-cta--outline:hover {
+  background: var(--guide-tint);
+}
+
+.guide-cta[hidden] {
+  display: none;
+}
+
+.guide-unavailable {
+  margin: 0;
+  padding: 1rem;
+  border: 2px solid var(--guide-red);
+  border-radius: 0.5rem;
+  background: #fdf7f7;
+}
+
+.guide-unavailable[hidden] {
+  display: none;
+}

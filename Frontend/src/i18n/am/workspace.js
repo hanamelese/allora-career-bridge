@@ -106,10 +106,24 @@ export default {
     widgetVersion: 'የዊጀት ስሪት',
     draftDiffers: (version) =>
       `ረቂቅዎ ገና በሥራ ላይ ያልዋሉ ለውጦች አሉት። ይህ ኮድ እንደታተመው ስሪት ${version}ን ያሳያል። ለውጦችዎን በድረ-ገጽዎ ላይ ለማድረግ አዲስ ስሪት ያትሙ።`,
-    codeLabel: (version) => `ለስሪት ${version} የማካተቻ ኮድ`,
+    frameworksLabel: 'ቅጹን የሚያስቀምጡበት',
+    how: {
+      html: 'ቅጹ እንዲታይ በሚፈልጉበት ቦታ ይህን በገጽዎ HTML ውስጥ ይለጥፉት። መጨረሻ ላይ ያለው ስክሪፕት መልሶቹን ይቀበላል።',
+      react:
+        'ይህን OnboardingForm.jsx ብለው ያስቀምጡት፤ ቅጹ እንዲታይ በሚፈልጉበት ቦታ <OnboardingForm /> ያሳዩ። የዊጀት ስክሪፕቱን አንድ ጊዜ ራሱ ያክላል።',
+      nextjs:
+        'ይህን እንደ ክፍል (component) ያስቀምጡት፤ ለምሳሌ app/components/OnboardingForm.jsx፤ ከዚያ በማንኛውም ገጽ ላይ ያሳዩት። ቅጹ በአሳሹ ውስጥ ስለሚሠራ "use client" ያስፈልጋል።',
+      vue: 'ይህን OnboardingForm.vue ብለው ያስቀምጡት። Vue የቅጹን መለያ (tag) እንዳይነካ፣ በመጀመሪያዎቹ መስመሮች ያለውን isCustomElement ቅንብር ወደ vite.config.js ያክሉ።',
+      angular:
+        'በመጀመሪያው አስተያየት ያለውን የስክሪፕት መስመር አንድ ጊዜ ወደ src/index.html ያክሉ፤ ከዚያ <app-onboarding-form> በማንኛውም አብነት ውስጥ ይጠቀሙ።',
+      svelte: 'ይህን OnboardingForm.svelte ብለው ያስቀምጡት፤ ቅጹ እንዲታይ በሚፈልጉበት ቦታ <OnboardingForm /> ይጠቀሙ።',
+      wordpress: 'በብሎክ አርታዒው ውስጥ ቅጹ እንዲታይ በሚፈልጉበት ቦታ "Custom HTML" ብሎክ ያክሉ፤ ይህን በውስጡ ይለጥፉ።',
+      php: 'ይህን በPHP አብነትዎ ውስጥ ይለጥፉት። መልሶቹን ለመቀበል፣ መጨረሻ ላይ ባለው አስተያየት እንደሚታየው save-answers.php ን ከጎኑ ይፍጠሩ።',
+    },
+    codeLabel: (version, framework) => `ለስሪት ${version} የ${framework} የማካተቻ ኮድ`,
     copied: 'ተቀድቷል',
-    copyTag: 'ኮዱን ቅዳ',
-    copiedStatus: (version) => `ለስሪት ${version} የማካተቻ ኮድ ወደ ቅንጥብ ሰሌዳዎ ተቀድቷል።`,
+    copyTag: (framework) => `የ${framework} ኮዱን ቅዳ`,
+    copiedStatus: (version, framework) => `ለስሪት ${version} የ${framework} የማካተቻ ኮድ ወደ ቅንጥብ ሰሌዳዎ ተቀድቷል።`,
     selectedStatus: 'አሳሽዎ መቅዳት አልፈቀደም። ኮዱ ተመርጧል፦ ለመቅዳት Ctrl+C (ወይም Cmd+C) ይጫኑ።',
     whereTitle: 'የት እንደሚቀመጥ',
     whereText: 'ቅጹ እንዲታይ በሚፈልጉበት ቦታ በገጽዎ HTML ውስጥ ይለጥፉት። ስክሪፕቱ የሚጫነው ከዚህ ነው፦',
@@ -121,8 +135,7 @@ export default {
     publicKeyText: 'በድረ-ገጽ ውስጥ ማስቀመጥ ደኅንነቱ የተጠበቀ ነው። ሚስጥራዊ ቁልፍዎ በአገልጋዩ ላይ ይቆያል፤ እዚህ ፈጽሞ አይካተትም።',
     answersTitle: 'መልሶቹን ማግኘት',
     answersText:
-      'አንድ ሰው ቅጹን ሲልክ፣ ገጽዎ እያንዳንዱን መልስ በ onboarding-submit ክስተት ውስጥ እንደ JSON ይቀበላል፤ ፋይሎች ካሉ እንደ File ዕቃዎች ይመጣሉ። እንደሚፈልጉት ያስኬዷቸው፤ ለምሳሌ በራስዎ አገልጋይ ላይ በማስቀመጥ፦',
-    answersCodeLabel: 'መልሶቹን ለመሰብሰብ የሚያገለግል ምሳሌ ኮድ',
+      'አንድ ሰው ቅጹን ሲልክ፣ ገጽዎ እያንዳንዱን መልስ በ onboarding-submit ክስተት ውስጥ እንደ JSON ይቀበላል፤ ፋይሎች ካሉ እንደ File ዕቃዎች ይመጣሉ። ከላይ ያለው እያንዳንዱ ምሳሌ መልሶቹን በራስዎ አገልጋይ ላይ ያስቀምጣል፤ አድራሻውን በራስዎ ይተኩ፣ ወይም እንደሚፈልጉት ያስኬዷቸው።',
     answersNote:
       'Allora Accessibility Bridge መልሶቹን አይቀበልም፤ አያስቀምጥምም። በተጨማሪ በቀጥታ ወደ ራስዎ አገልጋይ እንዲላኩ ከፈለጉ፣ አድራሻውን በ«የእርስዎ ድርጅት → የተላኩ ቅጾች የሚሄዱበት» ስር ያስገቡ።',
     pinnedTitle: 'የተቆለፉ ስሪቶች',

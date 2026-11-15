@@ -47,6 +47,7 @@
 
     <link rel="stylesheet" href="../assets/css/static-page.css" media="all" />
     <link rel="stylesheet" href="../assets/css/onboarding-demo.css" media="all" />
+    <link rel="stylesheet" href="../assets/css/full-view.css" media="all" />
   </head>
 
   <body class="signed_in env_development notranslate" translate="no" data-theme-suffix="_alx">
@@ -161,11 +162,15 @@
           <h1 class="fs-3 fw-semibold mt-3 mb-2">Apply for a job</h1>
           <p class="onboarding-intro text-muted mb-4">Apply to ALX's hiring partners, one question at a time. You can add your CV, answer by typing or by voice, and say privately what would help you at this job.</p>
 
+          <!-- Opens the form below as a large pop-up (../assets/js/full-view.js); hidden without that script. -->
+          <div class="full-view-bar">
+            <button type="button" class="full-view-open" data-full-view-open="job-form-card" aria-haspopup="dialog" hidden>Full view</button>
+          </div>
           <section
+            id="job-form-card"
             class="card homepage-card border-primary-subtle rounded-3 onboarding-card"
             aria-labelledby="job-application-form-title"
           >
-            <h2 class="card-header fw-medium fs-6 mb-0" id="job-application-form-title">Job application</h2>
             <div class="card-body onboarding-slot" data-onboarding-slot="job-application">
               <!--
                 The tag below is pasted unchanged from Allora Accessibility Bridge (form -> Embed tag -> Copy the tag).
@@ -223,5 +228,6 @@
     <script src="../assets/js/bootstrap.bundle.js"></script>
     <script src="../assets/js/static-page.js"></script>
     <script src="../assets/js/onboarding-demo.js"></script>
+    <script src="../assets/js/full-view.js"></script>
   </body>
 </html>

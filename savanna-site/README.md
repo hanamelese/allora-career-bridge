@@ -65,8 +65,8 @@ Pages added for the demo, each showing a form built and published in **Allora Ac
 
 | Address | Page | What it shows |
 |---------|------|---------------|
-| `/` | `index.html` | **Sign in / Create account**: ALX's published Sign up / Sign in form in a sign-in page styled after ALX's other sign-in pages. The form's own link switches to creating an account; `/#create-account` opens there. |
-| `/guide/` | `guide/index.html` | **The demo guide**: what the demo is, where to begin, and the steps through it |
+| `/` | `index.html` | **Sign in / Create account**: ALX's published Sign up / Sign in form in a sign-in page styled after ALX's other sign-in pages. A **Sign in | Create account** switch above the form (and the form's own link) switches to creating an account; `/#create-account` opens there. |
+| `/guide/` | `guide/index.html` | **The demo guide**: what the demo is, where to begin, and the steps through it. Its **Create an account** buttons open the same sign-up form in a pop-up. |
 | `/pages/register.html` | `pages/register.html` | **Learner Registration & Profile**, in the portal layout |
 | `/pages/job-application.html` | `pages/job-application.html` | **Job Application**, in the portal layout |
 
@@ -76,9 +76,13 @@ questions come from the Bridge's API, and sent answers are handed to the page as
 what they received; the Bridge keeps none). The two portal forms also link from the sidebar of every page ("Get hired")
 and from a "Ready for work?" card on the self-paced homepage.
 
+**Full view.** Every embedded form has a **Full view** button above it that opens the form as a large pop-up
+over a blurred page (`assets/js/full-view.js`, `assets/css/full-view.css`). The form is not moved or restarted,
+so answers and the current question stay; Escape, **Close full view** or a click outside closes it.
+
 **Sign in and sign up are a demo.** This static site has no accounts. The form hands what was typed to the
 page; the page (`assets/js/login.js`) removes the password at once, sends and keeps nothing, and opens the
-guide. The sign-in cover photo is ALX's own, loaded from ehub.alxafrica.com; without a connection the panel
+guide; the guide's sign-up pop-up (`assets/js/guide.js`) does the same. The sign-in cover photo is ALX's own, loaded from ehub.alxafrica.com; without a connection the panel
 shows its gradient.
 
 Also added: `assets/css/login.css` and `assets/js/login.js` (the sign-in page), `assets/css/guide.css` (the

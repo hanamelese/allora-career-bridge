@@ -4,8 +4,9 @@
 // including its own link between "Sign in" and "Create an account". It checks no account itself:
 // it hands what was typed to this page in an `onboarding-submit` event, and signing in (or up) is
 // the page's job. This static demo has no accounts, so it:
-//   - opens the form in sign-up mode for /#create-account, and keeps the page's heading, title and
-//     address in step with the form's mode (`onboarding-mode`);
+//   - offers a Sign in | Create account switch above the form (it sets the form's `mode`), opens
+//     the form in sign-up mode for /#create-account, and keeps the switch, heading, title and
+//     address in step with the form's mode, including when its own link is used (`onboarding-mode`);
 //   - removes the password from the submitted answers at once - it is never kept, logged or sent;
 //   - says what happens, then opens the demo guide.
 // If the form's script never loads, it says so in place of the form.
@@ -21,6 +22,8 @@
   var status = slot.querySelector('[data-login-status]');
   var title = document.querySelector('[data-login-title]');
   var lead = document.querySelector('[data-login-lead]');
+  var modeSwitch = document.querySelector('[data-login-switch]');
+  var modeButtons = modeSwitch ? modeSwitch.querySelectorAll('[data-login-mode]') : [];
 
   var COPY = {
     signIn: {
@@ -43,6 +46,9 @@
     lead.textContent = copy.lead;
     document.title = copy.page;
     window.history.replaceState(null, '', mode === 'signUp' ? '#create-account' : window.location.pathname);
+    Array.prototype.forEach.call(modeButtons, function (button) {
+      button.setAttribute('aria-pressed', String(button.getAttribute('data-login-mode') === (COPY[mode] ? mode : 'signIn')));
+    });
     // The form starts afresh in the new mode, so focus goes to the page's new heading.
     if (moveFocus) title.focus();
   }
@@ -55,6 +61,20 @@
   window.addEventListener('load', function () {
     if (unavailable && !window.customElements.get('onboarding-form')) unavailable.hidden = false;
   });
+
+  // The Sign in | Create account switch above the form. Focus stays on the button pressed.
+  if (modeSwitch && form) {
+    modeSwitch.hidden = false;
+    Array.prototype.forEach.call(modeButtons, function (button) {
+      button.addEventListener('click', function () {
+        var mode = button.getAttribute('data-login-mode');
+        if (button.getAttribute('aria-pressed') === 'true') return;
+        form.setAttribute('mode', mode);
+        if (status) status.textContent = '';
+        show(mode, false);
+      });
+    });
+  }
 
   slot.addEventListener('onboarding-mode', function (event) {
     show(event.detail && event.detail.mode, true);

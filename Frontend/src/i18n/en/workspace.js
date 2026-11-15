@@ -111,10 +111,25 @@ export default {
     widgetVersion: 'Widget version',
     draftDiffers: (version) =>
       `Your draft has changes that are not live yet. This tag shows version ${version}, as published. Publish a new version to put your changes on your site.`,
-    codeLabel: (version) => `Embed tag for version ${version}`,
+    frameworksLabel: 'Where you are putting the form',
+    how: {
+      html: 'Paste this into your page’s HTML where the form should appear. The script at the end receives the answers.',
+      react:
+        'Save this as OnboardingForm.jsx and render <OnboardingForm /> where the form should appear. It adds the widget script once by itself.',
+      nextjs:
+        'Save this as a component, for example app/components/OnboardingForm.jsx, and render it on any page. "use client" is needed because the form runs in the browser.',
+      vue: 'Save this as OnboardingForm.vue. Add the isCustomElement setting from its first lines to vite.config.js, so Vue leaves the form’s tag alone.',
+      angular:
+        'Add the script line from the first comment to src/index.html once, then use <app-onboarding-form> in any template.',
+      svelte: 'Save this as OnboardingForm.svelte and use <OnboardingForm /> where the form should appear.',
+      wordpress:
+        'In the block editor, add a "Custom HTML" block where the form should appear and paste this into it.',
+      php: 'Paste this into your PHP template. To receive the answers, create save-answers.php beside it, as the comment at the end shows.',
+    },
+    codeLabel: (version, framework) => `${framework} embed code for version ${version}`,
     copied: 'Copied',
-    copyTag: 'Copy the tag',
-    copiedStatus: (version) => `Embed tag for version ${version} copied to your clipboard.`,
+    copyTag: (framework) => `Copy the ${framework} code`,
+    copiedStatus: (version, framework) => `${framework} embed code for version ${version} copied to your clipboard.`,
     selectedStatus:
       'Your browser did not allow copying. The tag is selected: press Ctrl+C (or Cmd+C) to copy it.',
     whereTitle: 'Where it goes',
@@ -127,8 +142,7 @@ export default {
     publicKeyText: 'Safe to put in a web page. Your secret key stays on the server and is never included here.',
     answersTitle: 'Getting the answers',
     answersText:
-      'When someone sends the form, your page receives every answer as JSON in the onboarding-submit event, with any files as File objects. Process them as you need, for example by saving them on your own server:',
-    answersCodeLabel: 'Example code for collecting the answers',
+      'When someone sends the form, your page receives every answer as JSON in the onboarding-submit event, with any files as File objects. Each example above saves them on your own server; replace the address with yours, or process them as you need.',
     answersNote:
       'Allora Accessibility Bridge never receives or keeps the answers. To have them posted straight to your own server as well, add its address under Your organisation → Where submitted forms go.',
     pinnedTitle: 'Pinned versions',
