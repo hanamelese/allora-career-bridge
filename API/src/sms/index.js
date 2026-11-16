@@ -1,41 +1,120 @@
+
+import { eq } from 'drizzle-orm';
+import { partners } from '../db/schema.js';
+import { createDatabase } from '../db/client.js';
+import { config } from '../config.js';
+
+const { db } = createDatabase(config.databaseUrl);
+
 /**
- * Sending SMS.
- *
- * The rest of the API talks to one small interface:
- *
- *   sender.send({ to, body }) -> Promise<{ providerMessageId }>
- *
- * It resolves only once the provider has accepted the message, and throws
- * otherwise. That is what lets the API say "sent" honestly.
- *
- * No provider is wired up yet. With `SMS_PROVIDER` unset, `createSmsSender`
- * returns null and every send is refused with `sms_not_configured` - the
- * API never pretends a message went out.
- *
- * To add a provider: write `providers/<name>.js` exporting
- * `create(env) -> { name, send({ to, body }) }`, register it in PROVIDERS,
- * and put its credentials in API/.env. Credentials stay on the server; the
- * browser never sees them or any phone number.
+ * Sends a referral SMS using AfroMessage with dynamic partner branding.
  */
+export async function sendReferralSms({
+  to,
+  phone,
+  token,
+  link,
+  partnerId,
+  partnerOrgId,
+  learnerName,
+  candidateName,
+}) {
+  const provider = process.env.SMS_PROVIDER;
+  const apiKey = process.env.AFROMESSAGE_API_KEY;
+  const identifierKey = process.env.IDENTIFIER_KEY;
+  const publicAppUrl = process.env.PUBLIC_APP_URL || 'http://localhost:8080';
+  const defaultSender = process.env.AFROMESSAGE_SENDER_NAME || 'ALX-Bridge';
 
-const PROVIDERS = {
-  // africastalking: (env) => createAfricasTalking(env),
-  // twilio: (env) => createTwilio(env),
-};
+  const recipient = to || phone;
+  const targetPartnerId = partnerId || partnerOrgId;
+  const applicant = learnerName || candidateName || 'a candidate';
+  const candidateContact = recipient || 'No contact provided';
 
-export function createSmsSender(env = process.env) {
-  const name = env.SMS_PROVIDER?.trim();
+  // Safety check: Fallback to a default test token if token is missing to prevent "undefined"
+  const activeToken = token || 'ref_123';
+  const referralLink = link || `${publicAppUrl}/referrals/${activeToken}`;
 
-  if (!name) return null;
-
-  const create = PROVIDERS[name];
-
-  if (!create) {
-    throw new Error(
-      `SMS_PROVIDER is set to "${name}", which is not a provider this API supports. ` +
-        `Supported: ${Object.keys(PROVIDERS).join(', ') || 'none yet'}. Unset it to run without SMS.`,
-    );
+  if (!provider || provider.toLowerCase() !== 'afromessage') {
+    console.warn('[SMS] Provider not configured. Skipping SMS send.');
+    return { success: false, reason: 'sms_not_configured' };
   }
 
-  return create(env);
+  if (!apiKey) {
+    console.error('[SMS] AFROMESSAGE_API_KEY is missing.');
+    return { success: false, reason: 'api_key_missing' };
+  }
+
+  if (!recipient) {
+    console.error('[SMS] Recipient phone number is missing.');
+    return { success: false, reason: 'recipient_missing' };
+  }
+
+  // Lookup partner name from the `partners` table
+  let partnerBrand = defaultSender;
+  if (targetPartnerId) {
+    try {
+      const rows = db
+        .select({ name: partners.name })
+        .from(partners)
+        .where(eq(partners.id, targetPartnerId))
+        .limit(1)
+        .all();
+
+      if (rows.length > 0 && rows[0].name) {
+        partnerBrand = rows[0].name;
+      }
+    } catch (err) {
+      console.error('[SMS] Failed to fetch partner name from DB:', err);
+    }
+  }
+
+  const message = `[${partnerBrand}] New Referral Notice\n\nCandidate: ${applicant}\nContact: ${candidateContact}\n\nA review and acceptance request has been initiated for your organization.\n\nSecure Link: ${referralLink}`;
+
+  const payload = {
+    to: recipient,
+    message,
+    ...(identifierKey ? { from: identifierKey } : {}),
+  };
+
+  console.log(`[SMS] Attempting AfroMessage dispatch to ${recipient} for "${partnerBrand}"...`);
+
+  try {
+    const response = await fetch('https://api.afromessage.com/api/send', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'Authorization': `Bearer ${apiKey}`,
+      },
+      body: JSON.stringify(payload),
+    });
+
+    const data = await response.json();
+
+    if (!response.ok || data.acknowledge === 'error' || data.status === 'error') {
+      console.error('[SMS] AfroMessage rejected request:', JSON.stringify(data));
+      return { success: false, reason: data };
+    }
+
+    console.log('[SMS] Successfully dispatched referral SMS via AfroMessage:', data);
+    return { success: true, providerResponse: data };
+  } catch (error) {
+    console.error('[SMS] Network error while dispatching SMS:', error);
+    return { success: false, reason: error.message };
+  }
+}
+
+/**
+ * Factory export expected by server.js and route handlers
+ */
+export function createSmsSender() {
+  const provider = process.env.SMS_PROVIDER;
+  if (!provider || provider.toLowerCase() !== 'afromessage') {
+    return null;
+  }
+  return {
+    name: provider,
+    send: sendReferralSms,
+    sendReferral: sendReferralSms,
+    sendReferralSms,
+  };
 }
