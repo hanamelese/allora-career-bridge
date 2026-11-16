@@ -1,0 +1,1759 @@
+{
+  "format": 1,
+  "partner": {
+    "id": "ptn_143c02079f0f6ae5",
+    "name": "ALX Ethiopia",
+    "createdAt": "2026-11-13T21:09:26.106Z"
+  },
+  "apiKey": {
+    "id": "key_60e23969425c6a2b",
+    "publicKey": "pk_live_649f880df0dc14c902fce4a2",
+    "createdAt": "2026-11-13T21:09:26.106Z"
+  },
+  "forms": [
+    {
+      "id": "frm_9907f7fc0113c63a",
+      "type": "account",
+      "draftConfig": {
+        "schemaVersion": 1,
+        "formId": "frm_9907f7fc0113c63a",
+        "type": "account",
+        "version": "draft",
+        "languages": [
+          "en",
+          "am"
+        ],
+        "defaultLanguage": "en",
+        "fields": [
+          {
+            "key": "name",
+            "enabled": true,
+            "required": true,
+            "locked": false,
+            "visibility": "public"
+          },
+          {
+            "key": "email",
+            "enabled": true,
+            "required": true,
+            "locked": true,
+            "visibility": "public"
+          },
+          {
+            "key": "password",
+            "enabled": true,
+            "required": true,
+            "locked": true,
+            "visibility": "public"
+          }
+        ],
+        "identityRoutes": [
+          "kebele_id",
+          "passport",
+          "refugee_id",
+          "other_document",
+          "no_document"
+        ],
+        "customFields": [],
+        "account": {
+          "mode": "signIn",
+          "allowEmailPassword": true,
+          "socialProviders": [
+            {
+              "key": "google",
+              "enabled": true,
+              "url": "https://example.org/alx/sign-in/google"
+            },
+            {
+              "key": "linkedin",
+              "enabled": true,
+              "url": "https://example.org/alx/sign-in/linkedin"
+            },
+            {
+              "key": "facebook",
+              "enabled": true,
+              "url": "https://example.org/alx/sign-in/facebook"
+            },
+            {
+              "key": "microsoft",
+              "enabled": true,
+              "url": "https://example.org/alx/sign-in/microsoft"
+            },
+            {
+              "key": "apple",
+              "enabled": true,
+              "url": "https://example.org/alx/sign-in/apple"
+            }
+          ]
+        }
+      },
+      "currentVersion": 2,
+      "status": "published",
+      "updatedAt": "2026-11-15T21:24:30.695Z",
+      "publishedAt": "2026-11-15T21:24:30.708Z"
+    },
+    {
+      "id": "frm_8a510b21f78b7470",
+      "type": "employer",
+      "draftConfig": {
+        "schemaVersion": 1,
+        "formId": "frm_8a510b21f78b7470",
+        "type": "employer",
+        "version": "draft",
+        "languages": [
+          "en",
+          "am"
+        ],
+        "defaultLanguage": "en",
+        "features": {
+          "voiceInput": true,
+          "readAloud": true,
+          "lowLiteracy": true
+        },
+        "fields": [
+          {
+            "key": "organisationName",
+            "enabled": true,
+            "required": true,
+            "locked": true,
+            "visibility": "public"
+          },
+          {
+            "key": "contactName",
+            "enabled": false,
+            "required": false,
+            "locked": false,
+            "visibility": "public"
+          },
+          {
+            "key": "contactEmail",
+            "enabled": false,
+            "required": false,
+            "locked": false,
+            "visibility": "public"
+          },
+          {
+            "key": "website",
+            "enabled": false,
+            "required": false,
+            "locked": false,
+            "visibility": "public"
+          },
+          {
+            "key": "sector",
+            "enabled": true,
+            "required": false,
+            "locked": false,
+            "visibility": "public"
+          },
+          {
+            "key": "jobTitle",
+            "enabled": false,
+            "required": false,
+            "locked": false,
+            "visibility": "public"
+          },
+          {
+            "key": "jobLocation",
+            "enabled": false,
+            "required": false,
+            "locked": false,
+            "visibility": "public"
+          },
+          {
+            "key": "employmentType",
+            "enabled": false,
+            "required": false,
+            "locked": false,
+            "visibility": "public"
+          },
+          {
+            "key": "workplaceAccommodations",
+            "enabled": true,
+            "required": false,
+            "locked": true,
+            "visibility": "public"
+          },
+          {
+            "key": "consent",
+            "enabled": true,
+            "required": true,
+            "locked": true,
+            "visibility": "public"
+          }
+        ],
+        "identityRoutes": [
+          "kebele_id",
+          "passport",
+          "refugee_id",
+          "other_document",
+          "no_document"
+        ],
+        "customFields": []
+      },
+      "currentVersion": 2,
+      "status": "published",
+      "updatedAt": "2026-11-14T17:33:29.941Z",
+      "publishedAt": "2026-11-14T07:56:29.190Z"
+    },
+    {
+      "id": "frm_b883f8fd2a3f719f",
+      "type": "jobApplication",
+      "draftConfig": {
+        "schemaVersion": 1,
+        "formId": "frm_b883f8fd2a3f719f",
+        "type": "jobApplication",
+        "version": "draft",
+        "languages": [
+          "en",
+          "am"
+        ],
+        "defaultLanguage": "en",
+        "features": {
+          "voiceInput": true,
+          "readAloud": true,
+          "lowLiteracy": false
+        },
+        "fields": [
+          {
+            "key": "name",
+            "enabled": true,
+            "required": true,
+            "locked": true,
+            "visibility": "public"
+          },
+          {
+            "key": "phone",
+            "enabled": true,
+            "required": true,
+            "locked": false,
+            "visibility": "public"
+          },
+          {
+            "key": "email",
+            "enabled": true,
+            "required": false,
+            "locked": false,
+            "visibility": "public"
+          },
+          {
+            "key": "jobReference",
+            "enabled": true,
+            "required": true,
+            "locked": false,
+            "visibility": "public"
+          },
+          {
+            "key": "experience",
+            "enabled": true,
+            "required": false,
+            "locked": false,
+            "visibility": "public"
+          },
+          {
+            "key": "motivation",
+            "enabled": true,
+            "required": false,
+            "locked": false,
+            "visibility": "public"
+          },
+          {
+            "key": "skills",
+            "enabled": true,
+            "required": false,
+            "locked": false,
+            "visibility": "public"
+          },
+          {
+            "key": "cvFile",
+            "enabled": true,
+            "required": false,
+            "locked": false,
+            "visibility": "public"
+          },
+          {
+            "key": "availability",
+            "enabled": true,
+            "required": false,
+            "locked": false,
+            "visibility": "public"
+          },
+          {
+            "key": "interviewAccommodations",
+            "enabled": true,
+            "required": false,
+            "locked": true,
+            "visibility": "private"
+          },
+          {
+            "key": "identityRoute",
+            "enabled": true,
+            "required": true,
+            "locked": true,
+            "visibility": "public"
+          },
+          {
+            "key": "documentId",
+            "enabled": true,
+            "required": false,
+            "locked": false,
+            "visibility": "public",
+            "showIf": {
+              "field": "identityRoute",
+              "in": [
+                "kebele_id",
+                "passport",
+                "refugee_id"
+              ]
+            }
+          },
+          {
+            "key": "identityDocumentFile",
+            "enabled": true,
+            "required": false,
+            "locked": false,
+            "visibility": "private",
+            "showIf": {
+              "field": "identityRoute",
+              "in": [
+                "kebele_id",
+                "passport",
+                "refugee_id",
+                "other_document"
+              ]
+            }
+          },
+          {
+            "key": "referral",
+            "enabled": true,
+            "required": false,
+            "locked": true,
+            "visibility": "private",
+            "showIf": {
+              "field": "identityRoute",
+              "in": [
+                "no_document"
+              ]
+            }
+          }
+        ],
+        "identityRoutes": [
+          "kebele_id",
+          "passport",
+          "refugee_id",
+          "other_document",
+          "no_document"
+        ],
+        "customFields": []
+      },
+      "currentVersion": 1,
+      "status": "published",
+      "updatedAt": "2026-11-14T18:03:12.651Z",
+      "publishedAt": "2026-11-14T20:18:27.199Z"
+    },
+    {
+      "id": "frm_97ff235fb7d159c5",
+      "type": "learner",
+      "draftConfig": {
+        "schemaVersion": 1,
+        "formId": "frm_97ff235fb7d159c5",
+        "type": "learner",
+        "version": "draft",
+        "languages": [
+          "en",
+          "am"
+        ],
+        "defaultLanguage": "en",
+        "features": {
+          "voiceInput": true,
+          "readAloud": true,
+          "lowLiteracy": true
+        },
+        "fields": [
+          {
+            "key": "name",
+            "enabled": true,
+            "required": true,
+            "locked": true,
+            "visibility": "public"
+          },
+          {
+            "key": "education",
+            "enabled": true,
+            "required": false,
+            "locked": false,
+            "visibility": "public"
+          },
+          {
+            "key": "currentLevel",
+            "enabled": true,
+            "required": true,
+            "locked": false,
+            "visibility": "public"
+          },
+          {
+            "key": "skills",
+            "enabled": true,
+            "required": false,
+            "locked": false,
+            "visibility": "public"
+          },
+          {
+            "key": "careerGoal",
+            "enabled": true,
+            "required": false,
+            "locked": false,
+            "visibility": "public"
+          },
+          {
+            "key": "location",
+            "enabled": true,
+            "required": false,
+            "locked": false,
+            "visibility": "public"
+          },
+          {
+            "key": "address",
+            "enabled": false,
+            "required": false,
+            "locked": false,
+            "visibility": "public"
+          },
+          {
+            "key": "supportNeeds",
+            "enabled": true,
+            "required": false,
+            "locked": true,
+            "visibility": "private"
+          },
+          {
+            "key": "supportNote",
+            "enabled": true,
+            "required": false,
+            "locked": false,
+            "visibility": "private"
+          },
+          {
+            "key": "consent",
+            "enabled": true,
+            "required": true,
+            "locked": true,
+            "visibility": "public"
+          }
+        ],
+        "identityRoutes": [
+          "kebele_id",
+          "passport",
+          "refugee_id",
+          "other_document",
+          "partner_referral",
+          "no_document"
+        ],
+        "customFields": []
+      },
+      "currentVersion": null,
+      "status": "draft",
+      "updatedAt": null,
+      "publishedAt": null
+    },
+    {
+      "id": "frm_bf1e9d4908a45f48",
+      "type": "signup",
+      "draftConfig": {
+        "schemaVersion": 1,
+        "formId": "frm_bf1e9d4908a45f48",
+        "type": "signup",
+        "version": "draft",
+        "languages": [
+          "en",
+          "am"
+        ],
+        "defaultLanguage": "en",
+        "features": {
+          "voiceInput": false,
+          "readAloud": true,
+          "lowLiteracy": false
+        },
+        "fields": [
+          {
+            "key": "name",
+            "enabled": true,
+            "required": false,
+            "locked": true,
+            "visibility": "public"
+          },
+          {
+            "key": "phone",
+            "enabled": false,
+            "required": false,
+            "locked": false,
+            "visibility": "public"
+          },
+          {
+            "key": "email",
+            "enabled": false,
+            "required": false,
+            "locked": false,
+            "visibility": "public"
+          },
+          {
+            "key": "location",
+            "enabled": true,
+            "required": false,
+            "locked": false,
+            "visibility": "public"
+          },
+          {
+            "key": "address",
+            "enabled": true,
+            "required": false,
+            "locked": false,
+            "visibility": "public"
+          },
+          {
+            "key": "education",
+            "enabled": true,
+            "required": false,
+            "locked": false,
+            "visibility": "public"
+          },
+          {
+            "key": "currentLevel",
+            "enabled": true,
+            "required": true,
+            "locked": false,
+            "visibility": "public"
+          },
+          {
+            "key": "skills",
+            "enabled": true,
+            "required": false,
+            "locked": false,
+            "visibility": "public"
+          },
+          {
+            "key": "careerGoal",
+            "enabled": true,
+            "required": false,
+            "locked": false,
+            "visibility": "public"
+          },
+          {
+            "key": "supportNeeds",
+            "enabled": true,
+            "required": false,
+            "locked": true,
+            "visibility": "private"
+          },
+          {
+            "key": "supportNote",
+            "enabled": true,
+            "required": false,
+            "locked": false,
+            "visibility": "private"
+          },
+          {
+            "key": "assistedBy",
+            "enabled": false,
+            "required": false,
+            "locked": false,
+            "visibility": "public"
+          },
+          {
+            "key": "assistedConsent",
+            "enabled": false,
+            "required": false,
+            "locked": false,
+            "visibility": "public"
+          },
+          {
+            "key": "identityRoute",
+            "enabled": true,
+            "required": true,
+            "locked": true,
+            "visibility": "public"
+          },
+          {
+            "key": "documentId",
+            "enabled": true,
+            "required": false,
+            "locked": false,
+            "visibility": "public",
+            "showIf": {
+              "field": "identityRoute",
+              "in": [
+                "kebele_id",
+                "passport",
+                "refugee_id"
+              ]
+            }
+          },
+          {
+            "key": "identityDocumentFile",
+            "enabled": true,
+            "required": false,
+            "locked": false,
+            "visibility": "private",
+            "showIf": {
+              "field": "identityRoute",
+              "in": [
+                "kebele_id",
+                "passport",
+                "refugee_id",
+                "other_document"
+              ]
+            }
+          },
+          {
+            "key": "referral",
+            "enabled": true,
+            "required": false,
+            "locked": true,
+            "visibility": "private",
+            "showIf": {
+              "field": "identityRoute",
+              "in": [
+                "no_document"
+              ]
+            }
+          }
+        ],
+        "identityRoutes": [
+          "kebele_id",
+          "no_document"
+        ],
+        "customFields": []
+      },
+      "currentVersion": 5,
+      "status": "published",
+      "updatedAt": "2026-11-14T18:03:04.522Z",
+      "publishedAt": "2026-11-14T20:14:19.409Z"
+    }
+  ],
+  "versions": [
+    {
+      "id": "ver_48546fb23ba04aa3",
+      "partnerFormId": "frm_9907f7fc0113c63a",
+      "version": 1,
+      "config": {
+        "schemaVersion": 1,
+        "formId": "frm_9907f7fc0113c63a",
+        "type": "account",
+        "version": "1",
+        "languages": [
+          "en",
+          "am"
+        ],
+        "defaultLanguage": "en",
+        "fields": [
+          {
+            "key": "name",
+            "enabled": true,
+            "required": true,
+            "locked": false,
+            "visibility": "public"
+          },
+          {
+            "key": "email",
+            "enabled": true,
+            "required": true,
+            "locked": true,
+            "visibility": "public"
+          },
+          {
+            "key": "password",
+            "enabled": true,
+            "required": true,
+            "locked": true,
+            "visibility": "public"
+          }
+        ],
+        "identityRoutes": [
+          "kebele_id",
+          "passport",
+          "refugee_id",
+          "other_document",
+          "no_document"
+        ],
+        "customFields": [],
+        "account": {
+          "mode": "signIn",
+          "allowEmailPassword": true,
+          "socialProviders": [
+            {
+              "key": "google",
+              "enabled": false,
+              "url": ""
+            },
+            {
+              "key": "linkedin",
+              "enabled": false,
+              "url": ""
+            },
+            {
+              "key": "facebook",
+              "enabled": false,
+              "url": ""
+            },
+            {
+              "key": "microsoft",
+              "enabled": false,
+              "url": ""
+            },
+            {
+              "key": "apple",
+              "enabled": false,
+              "url": ""
+            }
+          ]
+        }
+      },
+      "publishedAt": "2026-11-15T13:32:52.748Z"
+    },
+    {
+      "id": "ver_c410217260e8a544",
+      "partnerFormId": "frm_9907f7fc0113c63a",
+      "version": 2,
+      "config": {
+        "schemaVersion": 1,
+        "formId": "frm_9907f7fc0113c63a",
+        "type": "account",
+        "version": "2",
+        "languages": [
+          "en",
+          "am"
+        ],
+        "defaultLanguage": "en",
+        "fields": [
+          {
+            "key": "name",
+            "enabled": true,
+            "required": true,
+            "locked": false,
+            "visibility": "public"
+          },
+          {
+            "key": "email",
+            "enabled": true,
+            "required": true,
+            "locked": true,
+            "visibility": "public"
+          },
+          {
+            "key": "password",
+            "enabled": true,
+            "required": true,
+            "locked": true,
+            "visibility": "public"
+          }
+        ],
+        "identityRoutes": [
+          "kebele_id",
+          "passport",
+          "refugee_id",
+          "other_document",
+          "no_document"
+        ],
+        "customFields": [],
+        "account": {
+          "mode": "signIn",
+          "allowEmailPassword": true,
+          "socialProviders": [
+            {
+              "key": "google",
+              "enabled": true,
+              "url": "https://example.org/alx/sign-in/google"
+            },
+            {
+              "key": "linkedin",
+              "enabled": true,
+              "url": "https://example.org/alx/sign-in/linkedin"
+            },
+            {
+              "key": "facebook",
+              "enabled": true,
+              "url": "https://example.org/alx/sign-in/facebook"
+            },
+            {
+              "key": "microsoft",
+              "enabled": true,
+              "url": "https://example.org/alx/sign-in/microsoft"
+            },
+            {
+              "key": "apple",
+              "enabled": true,
+              "url": "https://example.org/alx/sign-in/apple"
+            }
+          ]
+        }
+      },
+      "publishedAt": "2026-11-15T21:24:30.708Z"
+    },
+    {
+      "id": "ver_95c677dfebdac27d",
+      "partnerFormId": "frm_8a510b21f78b7470",
+      "version": 1,
+      "config": {
+        "schemaVersion": 1,
+        "formId": "frm_8a510b21f78b7470",
+        "type": "employer",
+        "version": "1",
+        "languages": [
+          "en",
+          "am"
+        ],
+        "defaultLanguage": "en",
+        "features": {
+          "voiceInput": true,
+          "readAloud": true,
+          "lowLiteracy": true
+        },
+        "fields": [
+          {
+            "key": "organisationName",
+            "enabled": true,
+            "required": true,
+            "locked": true,
+            "visibility": "public"
+          },
+          {
+            "key": "contactName",
+            "enabled": true,
+            "required": true,
+            "locked": false,
+            "visibility": "public"
+          },
+          {
+            "key": "contactEmail",
+            "enabled": true,
+            "required": true,
+            "locked": false,
+            "visibility": "public"
+          },
+          {
+            "key": "website",
+            "enabled": true,
+            "required": false,
+            "locked": false,
+            "visibility": "public"
+          },
+          {
+            "key": "sector",
+            "enabled": true,
+            "required": false,
+            "locked": false,
+            "visibility": "public"
+          },
+          {
+            "key": "jobTitle",
+            "enabled": true,
+            "required": false,
+            "locked": false,
+            "visibility": "public"
+          },
+          {
+            "key": "jobLocation",
+            "enabled": true,
+            "required": false,
+            "locked": false,
+            "visibility": "public"
+          },
+          {
+            "key": "employmentType",
+            "enabled": true,
+            "required": false,
+            "locked": false,
+            "visibility": "public"
+          },
+          {
+            "key": "workplaceAccommodations",
+            "enabled": true,
+            "required": false,
+            "locked": true,
+            "visibility": "public"
+          },
+          {
+            "key": "consent",
+            "enabled": true,
+            "required": true,
+            "locked": true,
+            "visibility": "public"
+          }
+        ],
+        "identityRoutes": [
+          "kebele_id",
+          "passport",
+          "refugee_id",
+          "other_document",
+          "partner_referral",
+          "no_document"
+        ],
+        "customFields": []
+      },
+      "publishedAt": "2026-11-14T07:54:14.318Z"
+    },
+    {
+      "id": "ver_5b1e413b96c5f09d",
+      "partnerFormId": "frm_8a510b21f78b7470",
+      "version": 2,
+      "config": {
+        "schemaVersion": 1,
+        "formId": "frm_8a510b21f78b7470",
+        "type": "employer",
+        "version": "2",
+        "languages": [
+          "en",
+          "am"
+        ],
+        "defaultLanguage": "en",
+        "features": {
+          "voiceInput": true,
+          "readAloud": true,
+          "lowLiteracy": true
+        },
+        "fields": [
+          {
+            "key": "organisationName",
+            "enabled": true,
+            "required": true,
+            "locked": true,
+            "visibility": "public"
+          },
+          {
+            "key": "contactName",
+            "enabled": false,
+            "required": false,
+            "locked": false,
+            "visibility": "public"
+          },
+          {
+            "key": "contactEmail",
+            "enabled": false,
+            "required": false,
+            "locked": false,
+            "visibility": "public"
+          },
+          {
+            "key": "website",
+            "enabled": false,
+            "required": false,
+            "locked": false,
+            "visibility": "public"
+          },
+          {
+            "key": "sector",
+            "enabled": true,
+            "required": false,
+            "locked": false,
+            "visibility": "public"
+          },
+          {
+            "key": "jobTitle",
+            "enabled": false,
+            "required": false,
+            "locked": false,
+            "visibility": "public"
+          },
+          {
+            "key": "jobLocation",
+            "enabled": false,
+            "required": false,
+            "locked": false,
+            "visibility": "public"
+          },
+          {
+            "key": "employmentType",
+            "enabled": false,
+            "required": false,
+            "locked": false,
+            "visibility": "public"
+          },
+          {
+            "key": "workplaceAccommodations",
+            "enabled": true,
+            "required": false,
+            "locked": true,
+            "visibility": "public"
+          },
+          {
+            "key": "consent",
+            "enabled": true,
+            "required": true,
+            "locked": true,
+            "visibility": "public"
+          }
+        ],
+        "identityRoutes": [
+          "kebele_id",
+          "passport",
+          "refugee_id",
+          "other_document",
+          "partner_referral",
+          "no_document"
+        ],
+        "customFields": []
+      },
+      "publishedAt": "2026-11-14T07:56:29.190Z"
+    },
+    {
+      "id": "ver_1fc11588d500d03d",
+      "partnerFormId": "frm_b883f8fd2a3f719f",
+      "version": 1,
+      "config": {
+        "schemaVersion": 1,
+        "formId": "frm_b883f8fd2a3f719f",
+        "type": "jobApplication",
+        "version": "1",
+        "languages": [
+          "en",
+          "am"
+        ],
+        "defaultLanguage": "en",
+        "features": {
+          "voiceInput": true,
+          "readAloud": true,
+          "lowLiteracy": false
+        },
+        "fields": [
+          {
+            "key": "name",
+            "enabled": true,
+            "required": true,
+            "locked": true,
+            "visibility": "public"
+          },
+          {
+            "key": "phone",
+            "enabled": true,
+            "required": true,
+            "locked": false,
+            "visibility": "public"
+          },
+          {
+            "key": "email",
+            "enabled": true,
+            "required": false,
+            "locked": false,
+            "visibility": "public"
+          },
+          {
+            "key": "jobReference",
+            "enabled": true,
+            "required": true,
+            "locked": false,
+            "visibility": "public"
+          },
+          {
+            "key": "experience",
+            "enabled": true,
+            "required": false,
+            "locked": false,
+            "visibility": "public"
+          },
+          {
+            "key": "motivation",
+            "enabled": true,
+            "required": false,
+            "locked": false,
+            "visibility": "public"
+          },
+          {
+            "key": "skills",
+            "enabled": true,
+            "required": false,
+            "locked": false,
+            "visibility": "public"
+          },
+          {
+            "key": "cvFile",
+            "enabled": true,
+            "required": false,
+            "locked": false,
+            "visibility": "public"
+          },
+          {
+            "key": "availability",
+            "enabled": true,
+            "required": false,
+            "locked": false,
+            "visibility": "public"
+          },
+          {
+            "key": "interviewAccommodations",
+            "enabled": true,
+            "required": false,
+            "locked": true,
+            "visibility": "private"
+          },
+          {
+            "key": "identityRoute",
+            "enabled": true,
+            "required": true,
+            "locked": true,
+            "visibility": "public"
+          },
+          {
+            "key": "documentId",
+            "enabled": true,
+            "required": false,
+            "locked": false,
+            "visibility": "public",
+            "showIf": {
+              "field": "identityRoute",
+              "in": [
+                "kebele_id",
+                "passport",
+                "refugee_id"
+              ]
+            }
+          },
+          {
+            "key": "identityDocumentFile",
+            "enabled": true,
+            "required": false,
+            "locked": false,
+            "visibility": "private",
+            "showIf": {
+              "field": "identityRoute",
+              "in": [
+                "kebele_id",
+                "passport",
+                "refugee_id",
+                "other_document"
+              ]
+            }
+          },
+          {
+            "key": "referral",
+            "enabled": true,
+            "required": false,
+            "locked": true,
+            "visibility": "private",
+            "showIf": {
+              "field": "identityRoute",
+              "in": [
+                "no_document"
+              ]
+            }
+          }
+        ],
+        "identityRoutes": [
+          "kebele_id",
+          "passport",
+          "refugee_id",
+          "other_document",
+          "no_document"
+        ],
+        "customFields": []
+      },
+      "publishedAt": "2026-11-14T20:18:27.199Z"
+    },
+    {
+      "id": "ver_ef74503514400a08",
+      "partnerFormId": "frm_bf1e9d4908a45f48",
+      "version": 1,
+      "config": {
+        "schemaVersion": 1,
+        "formId": "frm_bf1e9d4908a45f48",
+        "type": "signup",
+        "version": "1",
+        "languages": [
+          "en",
+          "am"
+        ],
+        "defaultLanguage": "en",
+        "features": {
+          "voiceInput": true,
+          "readAloud": true,
+          "lowLiteracy": false
+        },
+        "fields": [
+          {
+            "key": "name",
+            "enabled": true,
+            "required": true,
+            "locked": true,
+            "visibility": "public"
+          },
+          {
+            "key": "phone",
+            "enabled": true,
+            "required": true,
+            "locked": false,
+            "visibility": "public"
+          },
+          {
+            "key": "email",
+            "enabled": true,
+            "required": false,
+            "locked": false,
+            "visibility": "public"
+          },
+          {
+            "key": "identityRoute",
+            "enabled": true,
+            "required": true,
+            "locked": true,
+            "visibility": "public"
+          },
+          {
+            "key": "documentId",
+            "enabled": true,
+            "required": false,
+            "locked": false,
+            "visibility": "public",
+            "showIf": {
+              "field": "identityRoute",
+              "in": [
+                "kebele_id",
+                "passport",
+                "refugee_id"
+              ]
+            }
+          },
+          {
+            "key": "location",
+            "enabled": true,
+            "required": false,
+            "locked": false,
+            "visibility": "public"
+          },
+          {
+            "key": "address",
+            "enabled": false,
+            "required": false,
+            "locked": false,
+            "visibility": "public"
+          },
+          {
+            "key": "assistedBy",
+            "enabled": false,
+            "required": false,
+            "locked": false,
+            "visibility": "public"
+          },
+          {
+            "key": "assistedConsent",
+            "enabled": false,
+            "required": false,
+            "locked": false,
+            "visibility": "public"
+          },
+          {
+            "key": "consent",
+            "enabled": true,
+            "required": true,
+            "locked": true,
+            "visibility": "public"
+          }
+        ],
+        "identityRoutes": [
+          "kebele_id",
+          "passport",
+          "refugee_id",
+          "other_document",
+          "partner_referral",
+          "no_document"
+        ],
+        "customFields": []
+      },
+      "publishedAt": "2026-11-13T21:09:54.397Z"
+    },
+    {
+      "id": "ver_2714748ce28ba66d",
+      "partnerFormId": "frm_bf1e9d4908a45f48",
+      "version": 2,
+      "config": {
+        "schemaVersion": 1,
+        "formId": "frm_bf1e9d4908a45f48",
+        "type": "signup",
+        "version": "2",
+        "languages": [
+          "en",
+          "am"
+        ],
+        "defaultLanguage": "en",
+        "features": {
+          "voiceInput": false,
+          "readAloud": true,
+          "lowLiteracy": false
+        },
+        "fields": [
+          {
+            "key": "name",
+            "enabled": true,
+            "required": true,
+            "locked": true,
+            "visibility": "public"
+          },
+          {
+            "key": "phone",
+            "enabled": true,
+            "required": true,
+            "locked": false,
+            "visibility": "public"
+          },
+          {
+            "key": "email",
+            "enabled": true,
+            "required": false,
+            "locked": false,
+            "visibility": "public"
+          },
+          {
+            "key": "identityRoute",
+            "enabled": true,
+            "required": true,
+            "locked": true,
+            "visibility": "public"
+          },
+          {
+            "key": "documentId",
+            "enabled": true,
+            "required": false,
+            "locked": false,
+            "visibility": "public",
+            "showIf": {
+              "field": "identityRoute",
+              "in": [
+                "kebele_id",
+                "passport",
+                "refugee_id"
+              ]
+            }
+          },
+          {
+            "key": "location",
+            "enabled": true,
+            "required": false,
+            "locked": false,
+            "visibility": "public"
+          },
+          {
+            "key": "address",
+            "enabled": false,
+            "required": false,
+            "locked": false,
+            "visibility": "public"
+          },
+          {
+            "key": "assistedBy",
+            "enabled": false,
+            "required": false,
+            "locked": false,
+            "visibility": "public"
+          },
+          {
+            "key": "assistedConsent",
+            "enabled": false,
+            "required": false,
+            "locked": false,
+            "visibility": "public"
+          },
+          {
+            "key": "consent",
+            "enabled": true,
+            "required": true,
+            "locked": true,
+            "visibility": "public"
+          }
+        ],
+        "identityRoutes": [
+          "kebele_id",
+          "passport",
+          "refugee_id",
+          "other_document",
+          "partner_referral",
+          "no_document"
+        ],
+        "customFields": []
+      },
+      "publishedAt": "2026-11-13T21:09:54.761Z"
+    },
+    {
+      "id": "ver_158c57415c7981e9",
+      "partnerFormId": "frm_bf1e9d4908a45f48",
+      "version": 3,
+      "config": {
+        "schemaVersion": 1,
+        "formId": "frm_bf1e9d4908a45f48",
+        "type": "signup",
+        "version": "3",
+        "languages": [
+          "en",
+          "am"
+        ],
+        "defaultLanguage": "en",
+        "features": {
+          "voiceInput": false,
+          "readAloud": true,
+          "lowLiteracy": false
+        },
+        "fields": [
+          {
+            "key": "name",
+            "enabled": true,
+            "required": false,
+            "locked": true,
+            "visibility": "public"
+          },
+          {
+            "key": "phone",
+            "enabled": false,
+            "required": false,
+            "locked": false,
+            "visibility": "public"
+          },
+          {
+            "key": "email",
+            "enabled": false,
+            "required": false,
+            "locked": false,
+            "visibility": "public"
+          },
+          {
+            "key": "identityRoute",
+            "enabled": true,
+            "required": true,
+            "locked": true,
+            "visibility": "public"
+          },
+          {
+            "key": "documentId",
+            "enabled": true,
+            "required": false,
+            "locked": false,
+            "visibility": "public",
+            "showIf": {
+              "field": "identityRoute",
+              "in": [
+                "kebele_id",
+                "passport",
+                "refugee_id"
+              ]
+            }
+          },
+          {
+            "key": "location",
+            "enabled": true,
+            "required": false,
+            "locked": false,
+            "visibility": "public"
+          },
+          {
+            "key": "address",
+            "enabled": true,
+            "required": false,
+            "locked": false,
+            "visibility": "public"
+          },
+          {
+            "key": "assistedBy",
+            "enabled": false,
+            "required": false,
+            "locked": false,
+            "visibility": "public"
+          },
+          {
+            "key": "assistedConsent",
+            "enabled": false,
+            "required": false,
+            "locked": false,
+            "visibility": "public"
+          },
+          {
+            "key": "consent",
+            "enabled": true,
+            "required": true,
+            "locked": true,
+            "visibility": "public"
+          }
+        ],
+        "identityRoutes": [
+          "passport",
+          "no_document"
+        ],
+        "customFields": []
+      },
+      "publishedAt": "2026-11-13T21:29:20.523Z"
+    },
+    {
+      "id": "ver_ed46ac4d4d139d63",
+      "partnerFormId": "frm_bf1e9d4908a45f48",
+      "version": 4,
+      "config": {
+        "schemaVersion": 1,
+        "formId": "frm_bf1e9d4908a45f48",
+        "type": "signup",
+        "version": "4",
+        "languages": [
+          "en",
+          "am"
+        ],
+        "defaultLanguage": "en",
+        "features": {
+          "voiceInput": false,
+          "readAloud": true,
+          "lowLiteracy": false
+        },
+        "fields": [
+          {
+            "key": "name",
+            "enabled": true,
+            "required": false,
+            "locked": true,
+            "visibility": "public"
+          },
+          {
+            "key": "phone",
+            "enabled": false,
+            "required": false,
+            "locked": false,
+            "visibility": "public"
+          },
+          {
+            "key": "email",
+            "enabled": false,
+            "required": false,
+            "locked": false,
+            "visibility": "public"
+          },
+          {
+            "key": "identityRoute",
+            "enabled": true,
+            "required": true,
+            "locked": true,
+            "visibility": "public"
+          },
+          {
+            "key": "documentId",
+            "enabled": true,
+            "required": false,
+            "locked": false,
+            "visibility": "public",
+            "showIf": {
+              "field": "identityRoute",
+              "in": [
+                "kebele_id",
+                "passport",
+                "refugee_id"
+              ]
+            }
+          },
+          {
+            "key": "location",
+            "enabled": true,
+            "required": false,
+            "locked": false,
+            "visibility": "public"
+          },
+          {
+            "key": "address",
+            "enabled": true,
+            "required": false,
+            "locked": false,
+            "visibility": "public"
+          },
+          {
+            "key": "assistedBy",
+            "enabled": false,
+            "required": false,
+            "locked": false,
+            "visibility": "public"
+          },
+          {
+            "key": "assistedConsent",
+            "enabled": false,
+            "required": false,
+            "locked": false,
+            "visibility": "public"
+          },
+          {
+            "key": "consent",
+            "enabled": true,
+            "required": true,
+            "locked": true,
+            "visibility": "public"
+          }
+        ],
+        "identityRoutes": [
+          "kebele_id",
+          "no_document"
+        ],
+        "customFields": []
+      },
+      "publishedAt": "2026-11-14T09:31:03.890Z"
+    },
+    {
+      "id": "ver_9763758b214fe5c6",
+      "partnerFormId": "frm_bf1e9d4908a45f48",
+      "version": 5,
+      "config": {
+        "schemaVersion": 1,
+        "formId": "frm_bf1e9d4908a45f48",
+        "type": "signup",
+        "version": "5",
+        "languages": [
+          "en",
+          "am"
+        ],
+        "defaultLanguage": "en",
+        "features": {
+          "voiceInput": false,
+          "readAloud": true,
+          "lowLiteracy": false
+        },
+        "fields": [
+          {
+            "key": "name",
+            "enabled": true,
+            "required": false,
+            "locked": true,
+            "visibility": "public"
+          },
+          {
+            "key": "phone",
+            "enabled": false,
+            "required": false,
+            "locked": false,
+            "visibility": "public"
+          },
+          {
+            "key": "email",
+            "enabled": false,
+            "required": false,
+            "locked": false,
+            "visibility": "public"
+          },
+          {
+            "key": "location",
+            "enabled": true,
+            "required": false,
+            "locked": false,
+            "visibility": "public"
+          },
+          {
+            "key": "address",
+            "enabled": true,
+            "required": false,
+            "locked": false,
+            "visibility": "public"
+          },
+          {
+            "key": "education",
+            "enabled": true,
+            "required": false,
+            "locked": false,
+            "visibility": "public"
+          },
+          {
+            "key": "currentLevel",
+            "enabled": true,
+            "required": true,
+            "locked": false,
+            "visibility": "public"
+          },
+          {
+            "key": "skills",
+            "enabled": true,
+            "required": false,
+            "locked": false,
+            "visibility": "public"
+          },
+          {
+            "key": "careerGoal",
+            "enabled": true,
+            "required": false,
+            "locked": false,
+            "visibility": "public"
+          },
+          {
+            "key": "supportNeeds",
+            "enabled": true,
+            "required": false,
+            "locked": true,
+            "visibility": "private"
+          },
+          {
+            "key": "supportNote",
+            "enabled": true,
+            "required": false,
+            "locked": false,
+            "visibility": "private"
+          },
+          {
+            "key": "assistedBy",
+            "enabled": false,
+            "required": false,
+            "locked": false,
+            "visibility": "public"
+          },
+          {
+            "key": "assistedConsent",
+            "enabled": false,
+            "required": false,
+            "locked": false,
+            "visibility": "public"
+          },
+          {
+            "key": "identityRoute",
+            "enabled": true,
+            "required": true,
+            "locked": true,
+            "visibility": "public"
+          },
+          {
+            "key": "documentId",
+            "enabled": true,
+            "required": false,
+            "locked": false,
+            "visibility": "public",
+            "showIf": {
+              "field": "identityRoute",
+              "in": [
+                "kebele_id",
+                "passport",
+                "refugee_id"
+              ]
+            }
+          },
+          {
+            "key": "identityDocumentFile",
+            "enabled": true,
+            "required": false,
+            "locked": false,
+            "visibility": "private",
+            "showIf": {
+              "field": "identityRoute",
+              "in": [
+                "kebele_id",
+                "passport",
+                "refugee_id",
+                "other_document"
+              ]
+            }
+          },
+          {
+            "key": "referral",
+            "enabled": true,
+            "required": false,
+            "locked": true,
+            "visibility": "private",
+            "showIf": {
+              "field": "identityRoute",
+              "in": [
+                "no_document"
+              ]
+            }
+          }
+        ],
+        "identityRoutes": [
+          "kebele_id",
+          "no_document"
+        ],
+        "customFields": []
+      },
+      "publishedAt": "2026-11-14T20:14:19.409Z"
+    }
+  ]
+}

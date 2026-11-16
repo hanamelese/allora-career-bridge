@@ -10,6 +10,7 @@
     "start": "node src/server.js",
     "db:generate": "drizzle-kit generate",
     "db:seed": "node src/db/seed.js",
+    "db:export-snapshot": "node src/db/snapshot.js",
     "test": "vitest run"
   },
   "dependencies": {

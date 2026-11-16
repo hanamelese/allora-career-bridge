@@ -182,12 +182,18 @@
       <section class="guide-section" aria-labelledby="setup-title">
         <div class="guide-wrap">
           <h2 id="setup-title">Before you present it</h2>
-          <p>The demo runs on this computer. For every step to work:</p>
+          <p>For every step to work:</p>
           <ul class="guide-checklist">
-            <li>The Bridge's API is running (<code>npm run api</code>), and the forms are published.</li>
             <li>
-              Savanna is opened at exactly <code>http://localhost:8080</code>. Another address, such as
-              <code>127.0.0.1:8080</code>, counts as a different website and is refused.
+              The Bridge's API is awake: open
+              <a href="https://allora-career-bridge.onrender.com/api/v1/health">its health check</a> a minute
+              before presenting. On the free plan it sleeps after 15 idle minutes, and the first load then takes
+              about 50 seconds.
+            </li>
+            <li>
+              Savanna is opened at its exact address: the Vercel address listed under
+              <strong>Your organisation → Websites</strong> (or, when run on this computer,
+              <code>http://localhost:8080</code>). Another address counts as a different website and is refused.
             </li>
             <li>
               Optional: to show answers also arriving on a server of ALX's own, run the example receiver
@@ -238,7 +244,7 @@
           straight away, and nothing is sent or kept.
         </p>
 
-        <script src="http://localhost:3001/widget/v1/onboarding-widget.js" async></script>
+        <script src="https://allora-career-bridge.onrender.com/widget/v1/onboarding-widget.js" async></script>
 
         <onboarding-form
           form-id="frm_9907f7fc0113c63a"
