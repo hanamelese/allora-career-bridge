@@ -5,6 +5,7 @@ import { drizzle } from 'drizzle-orm/better-sqlite3';
 import { migrate } from 'drizzle-orm/better-sqlite3/migrator';
 import * as schema from './schema.js';
 import { ensurePartnerForms, upgradeStoredDrafts } from './upgrades.js';
+import { fileURLToPath } from 'node:url';
 
 /**
  * Published form versions must never change. The route only ever inserts
@@ -36,8 +37,10 @@ export function createDatabase(url) {
   sqlite.pragma('foreign_keys = ON');
 
   const db = drizzle(sqlite, { schema });
-
-  migrate(db, { migrationsFolder: new URL('../../drizzle', import.meta.url).pathname });
+migrate(db, {
+  migrationsFolder: fileURLToPath(new URL('../../drizzle', import.meta.url)),
+});
+  // migrate(db, { migrationsFolder: new URL('../../drizzle', import.meta.url).pathname });
   sqlite.exec(IMMUTABILITY_TRIGGERS);
   upgradeStoredDrafts(db);
   ensurePartnerForms(db);
